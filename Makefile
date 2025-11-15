@@ -1,11 +1,12 @@
 override NAME		:=	webserv
 
-override INCLUDE_DIR	:=	include/
-override TEMPLATE_DIR	:=	include/
+override INCLUDE_DIR	:=	includes/
+override TEMPLATE_DIR	:=	includes/
 override SOURCE_DIR		:=	src/
 INCLUDES				:=
 TEMPLATES				:=
-SOURCES					:=	main
+SOURCES					:=	main \
+							Server
 override INCLUDE		:=	$(addprefix $(INCLUDE_DIR), $(addsuffix .hpp, $(INCLUDES)))
 override TEMPLATE		:=	$(addprefix $(TEMPLATE_DIR), $(addsuffix .tpp, $(TEMPLATES)))
 override SOURCE			:=	$(addprefix $(SOURCE_DIR), $(addsuffix .cpp, $(SOURCES)))

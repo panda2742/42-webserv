@@ -9,24 +9,32 @@
 #include <sys/epoll.h>
 #include <iostream>
 #include <unistd.h>
+#include <errno.h>
 
 #define BASEPORT 8080
 #define MAX_EVENTS 64
 
-void handle_client(int client_fd)
+void handle_client(int fd)
 {
-	char buffer[4096];
-	ssize_t bytes = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
-	if (bytes <= 0) {
-		close(client_fd);
+	std::vector<char> request_buffer;
+	char buf[4096];
+	ssize_t r;
+
+	while ((r = recv(fd, buf, sizeof(buf), 0)) > 0)
+	{
+		request_buffer.insert(request_buffer.end(), buf, buf + r);
+	}
+
+	if (r == 0)
+	{
+		close(fd);
 		return;
 	}
 
-	buffer[bytes] = '\0';
+	request_buffer.push_back('\0');
 	std::cout << "=== Requête reçue ===" << std::endl;
-	std::cout << buffer << std::endl;
+	std::cout << request_buffer.data() << std::endl;
 }
-
 
 Server::Server()
 	: running_(false)
@@ -52,7 +60,7 @@ Server::Server()
 
 	fcntl(listen_fd_, F_SETFL, O_NONBLOCK);
 
-	epoll_fd_ = epoll_create(0);
+	epoll_fd_ = epoll_create(1);
 	if (epoll_fd_ < 0)
 		throw std::runtime_error("epoll_create failed");
 
@@ -74,7 +82,7 @@ void Server::run()
 		for (int i = 0; i < n; i++) {
 			if (events[i].data.fd == listen_fd_) {
 				// Nouvelle connexion entrante
-				int client_fd = accept(listen_fd_, nullptr, nullptr);
+				int client_fd = accept(listen_fd_, NULL, NULL);
 				fcntl(client_fd, F_SETFL, O_NONBLOCK);
 
 				struct epoll_event client_ev;
