@@ -1,5 +1,6 @@
 
-#include <Server.hpp>
+#include "Server.hpp"
+#include "Logger.hpp"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <cstring>
@@ -14,31 +15,39 @@
 #define BASEPORT 8080
 #define MAX_EVENTS 64
 
-void handle_client(int fd)
+void Server::handleClient(int fd)
 {
 	std::vector<char> request_buffer;
 	char buf[4096];
 	ssize_t r;
 
+	size_t size = 0;
+
 	while ((r = recv(fd, buf, sizeof(buf), 0)) > 0)
 	{
 		request_buffer.insert(request_buffer.end(), buf, buf + r);
+		size += r;
 	}
 
 	if (r == 0)
 	{
 		close(fd);
+		connections_[fd].clear();
+		connections_.erase(fd);
 		return;
 	}
 
-	request_buffer.push_back('\0');
-	std::cout << "=== Requête reçue ===" << std::endl;
-	std::cout << request_buffer.data() << std::endl;
+	connections_[fd].receiveContent(request_buffer.data(), size);
+	// request_buffer.push_back('\0');
+	// std::cout << "=== Requête reçue === - " << size << std::endl;
+	// std::cout << request_buffer.data() << std::endl;
 }
 
 Server::Server()
 	: running_(false)
 {
+	Logger::info("server starting");
+
 	listen_fd_ = socket(AF_INET, SOCK_STREAM, 0);
 
 	// Socket options pour ne pas bloquer le port apres un kill
@@ -75,23 +84,31 @@ void Server::run()
 {
 	running_ = true;
 
+	Logger::info("server running");
+
 	while (running_)
 	{
 		struct epoll_event events[MAX_EVENTS];
 		int n = epoll_wait(epoll_fd_, events, MAX_EVENTS, -1);
-		for (int i = 0; i < n; i++) {
-			if (events[i].data.fd == listen_fd_) {
-				// Nouvelle connexion entrante
+
+		for (int i = 0; i < n; i++)
+		{
+			if (events[i].data.fd == listen_fd_)
+			{
 				int client_fd = accept(listen_fd_, NULL, NULL);
 				fcntl(client_fd, F_SETFL, O_NONBLOCK);
 
 				struct epoll_event client_ev;
-				client_ev.events = EPOLLIN | EPOLLET; // lecture en mode edge-triggered
+				client_ev.events = EPOLLIN | EPOLLET;
 				client_ev.data.fd = client_fd;
 				epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, client_fd, &client_ev);
-			} else {
-				// Données à lire sur un client existant
-				handle_client(events[i].data.fd);
+
+				Logger::info("accepted new connection");
+				connections_.insert(std::make_pair(client_fd, HttpConnection()));
+			}
+			else
+			{
+				handleClient(events[i].data.fd);
 			}
 		}
 	}

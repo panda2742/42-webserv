@@ -6,7 +6,10 @@ override SOURCE_DIR		:=	src/
 INCLUDES				:=
 TEMPLATES				:=
 SOURCES					:=	main \
-							Server
+							Logger \
+							Server \
+							HttpConnection \
+							HttpRequest
 override INCLUDE		:=	$(addprefix $(INCLUDE_DIR), $(addsuffix .hpp, $(INCLUDES)))
 override TEMPLATE		:=	$(addprefix $(TEMPLATE_DIR), $(addsuffix .tpp, $(TEMPLATES)))
 override SOURCE			:=	$(addprefix $(SOURCE_DIR), $(addsuffix .cpp, $(SOURCES)))
