@@ -95,11 +95,12 @@ void HttpConnection::receiveContent(char *content, size_t size)
 
 void HttpConnection::handleRequest()
 {
-	std::cout << "Oeoe tkt je traite la requete" << std::endl;
+	// std::cout << "Oeoe tkt je traite la requete" << std::endl;
 
 	HttpRequest request(raw_, header_size_, content_size_);
+	request.parse();
 
-	std::cout << findHeaderContent("User-Agent:", header_size_) << std::endl;
+	// std::cout << findHeaderContent("User-Agent:", header_size_) << std::endl;
 
 	clear();
 }
