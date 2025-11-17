@@ -9,6 +9,8 @@ class HttpConnection
 {
 
 private:
+	int socket_fd_;
+
 	std::vector<char> raw_;
 	bool header_;
 	size_t content_size_;
@@ -20,7 +22,7 @@ private:
 	void handleRequest();
 	
 public:
-	HttpConnection();
+	HttpConnection(int socket_fd);
 	~HttpConnection();
 
 	void receiveContent(char *content, size_t size);

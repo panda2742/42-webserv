@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sys/types.h>
 #include <map>
+#include "HttpResponse.hpp"
 
 class HttpRequest
 {
@@ -31,6 +32,7 @@ public:
 	~HttpRequest();
 
 	void parse();
+	HttpResponse createResponse();
 
 };
 

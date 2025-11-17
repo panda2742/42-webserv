@@ -31,13 +31,22 @@ void Server::handleClient(int fd)
 
 	if (r == 0)
 	{
-		close(fd);
-		connections_[fd].clear();
-		connections_.erase(fd);
+ 		close(fd);
+ 		std::map<int, HttpConnection>::iterator it = connections_.find(fd);
+ 		if (it != connections_.end()) {
+ 			it->second.clear();
+ 			connections_.erase(it);
+ 		}
 		return;
 	}
 
-	connections_[fd].receiveContent(request_buffer.data(), size);
+	std::map<int, HttpConnection>::iterator it = connections_.find(fd);
+	if (it != connections_.end()) {
+		it->second.receiveContent(request_buffer.data(), size);
+	} else {
+		// No connection found for this fd; ignore or log.
+		Logger::info("received data for unknown fd");
+	}
 	// request_buffer.push_back('\0');
 	// std::cout << "=== Requête reçue === - " << size << std::endl;
 	// std::cout << request_buffer.data() << std::endl;
@@ -104,7 +113,7 @@ void Server::run()
 				epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, client_fd, &client_ev);
 
 				Logger::info("accepted new connection");
-				connections_.insert(std::make_pair(client_fd, HttpConnection()));
+				connections_.insert(std::make_pair(client_fd, HttpConnection(client_fd)));
 			}
 			else
 			{

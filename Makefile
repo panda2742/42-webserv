@@ -9,7 +9,8 @@ SOURCES					:=	main \
 							Logger \
 							Server \
 							HttpConnection \
-							HttpRequest
+							HttpRequest \
+							HttpResponse
 override INCLUDE		:=	$(addprefix $(INCLUDE_DIR), $(addsuffix .hpp, $(INCLUDES)))
 override TEMPLATE		:=	$(addprefix $(TEMPLATE_DIR), $(addsuffix .tpp, $(TEMPLATES)))
 override SOURCE			:=	$(addprefix $(SOURCE_DIR), $(addsuffix .cpp, $(SOURCES)))

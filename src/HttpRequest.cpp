@@ -64,6 +64,18 @@ void HttpRequest::parse()
 	}
 }
 
+HttpResponse HttpRequest::createResponse()
+{
+	HttpResponse response(200, "OK");
+	response.setHeader("Content-Type", "text/plain");
+	
+	std::string body = "Hello, World!";
+	std::vector<char> body_vec(body.begin(), body.end());
+	response.setBody(body_vec);
+
+	return response;
+}
+
 
 /*
 GET / HTTP/1.1
