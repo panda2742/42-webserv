@@ -1,6 +1,7 @@
 
 #include "HttpConnection.hpp"
 #include "HttpRequest.hpp"
+#include "HttpResponse.hpp"
 #include <algorithm>
 #include <vector>
 #include <sys/socket.h>
@@ -101,19 +102,22 @@ void HttpConnection::handleRequest()
 	HttpRequest request(raw_, header_size_, content_size_);
 	request.parse();
 
-	std::vector<char> serialized = request.createResponse().serialize();
+	HttpResponse response(request);
+	response.create();
+	response.sendResponse(socket_fd_);
+	// std::vector<char> serialized = request.createResponse().serialize();
 
-	size_t total = 0;
-	size_t to_send = serialized.size();
+	// size_t total = 0;
+	// size_t to_send = serialized.size();
 
-	while (total < to_send)
-	{
-		ssize_t sent = send(socket_fd_, serialized.data() + total, to_send - total, 0);
+	// while (total < to_send)
+	// {
+	// 	ssize_t sent = send(socket_fd_, serialized.data() + total, to_send - total, 0);
 		
-		if (sent <= 0) break;
+	// 	if (sent <= 0) break;
 
-		total += sent;
-	}
+	// 	total += sent;
+	// }
 
 	// std::cout << findHeaderContent("User-Agent:", header_size_) << std::endl;
 

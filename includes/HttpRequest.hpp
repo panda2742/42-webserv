@@ -5,17 +5,17 @@
 #include <iostream>
 #include <sys/types.h>
 #include <map>
-#include "HttpResponse.hpp"
+
+enum Method {
+	GET,
+	POST,
+	DELETE
+};
 
 class HttpRequest
 {
 
 private:
-	enum Method {
-		GET,
-		POST,
-		DELETE
-	};
 
 	std::vector<char> raw_;
 	size_t header_size_;
@@ -32,7 +32,10 @@ public:
 	~HttpRequest();
 
 	void parse();
-	HttpResponse createResponse();
+
+	std::string getTarget() { return target_; };
+	Method getMethod() { return method_; };
+	size_t getContentSize() { return content_size_; }
 
 };
 

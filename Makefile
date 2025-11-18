@@ -8,6 +8,7 @@ TEMPLATES				:=
 SOURCES					:=	main \
 							Logger \
 							Server \
+							FileCacheManager \
 							HttpConnection \
 							HttpRequest \
 							HttpResponse

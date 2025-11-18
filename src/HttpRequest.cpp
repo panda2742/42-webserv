@@ -1,4 +1,5 @@
 
+#include "FileCacheManager.hpp"
 #include "HttpRequest.hpp"
 #include "Logger.hpp"
 #include <algorithm>
@@ -6,9 +7,7 @@
 HttpRequest::HttpRequest(std::vector<char>& raw, size_t header_size, size_t content_size)
 	: raw_(raw), header_size_(header_size), content_size_(content_size)
 {
-	// std::cout<<raw.data()<<std::endl;
-	// std::cout << method_ << ", " << header_size_ << ", " << content_size_ << std::endl;
-	
+
 }
 
 void HttpRequest::parse()
@@ -26,6 +25,8 @@ void HttpRequest::parse()
 			header.erase(0, pos + 2);
 		}
 
+		Logger::info(lines[0]);
+
 		std::string method = lines[0].substr(0, lines[0].find(" ")); lines[0].erase(0, lines[0].find(" ") + 1);
 		
 
@@ -38,8 +39,6 @@ void HttpRequest::parse()
 
 		lines.erase(lines.begin());
 
-		std::cout << method_ << ", " << target_ << ", " << version_ << ", " << content_size_ << std::endl;
-
 		for (size_t i = 0; i < lines.size(); i++)
 		{
 			std::string key = lines[i].substr(0, lines[i].find(": "));
@@ -48,14 +47,12 @@ void HttpRequest::parse()
 			infos_.insert(std::make_pair(key, lines[i]));
 		}
 
-		
-
-		for (std::map<std::string, std::string>::const_iterator it = infos_.begin();
-			it != infos_.end();
-			++it)
-		{
-			std::cout << it->first << ": " << it->second << std::endl;
-		}
+		// for (std::map<std::string, std::string>::const_iterator it = infos_.begin();
+		// 	it != infos_.end();
+		// 	++it)
+		// {
+		// 	std::cout << it->first << ": " << it->second << std::endl;
+		// }
 
 	}
 	catch(const std::exception& e)
@@ -63,29 +60,6 @@ void HttpRequest::parse()
 		Logger::error("Wrong HTTP request format. " + std::string(e.what()));
 	}
 }
-
-HttpResponse HttpRequest::createResponse()
-{
-	HttpResponse response(200, "OK");
-	response.setHeader("Content-Type", "text/plain");
-	
-	std::string body = "Hello, World!";
-	std::vector<char> body_vec(body.begin(), body.end());
-	response.setBody(body_vec);
-
-	return response;
-}
-
-
-/*
-GET / HTTP/1.1
-Host: localhost:8080
-Content-Type: application/vnd.rar
-User-Agent: insomnia/11.6.1
-Accept: \*\/\*
-Content-Length: 640065
-
-*/
 
 HttpRequest::~HttpRequest()
 {

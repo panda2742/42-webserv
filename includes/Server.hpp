@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <map>
 #include "HttpConnection.hpp"
+#include "program.hpp"
 
 class Server
 {

@@ -93,7 +93,7 @@ void Server::run()
 {
 	running_ = true;
 
-	Logger::info("server running");
+	Logger::info("server running, version " + std::string(VERSION));
 
 	while (running_)
 	{
