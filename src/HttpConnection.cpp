@@ -6,7 +6,7 @@
 #include <vector>
 #include <sys/socket.h>
 
-HttpConnection::HttpConnection(int socket_fd) : socket_fd_(socket_fd), header_(false), content_size_(0)
+HttpConnection::HttpConnection(int socket_fd) : socket_fd_(socket_fd), header_(false), content_size_(0), res_ready_(false), res_(req_)
 {
 
 }
@@ -21,6 +21,7 @@ void HttpConnection::clear()
 	raw_.clear();
 	header_ = false;
 	content_size_ = 0;
+	res_ready_ = false;
 }
 
 ssize_t HttpConnection::find(const std::string& search, size_t range)
@@ -97,29 +98,16 @@ void HttpConnection::receiveContent(char *content, size_t size)
 
 void HttpConnection::handleRequest()
 {
-	// std::cout << "Oeoe tkt je traite la requete" << std::endl;
+	req_.init(raw_, header_size_, content_size_);
+	req_.parse();
 
-	HttpRequest request(raw_, header_size_, content_size_);
-	request.parse();
+	res_.create();
+	res_ready_ = true;
+}
 
-	HttpResponse response(request);
-	response.create();
-	response.sendResponse(socket_fd_);
-	// std::vector<char> serialized = request.createResponse().serialize();
-
-	// size_t total = 0;
-	// size_t to_send = serialized.size();
-
-	// while (total < to_send)
-	// {
-	// 	ssize_t sent = send(socket_fd_, serialized.data() + total, to_send - total, 0);
-		
-	// 	if (sent <= 0) break;
-
-	// 	total += sent;
-	// }
-
-	// std::cout << findHeaderContent("User-Agent:", header_size_) << std::endl;
-
+void HttpConnection::sendResponse()
+{
+	res_.sendResponse(socket_fd_);
 	clear();
 }
+

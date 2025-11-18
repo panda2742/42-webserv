@@ -8,7 +8,7 @@
 #include <ctime>
 #include <sys/stat.h>
 
-#define MAX_CACHE_FILE_SIZE 4194304
+#define MAX_CACHE_FILE_SIZE 10000 // 4194304
 #define MAX_CACHE_SIZE 1073741824 // 2^30
 
 extern const std::map<std::string, std::string> MIME_TABLE;
@@ -47,7 +47,7 @@ public:
 	FileCacheManager();
 	~FileCacheManager();
 
-	static FileStatus getFile(std::string path, CachedFile*& file, struct stat &fileInfo);
+	static FileStatus getFile(std::string path, CachedFile*& file, struct stat &fileInfo, std::string &full_path);
 
 };
 

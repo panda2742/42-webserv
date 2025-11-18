@@ -4,10 +4,16 @@
 #include "Logger.hpp"
 #include <algorithm>
 
-HttpRequest::HttpRequest(std::vector<char>& raw, size_t header_size, size_t content_size)
-	: raw_(raw), header_size_(header_size), content_size_(content_size)
+HttpRequest::HttpRequest()
 {
+	
+}
 
+void HttpRequest::init(std::vector<char>& raw, size_t header_size, size_t content_size)
+{
+	raw_ = raw;
+	header_size_ = header_size;
+	content_size_ = content_size;
 }
 
 void HttpRequest::parse()
@@ -59,6 +65,19 @@ void HttpRequest::parse()
 	{
 		Logger::error("Wrong HTTP request format. " + std::string(e.what()));
 	}
+}
+
+void HttpRequest::clear()
+{
+	raw_.clear();
+	header_size_ = 0;
+	content_size_ = 0;
+
+	method_ = GET;
+	target_.clear();
+	version_.clear();
+
+	infos_.clear();
 }
 
 HttpRequest::~HttpRequest()

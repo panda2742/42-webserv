@@ -28,14 +28,17 @@ private:
 	std::map<std::string, std::string>infos_;
 
 public:
-	HttpRequest(std::vector<char>& raw, size_t header_size, size_t content_size);
+	HttpRequest();
 	~HttpRequest();
 
+	void init(std::vector<char>& raw, size_t header_size, size_t content_size);
 	void parse();
 
 	std::string getTarget() { return target_; };
 	Method getMethod() { return method_; };
 	size_t getContentSize() { return content_size_; }
+
+	void clear();
 
 };
 

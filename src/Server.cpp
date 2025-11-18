@@ -47,9 +47,6 @@ void Server::handleClient(int fd)
 		// No connection found for this fd; ignore or log.
 		Logger::info("received data for unknown fd");
 	}
-	// request_buffer.push_back('\0');
-	// std::cout << "=== Requête reçue === - " << size << std::endl;
-	// std::cout << request_buffer.data() << std::endl;
 }
 
 Server::Server()

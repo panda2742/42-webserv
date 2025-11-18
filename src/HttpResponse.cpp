@@ -4,6 +4,8 @@
 #include "utils.hpp"
 #include <sys/socket.h>
 #include <sys/stat.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 static const std::pair<const int, std::string> http_response_code_messages[] = {
 	// 1xx: Informational
@@ -146,7 +148,7 @@ void HttpResponse::create()
 {
 	if (req_.getMethod() == GET)
 	{
-		file_status_ = FileCacheManager::getFile(req_.getTarget(), file_, file_info_);
+		file_status_ = FileCacheManager::getFile(req_.getTarget(), file_, file_info_, file_path_);
 		
 		if (file_status_ == FILE_OK)
 		{
@@ -213,7 +215,7 @@ void HttpResponse::sendHeader(int socket_fd)
 	while (total < to_send)
 	{
 		ssize_t sent = send(socket_fd, header.c_str() + total, to_send - total, 0);
-		if (sent <= 0) break;
+		if (sent <= 0) break; // gerer erreur pour de vrai
 		total += sent;
 	}
 }
@@ -226,11 +228,36 @@ void HttpResponse::sendBody(int socket_fd)
 	while (total < to_send)
 	{
 		ssize_t sent = send(socket_fd, body_.data() + total, to_send - total, 0);
-		if (sent <= 0) break;
+		if (sent <= 0) break; // gerer erreur pour de vrai
 		total += sent;
 	}
 }
 
+void HttpResponse::sendFileDirect(const std::string &path, int socket_fd)
+{
+	int fd = open(path.c_str(), O_RDONLY);
+	if (fd < 0) return;
+
+	char buffer[8192];
+	ssize_t n;
+
+	while ((n = read(fd, buffer, sizeof(buffer))) > 0)
+	{
+		ssize_t sent = 0;
+		while (sent < n)
+		{
+			ssize_t s = send(socket_fd, buffer + sent, n - sent, 0);
+			if (s <= 0)
+			{
+				close(fd); // aussi degager completement la connexion
+				return ;
+			}
+			sent += s;
+		}
+	}
+
+	close(fd);
+}
 
 void HttpResponse::sendResponse(int socket_fd)
 {
@@ -252,7 +279,8 @@ void HttpResponse::sendResponse(int socket_fd)
 		}
 		else if (file_status_ == FILE_STREAM_DIRECT)
 		{
-			// ca marche pas encore
+			sendHeader(socket_fd);
+			sendFileDirect(file_path_, socket_fd);
 		}
 		else
 		{
@@ -264,4 +292,18 @@ void HttpResponse::sendResponse(int socket_fd)
 	{
 		
 	}
+}
+
+void HttpResponse::clear()
+{
+	status_code_ = 0;
+	status_message_.clear();
+
+	headers_.clear();
+	body_.clear();
+
+	file_ = NULL;
+	file_status_ = FILE_OK;
+	file_path_.clear();
+
 }

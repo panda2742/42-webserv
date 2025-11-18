@@ -4,6 +4,8 @@
 #include <vector>
 #include <iostream>
 #include <sys/types.h>
+#include "HttpRequest.hpp"
+#include "HttpResponse.hpp"
 
 class HttpConnection
 {
@@ -19,6 +21,10 @@ private:
 	ssize_t find(const std::string& search, size_t range);
 	std::string findHeaderContent(const std::string& key, size_t range);
 
+	HttpRequest req_;
+	bool res_ready_;
+	HttpResponse res_;
+
 	void handleRequest();
 	
 public:
@@ -26,6 +32,7 @@ public:
 	~HttpConnection();
 
 	void receiveContent(char *content, size_t size);
+	void sendResponse();
 	void clear();
 
 };

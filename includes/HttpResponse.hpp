@@ -23,6 +23,7 @@ private:
 	CachedFile *file_;
 	FileStatus file_status_;
 	struct stat file_info_;
+	std::string file_path_;
 
 	void setHeader(const std::string &name, const std::string &value);
 	void setStatus(int code, const std::string &message);
@@ -32,6 +33,7 @@ private:
 
 	void sendHeader(int socket_fd);
 	void sendBody(int socket_fd);
+	void sendFileDirect(const std::string &path, int socket_fd);
 
 public:
 	HttpResponse(HttpRequest &req)
@@ -42,6 +44,8 @@ public:
 	
 	void create();
 	void sendResponse(int socket_fd);
+
+	void clear();
 
 };
 
