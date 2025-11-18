@@ -51,6 +51,8 @@ class HttpConfig
 		~Node_(void);
 	};
 
+	Node_	*root_;
+
 	static Node_	*createStringNode_(const std::string& str);
 	static Node_	*createUintNode_(unsigned int value);
 	static Node_	*createStringVectorNode_(void);
@@ -59,8 +61,12 @@ class HttpConfig
 	static Node_	*createMapUintStringVectorNode_(void);
 
 	public:
-	HttpConfig(void) {}
-	~HttpConfig(void) {}
+	HttpConfig(void): root_(NULL) {}
+	~HttpConfig(void)
+	{
+		if (root_)
+			delete root_;
+	}
 };
 
 
