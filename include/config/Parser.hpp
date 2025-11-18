@@ -16,7 +16,8 @@ namespace Config
 class ParsingException: public std::runtime_error
 {
 	public:
-	ParsingException(const std::string& msg);
+	ParsingException(const std::string& msg)
+		: std::runtime_error(RED PARSING_ERROR_MSG + msg + RESET) {}
 };
 
 class Parser
@@ -32,8 +33,9 @@ class Parser
 	void	generateStruct_(void) throw(ParsingException);
 
 	public:
-	Parser(const std::string& filename);
-	~Parser(void);
+	Parser(const std::string& filename)
+		: config_(), filename_(filename) {}
+	~Parser(void) {}
 
 	HttpConfig&	parse(void) throw(ParsingException);
 };

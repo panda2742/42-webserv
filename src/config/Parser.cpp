@@ -7,14 +7,6 @@ namespace Config
 {
 // #########################################################
 
-ParsingException::ParsingException(const std::string& msg)
-	: std::runtime_error(RED PARSING_ERROR_MSG + msg + RESET) {}
-
-Parser::Parser(const std::string& filename)
-	: config_(), filename_(filename) {}
-
-Parser::~Parser(void) {}
-
 void	Parser::saveRaw_(void) throw(ParsingException)
 {
 	std::ifstream	file(filename_.c_str(), std::ios::in | std::ios::binary);
@@ -60,7 +52,17 @@ void	Parser::tokenize_(void) throw(ParsingException)
 		if (!lexer_nodes_.empty())
 		{
 			if ((*it) == "{")
+			{
 				type = Lexer::TokenSymbolOpen;
+				for (std::vector<Config::Lexer::TokenNode>::reverse_iterator jt = lexer_nodes_.rbegin(); jt != lexer_nodes_.rend(); ++jt)
+				{
+					if ((*jt).type == Lexer::TokenDirective)
+					{
+						(*jt).type = Lexer::TokenParent;
+						break;
+					}
+				}
+			}
 			else if ((*it) == "}")
 				type = Lexer::TokenSymbolClose;
 			else if ((*it) == ";")

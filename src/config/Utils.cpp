@@ -39,6 +39,9 @@ void	printTokens_(const std::vector<Lexer::TokenNode>& nodes)
 			case Lexer::TokenDirective:
 				std::cout << CYAN "Directive" RESET;
 				break;
+			case Lexer::TokenParent:
+				std::cout << LIGHT_GREEN "ParentDir" RESET;
+				break;
 			case Lexer::TokenDelimiter:
 				std::cout << BLURPLE "Delimiter" RESET;
 				break;

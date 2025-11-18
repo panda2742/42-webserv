@@ -2,7 +2,7 @@ override NAME		:=	webserv
 
 CONFIG_HEADERS		:= $(addprefix config/, HttpConfig Lexer Parser types Utils)
 CONFIG_TEMPLATES	:=
-CONFIG_SOURCES		:= $(addprefix config/, HttpConfig Lexer Parser Utils)
+CONFIG_SOURCES		:= $(addprefix config/, HttpConfig Parser Utils)
 
 override INCLUDE_DIR	:=	include/
 override TEMPLATE_DIR	:=	include/

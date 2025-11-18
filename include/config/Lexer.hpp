@@ -15,6 +15,7 @@ enum Token
 	TokenSymbolClose,
 	TokenDelimiter,
 	TokenDirective,
+	TokenParent,
 	TokenArgument
 };
 
@@ -22,7 +23,8 @@ struct TokenNode
 {
 	Token				type;
 	const std::string	value;
-	TokenNode(const Token type, const std::string& value);
+	TokenNode(const Token type, const std::string& value)
+		: type(type), value(value) {}
 };
 
 // #########################################################
