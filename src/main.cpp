@@ -1,5 +1,5 @@
 #include <iostream>
-#include "parsing/Parser.hpp"
+#include "config/Parser.hpp"
 
 int	main(int argc, char **argv)
 {
@@ -8,7 +8,7 @@ int	main(int argc, char **argv)
 		std::cout << "Provide a unique configuration file." << std::endl;
 		return 1;
 	}
-	Parsing::Parser	parser(argv[1]);
+	Config::Parser	parser(argv[1]);
 
 	parser.parse();
 }

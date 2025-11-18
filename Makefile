@@ -1,11 +1,15 @@
 override NAME		:=	webserv
 
+CONFIG_HEADERS		:= $(addprefix config/, HttpConfig Lexer Parser types Utils)
+CONFIG_TEMPLATES	:=
+CONFIG_SOURCES		:= $(addprefix config/, HttpConfig Lexer Parser Utils)
+
 override INCLUDE_DIR	:=	include/
 override TEMPLATE_DIR	:=	include/
 override SOURCE_DIR		:=	src/
-INCLUDES				:=	parsing/Parser parsing/types
-TEMPLATES				:=
-SOURCES					:=	parsing/Parser main
+INCLUDES				:=	$(CONFIG_HEADERS)
+TEMPLATES				:=	$(CONFIG_TEMPLATES)
+SOURCES					:=	$(CONFIG_SOURCES) main
 override INCLUDE		:=	$(addprefix $(INCLUDE_DIR), $(addsuffix .hpp, $(INCLUDES)))
 override TEMPLATE		:=	$(addprefix $(TEMPLATE_DIR), $(addsuffix .tpp, $(TEMPLATES)))
 override SOURCE			:=	$(addprefix $(SOURCE_DIR), $(addsuffix .cpp, $(SOURCES)))

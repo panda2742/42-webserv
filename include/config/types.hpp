@@ -12,16 +12,14 @@
 
 #define PARSING_ERROR_MSG "Parsing error: "
 
-namespace HttpTypes
+namespace Config
 {
-	enum Method
-	{
-		MethodPut, MethodPost, MethodGet, MethodDelete
-	};
-	enum ToggleValue
-	{
-		MethodOn, MethodOff
-	};
-}
+// #########################################################
+
+
+
+// #########################################################
+};
+
 
 #endif
