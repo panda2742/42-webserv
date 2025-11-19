@@ -98,7 +98,6 @@ FileStatus FileCacheManager::getFile(std::string path, CachedFile*& file, struct
 {
 	file = NULL;
 	std::string basepath = "./www/";
-	Logger::error("Bah wesh, " + path);
 	full_path = basepath + path;
 
 	if (path.find("..") != std::string::npos) return PATH_FORBIDDEN;
@@ -116,7 +115,6 @@ FileStatus FileCacheManager::getFile(std::string path, CachedFile*& file, struct
 		else return(INTERNAL_ERROR);
 	}
 
-	if ((fileInfo.st_mode & S_IFMT) == S_IFDIR) Logger::error("Bah wesh, " + full_path);
 	if ((fileInfo.st_mode & S_IFMT) == S_IFDIR) return FILE_IS_DIR;
 	if (fileInfo.st_size > MAX_CACHE_FILE_SIZE) return FILE_STREAM_DIRECT;
 	

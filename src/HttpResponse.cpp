@@ -343,9 +343,21 @@ bool HttpResponse::sendFileDirectPart(int socket_fd)
 	return true;
 }
 
-void HttpResponse::sendResponsePart(int socket_fd)
+std::string respStateToText(ResponseState s)
 {
-	if (!res_ready_) return ;
+	if (s == NOT_SENT) return "Not sent";
+	if (s == HEADER) return "Header";
+	if (s == BODY) return "Body";
+	if (s == SENT) return "SENT";
+	if (s == ERROR) return "err";
+	return ("Bah wsh");
+}
+
+ResponseState HttpResponse::sendResponsePart(int socket_fd)
+{
+	if (!res_ready_) return ERROR;
+
+	// std::cout << "Send state " << respStateToText(send_state_) << std::endl;
 
 	if (send_state_ == NOT_SENT)
 	{
@@ -361,7 +373,7 @@ void HttpResponse::sendResponsePart(int socket_fd)
 		{
 			ssize_t sent = send(socket_fd, serialized_header_.c_str() + send_index_, to_send - send_index_, 0);
 
-			if (sent <= 0) return; // gerer erreur pour de vrai
+			if (sent <= 0) return ERROR; // gerer erreur pour de vrai
 
 			send_index_ += sent;
 		}
@@ -383,7 +395,7 @@ void HttpResponse::sendResponsePart(int socket_fd)
 				if (send_index_ < to_send)
 				{
 					ssize_t sent = send(socket_fd, file_->data.data() + send_index_, to_send - send_index_, 0);
-					if (sent <= 0) return; // ON GERE CORRECTEMENT LES ERREURS STP
+					if (sent <= 0) return ERROR; // ON GERE CORRECTEMENT LES ERREURS STP
 					send_index_ += sent;
 				}
 				else
@@ -395,6 +407,7 @@ void HttpResponse::sendResponsePart(int socket_fd)
 			{
 				if (!sendFileDirectPart(socket_fd))
 				{
+					return ERROR;
 					// gerer l'errreurrrr iciii aussi
 				}
 			}
@@ -405,7 +418,7 @@ void HttpResponse::sendResponsePart(int socket_fd)
 				if (send_index_ < to_send)
 				{
 					ssize_t sent = send(socket_fd, body_.data() + send_index_, to_send - send_index_, 0);
-					if (sent <= 0) return ; // gerer erreur pour de vrai
+					if (sent <= 0) return ERROR; // gerer erreur pour de vrai
 					send_index_ += sent;
 				}
 				else
@@ -420,8 +433,7 @@ void HttpResponse::sendResponsePart(int socket_fd)
 		}
 	}
 
-	
-
+	return send_state_;
 }
 
 void HttpResponse::clear()

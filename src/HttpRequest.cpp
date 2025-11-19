@@ -41,7 +41,6 @@ void HttpRequest::parse()
 		else if (method == "DELETE") method_ = DELETE;
 
 		target_ = lines[0].substr(0, lines[0].find(" ")); lines[0].erase(0, lines[0].find(" ") + 1);
-		Logger::error("BAH : " + target_);
 		version_ = lines[0];
 
 		lines.erase(lines.begin());

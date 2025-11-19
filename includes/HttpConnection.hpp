@@ -22,11 +22,8 @@ private:
 	ssize_t find(const std::string& search, size_t range);
 	std::string findHeaderContent(const std::string& key, size_t range);
 
-	HttpRequest req_;
-	HttpResponse res_;
-
-	// std::deque<HttpRequest> requests_;
-	// std::deque<HttpResponse> responses_;
+	std::deque<HttpRequest> requests_;
+	std::deque<HttpResponse> responses_;
 
 	void handleRequest();
 	

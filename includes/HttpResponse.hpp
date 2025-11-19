@@ -15,6 +15,7 @@ enum ResponseState
 	HEADER,
 	BODY,
 	SENT,
+	ERROR,
 };
 
 class HttpResponse
@@ -63,13 +64,13 @@ public:
 		: req_(req), status_code_(500), send_state_(NOT_SENT), res_ready_(false) {
 			Logger::warn(req.getTarget());
 		}
-	~HttpResponse() {}
+	~HttpResponse() { clear(); }
 
 	std::vector<char> serialize() const;
 	
 	void create();
 	void sendResponse(int socket_fd);
-	void sendResponsePart(int socket_fd);
+	ResponseState sendResponsePart(int socket_fd);
 
 	void clear();
 

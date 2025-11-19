@@ -6,7 +6,7 @@
 #include <vector>
 #include <sys/socket.h>
 
-HttpConnection::HttpConnection(int socket_fd) : socket_fd_(socket_fd), header_(false), content_size_(0), req_(), res_(req_)
+HttpConnection::HttpConnection(int socket_fd) : socket_fd_(socket_fd), header_(false), content_size_(0)
 {
 
 }
@@ -95,21 +95,44 @@ void HttpConnection::receiveContent(char *content, size_t size)
 		}
 	}
 }
-#include "Logger.hpp"
 
 void HttpConnection::handleRequest()
 {
-	req_.init(raw_, header_size_, content_size_);
-	req_.parse();
-	Logger::error(req_.getTarget());
-	res_.create();
-	Logger::error(req_.getTarget());
+	std::cout << "vasy frere je prends la nouvelle requete" << std::endl;
+	raw_.push_back('\0');
+	requests_.push_back(HttpRequest());
+	HttpRequest& req = requests_.back();
+
+	req.init(raw_, header_size_, content_size_);
+	req.parse();
+
+	responses_.push_back(HttpResponse(req));
+	HttpResponse& res = responses_.back();
+	res.create();
+	clear();
 	// res_ready_ = true;
 }
 
 void HttpConnection::sendResponse()
 {
-	res_.sendResponsePart(socket_fd_);
+	if (!responses_.empty())
+	{
+		HttpResponse& res = responses_.front();
+
+		ResponseState state = res.sendResponsePart(socket_fd_);
+
+		if (state == SENT)
+		{
+			responses_.pop_front();
+			requests_.pop_front();
+		}
+		else if (state == ERROR)
+		{
+			responses_.pop_front();
+			requests_.pop_front();
+			// gerer la deco du client
+		}
+	}
 	// clear();
 }
 
