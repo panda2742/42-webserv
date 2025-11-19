@@ -74,13 +74,11 @@ void	Parser::tokenize_(void) throw(ParsingException)
 	}
 }
 
-HttpConfig&	Parser::parse(void) throw(ParsingException)
+void	Parser::parse(void) throw(ParsingException)
 {
 	saveRaw_();
 	tokenize_();
 	Utils::printTokens_(lexer_nodes_);
-
-	return config_;
 }
 
 // #########################################################

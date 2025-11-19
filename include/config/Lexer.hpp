@@ -23,8 +23,8 @@ struct TokenNode
 {
 	Token				type;
 	const std::string	value;
-	TokenNode(const Token type, const std::string& value)
-		: type(type), value(value) {}
+	TokenNode(const Token type_, const std::string& value_)
+		: type(type_), value(value_) {}
 };
 
 // #########################################################

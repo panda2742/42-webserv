@@ -1,5 +1,7 @@
 #include "config/HttpConfig.hpp"
 
+#include <iostream>
+
 namespace Config
 {
 // #########################################################
@@ -97,6 +99,14 @@ HttpConfig::Node_	*HttpConfig::createMapUintStringVectorNode_(void)
 	Node_	*node = new Node_(Node_::Value::TYPE_MAP_UINT_STRING_VECTOR);
 	node->value.data = new std::map<unsigned int, std::vector<std::string> >();
 	return node;
+}
+
+void	HttpConfig::generate(const std::vector<Lexer::TokenNode>& nodes) throw(ParsingException)
+{
+	for (std::vector<Lexer::TokenNode>::const_iterator it = nodes.begin(); it != nodes.end(); ++it)
+	{
+		
+	}
 }
 
 

@@ -6,7 +6,6 @@
 #include <map>
 #include <stdexcept>
 #include "types.hpp"
-#include "HttpConfig.hpp"
 #include "Lexer.hpp"
 
 namespace Config
@@ -23,7 +22,6 @@ class ParsingException: public std::runtime_error
 class Parser
 {
 	private:
-	HttpConfig						config_;
 	std::string						filename_;
 	std::string						raw_config_;
 	std::vector<Lexer::TokenNode>	lexer_nodes_;
@@ -34,10 +32,14 @@ class Parser
 
 	public:
 	Parser(const std::string& filename)
-		: config_(), filename_(filename) {}
+		: filename_(filename) {}
 	~Parser(void) {}
 
-	HttpConfig&	parse(void) throw(ParsingException);
+	const std::vector<Lexer::TokenNode>&	getNodes(void) const
+	{
+		return lexer_nodes_;
+	}
+	void	parse(void) throw(ParsingException);
 };
 
 // #########################################################

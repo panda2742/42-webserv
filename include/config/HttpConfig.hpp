@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 #include "Lexer.hpp"
+#include "Parser.hpp"
 
 namespace Config
 {
@@ -67,6 +68,8 @@ class HttpConfig
 		if (root_)
 			delete root_;
 	}
+
+	void	generate(const std::vector<Lexer::TokenNode>& nodes) throw (ParsingException);
 };
 
 
