@@ -98,7 +98,6 @@ void HttpConnection::receiveContent(char *content, size_t size)
 
 void HttpConnection::handleRequest()
 {
-	std::cout << "vasy frere je prends la nouvelle requete" << std::endl;
 	raw_.push_back('\0');
 	requests_.push_back(HttpRequest());
 	HttpRequest& req = requests_.back();
