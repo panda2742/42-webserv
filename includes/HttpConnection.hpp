@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <iostream>
+#include <deque>
 #include <sys/types.h>
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
@@ -22,8 +23,10 @@ private:
 	std::string findHeaderContent(const std::string& key, size_t range);
 
 	HttpRequest req_;
-	bool res_ready_;
 	HttpResponse res_;
+
+	// std::deque<HttpRequest> requests_;
+	// std::deque<HttpResponse> responses_;
 
 	void handleRequest();
 	

@@ -6,7 +6,7 @@
 #include <vector>
 #include <sys/socket.h>
 
-HttpConnection::HttpConnection(int socket_fd) : socket_fd_(socket_fd), header_(false), content_size_(0), res_ready_(false), res_(req_)
+HttpConnection::HttpConnection(int socket_fd) : socket_fd_(socket_fd), header_(false), content_size_(0), req_(), res_(req_)
 {
 
 }
@@ -21,7 +21,7 @@ void HttpConnection::clear()
 	raw_.clear();
 	header_ = false;
 	content_size_ = 0;
-	res_ready_ = false;
+	// res_ready_ = false;
 }
 
 ssize_t HttpConnection::find(const std::string& search, size_t range)
@@ -95,19 +95,21 @@ void HttpConnection::receiveContent(char *content, size_t size)
 		}
 	}
 }
+#include "Logger.hpp"
 
 void HttpConnection::handleRequest()
 {
 	req_.init(raw_, header_size_, content_size_);
 	req_.parse();
-
+	Logger::error(req_.getTarget());
 	res_.create();
-	res_ready_ = true;
+	Logger::error(req_.getTarget());
+	// res_ready_ = true;
 }
 
 void HttpConnection::sendResponse()
 {
-	res_.sendResponse(socket_fd_);
-	clear();
+	res_.sendResponsePart(socket_fd_);
+	// clear();
 }
 

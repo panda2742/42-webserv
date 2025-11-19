@@ -144,6 +144,16 @@ void HttpResponse::setError(int code)
 	setBody(body_vec);
 }
 
+void HttpResponse::serializeHeader()
+{
+	serialized_header_ = "HTTP/1.1 " + to_string(status_code_) + " " + status_message_ + "\r\n";
+
+	for (std::map<std::string, std::string>::const_iterator it = headers_.begin(); it != headers_.end(); ++it)
+		serialized_header_ += it->first + ": " + it->second + "\r\n";
+
+	serialized_header_ += "\r\n";
+}
+
 void HttpResponse::create()
 {
 	if (req_.getMethod() == GET)
@@ -158,10 +168,17 @@ void HttpResponse::create()
 		}
 		else if (file_status_ == FILE_STREAM_DIRECT)
 		{
-			setStatus(200, "OK");
-			std::map<std::string, std::string>::const_iterator mime = MIME_TABLE.find(getExtension(req_.getTarget()));
-			setHeader("Content-Type", mime == MIME_TABLE.end() ? "application/octet-stream" : mime->second);
-			headers_["Content-Length"] = to_string(file_info_.st_size);
+			direct_file_fd_ = open(file_path_.c_str(), O_RDONLY);
+			
+			if (direct_file_fd_ < 0)
+				setError(500);
+			else
+			{
+				setStatus(200, "OK");
+				std::map<std::string, std::string>::const_iterator mime = MIME_TABLE.find(getExtension(req_.getTarget()));
+				setHeader("Content-Type", mime == MIME_TABLE.end() ? "application/octet-stream" : mime->second);
+				headers_["Content-Length"] = to_string(file_info_.st_size);
+			}
 		}
 		else if (file_status_ == FILE_IS_DIR)
 		{
@@ -196,6 +213,9 @@ void HttpResponse::create()
 		std::vector<char> body_vec(body.begin(), body.end());
 		setBody(body_vec);
 	}
+
+	serializeHeader();
+	res_ready_ = true;
 }
 
 void HttpResponse::sendHeader(int socket_fd)
@@ -294,6 +314,116 @@ void HttpResponse::sendResponse(int socket_fd)
 	}
 }
 
+bool HttpResponse::sendFileDirectPart(int socket_fd)
+{
+	if (send_index_ > 0)
+	{
+		if (send_index_ < (size_t)direct_file_n_)
+		{
+			ssize_t s = send(socket_fd, direct_file_buffer_ + send_index_, direct_file_n_ - send_index_, 0);
+			if (s <= 0) return false;
+
+			send_index_ += s;
+
+			return true;
+		}
+		else
+			send_index_ = 0;
+	}
+	
+	direct_file_n_ = read(direct_file_fd_, direct_file_buffer_, sizeof(direct_file_buffer_));
+	if (direct_file_n_ > 0)
+	{
+		ssize_t s = send(socket_fd, direct_file_buffer_ + send_index_, direct_file_n_ - send_index_, 0);
+		if (s <= 0) return false;
+		send_index_ += s;
+	}
+	else
+		send_state_ = SENT;
+	return true;
+}
+
+void HttpResponse::sendResponsePart(int socket_fd)
+{
+	if (!res_ready_) return ;
+
+	if (send_state_ == NOT_SENT)
+	{
+		send_state_ = HEADER;
+		send_index_ = 0;
+	}
+
+	if (send_state_ == HEADER)
+	{
+		size_t to_send = serialized_header_.size();
+
+		if (send_index_ < to_send)
+		{
+			ssize_t sent = send(socket_fd, serialized_header_.c_str() + send_index_, to_send - send_index_, 0);
+
+			if (sent <= 0) return; // gerer erreur pour de vrai
+
+			send_index_ += sent;
+		}
+		else
+		{
+			send_state_ = BODY;
+			send_index_ = 0;
+		}
+	}
+
+	if (send_state_ == BODY)
+	{
+		if (req_.getMethod() == GET)
+		{
+			if (file_status_ == FILE_OK)
+			{
+				size_t to_send = file_->data.size();
+
+				if (send_index_ < to_send)
+				{
+					ssize_t sent = send(socket_fd, file_->data.data() + send_index_, to_send - send_index_, 0);
+					if (sent <= 0) return; // ON GERE CORRECTEMENT LES ERREURS STP
+					send_index_ += sent;
+				}
+				else
+				{
+					send_state_ = SENT;
+				}
+			}
+			else if (file_status_ == FILE_STREAM_DIRECT)
+			{
+				if (!sendFileDirectPart(socket_fd))
+				{
+					// gerer l'errreurrrr iciii aussi
+				}
+			}
+			else
+			{
+				size_t to_send = body_.size();
+
+				if (send_index_ < to_send)
+				{
+					ssize_t sent = send(socket_fd, body_.data() + send_index_, to_send - send_index_, 0);
+					if (sent <= 0) return ; // gerer erreur pour de vrai
+					send_index_ += sent;
+				}
+				else
+				{
+					send_state_ = SENT;
+				}
+			}
+		}
+		else
+		{
+			
+		}
+	}
+
+	
+
+}
+
 void HttpResponse::clear()
 {
 	status_code_ = 0;
@@ -301,6 +431,8 @@ void HttpResponse::clear()
 
 	headers_.clear();
 	body_.clear();
+
+	if (direct_file_fd_ >= 0) close(direct_file_fd_);
 
 	file_ = NULL;
 	file_status_ = FILE_OK;

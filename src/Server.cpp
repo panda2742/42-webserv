@@ -15,7 +15,7 @@
 #define BASEPORT 8080
 #define MAX_EVENTS 64
 
-void Server::handleClient(int fd)
+void Server::handleClientIN(int fd)
 {
 	std::vector<char> request_buffer;
 	char buf[4096];
@@ -44,10 +44,39 @@ void Server::handleClient(int fd)
 	if (it != connections_.end()) {
 		it->second.receiveContent(request_buffer.data(), size);
 	} else {
-		// No connection found for this fd; ignore or log.
-		Logger::info("received data for unknown fd");
+		Logger::warn("received data for unknown fd");
 	}
 }
+
+void Server::handleClientOUT(int fd)
+{
+	std::map<int, HttpConnection>::iterator it = connections_.find(fd);
+	if (it == connections_.end()) {
+		Logger::warn("received data for unknown fd");
+		return ;
+	}
+
+	it->second.sendResponse();
+}
+
+void Server::handleClient(struct epoll_event& epoll)
+{
+	if (epoll.events & (EPOLLERR | EPOLLHUP))
+	{
+		// closeConnection(epoll.data.fd); gerer une deco
+		return;
+	}
+
+	if (epoll.events & EPOLLIN) {
+		handleClientIN(epoll.data.fd);   // lecture + parsing + queue des requêtes
+	}
+
+	if (epoll.events & EPOLLOUT) {
+		handleClientOUT(epoll.data.fd);  // machine à états d'envoi
+	}
+}
+
+
 
 Server::Server()
 	: running_(false)
@@ -105,7 +134,7 @@ void Server::run()
 				fcntl(client_fd, F_SETFL, O_NONBLOCK);
 
 				struct epoll_event client_ev;
-				client_ev.events = EPOLLIN | EPOLLET;
+				client_ev.events = EPOLLIN | EPOLLOUT | EPOLLERR | EPOLLHUP;
 				client_ev.data.fd = client_fd;
 				epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, client_fd, &client_ev);
 
@@ -114,7 +143,7 @@ void Server::run()
 			}
 			else
 			{
-				handleClient(events[i].data.fd);
+				handleClient(events[i]);
 			}
 		}
 	}

@@ -17,7 +17,9 @@ private:
 
 	std::map<int, HttpConnection> connections_;
 
-	void handleClient(int fd);
+	void handleClient(struct epoll_event& epoll);
+	void handleClientIN(int fd);
+	void handleClientOUT(int fd);
 
 public:
 	Server();

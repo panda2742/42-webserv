@@ -5,8 +5,17 @@
 #include <map>
 #include <vector>
 #include "HttpRequest.hpp"
+#include "Logger.hpp"
 #include "FileCacheManager.hpp"
 #include <sys/stat.h>
+
+enum ResponseState
+{
+	NOT_SENT,
+	HEADER,
+	BODY,
+	SENT,
+};
 
 class HttpResponse
 {
@@ -25,25 +34,42 @@ private:
 	struct stat file_info_;
 	std::string file_path_;
 
+	std::string serialized_header_;
+
+	ResponseState send_state_;
+	size_t send_index_;
+	int direct_file_fd_;
+	ssize_t direct_file_n_;
+	char direct_file_buffer_[8192];
+
+	bool res_ready_;
+
 	void setHeader(const std::string &name, const std::string &value);
 	void setStatus(int code, const std::string &message);
 	void setBody(const std::vector<char> &body);
 
 	void setError(int code);
 
+	void serializeHeader();
+
 	void sendHeader(int socket_fd);
 	void sendBody(int socket_fd);
 	void sendFileDirect(const std::string &path, int socket_fd);
+	
+	bool sendFileDirectPart(int socket_fd);
 
 public:
 	HttpResponse(HttpRequest &req)
-		: req_(req), status_code_(500) {}
+		: req_(req), status_code_(500), send_state_(NOT_SENT), res_ready_(false) {
+			Logger::warn(req.getTarget());
+		}
 	~HttpResponse() {}
 
 	std::vector<char> serialize() const;
 	
 	void create();
 	void sendResponse(int socket_fd);
+	void sendResponsePart(int socket_fd);
 
 	void clear();
 
