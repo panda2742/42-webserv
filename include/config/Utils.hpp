@@ -12,6 +12,7 @@ namespace Utils
 bool						isInCharset(char c, const char *cstr);
 void						printTokens_(const std::vector<Lexer::TokenNode>& nodes);
 std::vector<std::string>	&cleanVector(std::vector<std::string>& vect);
+bool						isNumber(const std::string& nbstr);
 
 // #########################################################
 };

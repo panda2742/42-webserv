@@ -2,6 +2,8 @@
 #define LEXER_HPP
 
 #include <string>
+#include <ostream>
+#include "types.hpp"
 
 namespace Config
 {
@@ -26,6 +28,8 @@ struct TokenNode
 	TokenNode(const Token type_, const std::string& value_)
 		: type(type_), value(value_) {}
 };
+
+std::ostream&	operator<<(std::ostream& os, const TokenNode& node);
 
 // #########################################################
 };

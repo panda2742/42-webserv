@@ -27,32 +27,7 @@ void	printTokens_(const std::vector<Lexer::TokenNode>& nodes)
 	{
 		if (it != nodes.begin())
 			std::cout << "    ↓" << std::endl;
-		std::cout << "";
-		switch ((*it).type)
-		{
-			case Lexer::TokenSymbolOpen:
-				std::cout << ORANGE "SymbolOpen" RESET;
-				break;
-			case Lexer::TokenSymbolClose:
-				std::cout << GREEN "SymbolClose" RESET;
-				break;
-			case Lexer::TokenDirective:
-				std::cout << CYAN "Directive" RESET;
-				break;
-			case Lexer::TokenParent:
-				std::cout << LIGHT_GREEN "ParentDir" RESET;
-				break;
-			case Lexer::TokenDelimiter:
-				std::cout << BLURPLE "Delimiter" RESET;
-				break;
-			case Lexer::TokenArgument:
-				std::cout << PINK "Argument" RESET;
-				break;
-			default:
-				std::cout << "UNKNOWN (" << (*it).type << ")";
-				break;
-		}
-		std::cout << "\t" GREY << (*it).value << RESET << std::endl;
+		std::cout << (*it);
 	}
 }
 
@@ -87,6 +62,16 @@ std::vector<std::string>&	cleanVector(std::vector<std::string>& vect)
 
 	vect.swap(res);
 	return vect;
+}
+
+bool	isNumber(const std::string& nbstr)
+{
+	for (std::string::const_iterator it = nbstr.begin(); it != nbstr.end(); ++it)
+	{
+		if (!isInCharset(*it, "1234567890"))
+			return false;
+	}
+	return true;
 }
 
 // #########################################################

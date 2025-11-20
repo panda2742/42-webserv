@@ -20,6 +20,7 @@ class HttpConfig
 		{
 			enum DataType
 			{
+				TYPE_NULL,
 				TYPE_STRING,
 				TYPE_UINT,
 				TYPE_STRING_VECTOR,
@@ -54,12 +55,14 @@ class HttpConfig
 
 	Node_	*root_;
 
-	static Node_	*createStringNode_(const std::string& str);
-	static Node_	*createUintNode_(unsigned int value);
-	static Node_	*createStringVectorNode_(void);
-	static Node_	*createUintVectorNode_(void);
-	static Node_	*createMapUintStringNode_(void);
-	static Node_	*createMapUintStringVectorNode_(void);
+	static Node_::Value::DataType	dataType_(std::vector<Lexer::TokenNode>::const_iterator node, std::vector<Lexer::TokenNode>::const_iterator end);
+	static Node_					*createNullNode_(void);
+	static Node_					*createStringNode_(const std::string& str);
+	static Node_					*createUintNode_(unsigned int value);
+	static Node_					*createStringVectorNode_(void);
+	static Node_					*createUintVectorNode_(void);
+	static Node_					*createMapUintStringNode_(void);
+	static Node_					*createMapUintStringVectorNode_(void);
 
 	public:
 	HttpConfig(void): root_(NULL) {}
