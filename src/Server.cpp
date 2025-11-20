@@ -1,6 +1,7 @@
 
 #include "Server.hpp"
 #include "Logger.hpp"
+#include "utils.hpp"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <cstring>
@@ -50,6 +51,7 @@ void Server::handleClientIN(int fd)
 
 void Server::handleClientOUT(int fd)
 {
+	// std::cout << "OUT" << std::endl;
 	std::map<int, HttpConnection>::iterator it = connections_.find(fd);
 	if (it == connections_.end()) {
 		Logger::warn("received data for unknown fd");
@@ -63,6 +65,7 @@ void Server::handleClient(struct epoll_event& epoll)
 {
 	if (epoll.events & (EPOLLERR | EPOLLHUP))
 	{
+		std::cout << "Co closed" << std::endl;
 		// closeConnection(epoll.data.fd); gerer une deco
 		return;
 	}
@@ -138,7 +141,7 @@ void Server::run()
 				client_ev.data.fd = client_fd;
 				epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, client_fd, &client_ev);
 
-				Logger::info("accepted new connection");
+				Logger::info("accepted new connection (fd: " + to_string(client_fd) + std::string(")"));
 				connections_.insert(std::make_pair(client_fd, HttpConnection(client_fd)));
 			}
 			else

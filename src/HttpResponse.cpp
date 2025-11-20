@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <dirent.h>
 
 void HttpResponse::setStatus(int code, const std::string &message) {
 	status_code_ = code;
@@ -35,6 +36,55 @@ void HttpResponse::setError(int code)
 	setBody(body_vec);
 }
 
+void HttpResponse::setDirectory()
+{
+	struct stat tmp_file_info;
+
+	std::string full_path_tmp;
+	std::string index_path = req_.getTarget()[req_.getTarget().size() - 1] == '/' ? req_.getTarget() + "index.html" : req_.getTarget() + "/index.html";
+
+	FileStatus index_status = FileCacheManager::getFile(index_path, file_, tmp_file_info, full_path_tmp);
+
+
+	if (index_status == FILE_OK || index_status == FILE_STREAM_DIRECT)
+	{
+		file_path_ = full_path_tmp;
+		file_info_ = tmp_file_info;
+		file_status_ = index_status;
+		create();
+		return ;
+	}
+
+	std::string dirname = (req_.getTarget()[req_.getTarget().size() - 1] == '/') ? req_.getTarget() : (req_.getTarget() + "/");
+	std::string auto_index_html = "<!DOCTYPE html><html><head><title>Index of "+ dirname + "</title></head><body><h1>Index of "+ dirname + "</h1><hr><pre>";
+
+
+	DIR *dr;
+	struct dirent *en;
+	dr = opendir(file_path_.c_str());
+	if (dr)
+	{
+		while ((en = readdir(dr)) != NULL)
+		{
+			std::string filename = en->d_name;
+
+			if (filename == ".") continue ;
+
+			if (en->d_type == DT_DIR) filename += "/";
+
+			auto_index_html += "<a href=\""+ dirname + filename +"\">"+ filename +"</a><br>";
+		}
+		closedir(dr);
+	}
+
+	auto_index_html += "</pre><hr></body></html>";
+
+	setStatus(200, "OK");
+	setHeader("Content-Type", "text/html");
+	std::vector<char> body_vec(auto_index_html.begin(), auto_index_html.end());
+	setBody(body_vec);
+}
+
 void HttpResponse::serializeHeader()
 {
 	serialized_header_ = "HTTP/1.1 " + to_string(status_code_) + " " + status_message_ + "\r\n";
@@ -49,7 +99,7 @@ void HttpResponse::create()
 {
 	if (req_.getMethod() == GET)
 	{
-		file_status_ = FileCacheManager::getFile(req_.getTarget(), file_, file_info_, file_path_);
+		if (file_status_ == NONE) file_status_ = FileCacheManager::getFile(req_.getTarget(), file_, file_info_, file_path_);
 		
 		if (file_status_ == FILE_OK)
 		{
@@ -72,11 +122,11 @@ void HttpResponse::create()
 		}
 		else if (file_status_ == FILE_IS_DIR)
 		{
-			setStatus(200, "OK");
-			setHeader("Content-Type", "text/plain");
-			std::string body = "Rholala la grosse galere je gere pas encore les directory :/\nJe fais ca au plus vite mon bébou";
-			std::vector<char> body_vec(body.begin(), body.end());
-			setBody(body_vec);
+			setDirectory();
+			// setHeader("Content-Type", "text/plain");
+			// std::string body = "Rholala la grosse galere je gere pas encore les directory :/\nJe fais ca au plus vite mon bébou";
+			// std::vector<char> body_vec(body.begin(), body.end());
+			// setBody(body_vec);
 		}
 		else if (file_status_ == FILE_NOT_FOUND)
 		{
@@ -84,7 +134,7 @@ void HttpResponse::create()
 		}
 		else if (file_status_ == FILE_FORBIDDEN || file_status_ == PATH_FORBIDDEN)
 		{
-			setError(404);
+			setError(403);
 		}
 		else if (file_status_ == PATH_TO_LONG)
 		{
@@ -137,21 +187,11 @@ bool HttpResponse::sendFileDirectPart(int socket_fd)
 	return true;
 }
 
-std::string respStateToText(ResponseState s)
-{
-	if (s == NOT_SENT) return "Not sent";
-	if (s == HEADER) return "Header";
-	if (s == BODY) return "Body";
-	if (s == SENT) return "SENT";
-	if (s == ERROR) return "err";
-	return ("Bah wsh");
-}
-
 ResponseState HttpResponse::sendResponsePart(int socket_fd)
 {
 	if (!res_ready_) return ERROR;
 
-	//std::cout << "Send state " << respStateToText(send_state_) << std::endl;
+	std::cout << "Send state " << respStateToText(send_state_) << std::endl;
 
 	if (send_state_ == NOT_SENT)
 	{

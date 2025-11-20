@@ -1,4 +1,5 @@
 #include <string>
+#include "utils.hpp"
 
 const std::string getMimeType(const std::string& ext)
 {
@@ -104,4 +105,14 @@ const std::string getHttpErrorMessage(int code)
 	}
 
 	return "Unknown Error";
+}
+
+const std::string respStateToText(ResponseState s)
+{
+	if (s == NOT_SENT) return "Not sent";
+	if (s == HEADER) return "Header";
+	if (s == BODY) return "Body";
+	if (s == SENT) return "SENT";
+	if (s == ERROR) return "err";
+	return ("Bah wsh");
 }

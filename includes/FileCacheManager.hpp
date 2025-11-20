@@ -15,6 +15,7 @@ std::string getExtension(const std::string &path);
 
 enum FileStatus
 {
+	NONE,
 	FILE_OK,
 	FILE_STREAM_DIRECT,
 	FILE_IS_DIR,

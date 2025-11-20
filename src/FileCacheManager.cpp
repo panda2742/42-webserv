@@ -78,7 +78,7 @@ bool readFileToVector(const std::string& path, std::vector<char>& out)
 FileStatus FileCacheManager::getFile(std::string path, CachedFile*& file, struct stat &fileInfo, std::string &full_path)
 {
 	file = NULL;
-	std::string basepath = "./www/";
+	std::string basepath = path[0] == '/' ? "./www" : "./www/";
 	full_path = basepath + path;
 
 	if (path.find("..") != std::string::npos) return PATH_FORBIDDEN;

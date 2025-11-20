@@ -1,5 +1,6 @@
 #include <sstream>
 #include <string>
+#include "HttpResponse.hpp"
 
 template<typename T>
 std::string to_string(const T& value)
@@ -11,3 +12,5 @@ std::string to_string(const T& value)
 
 const std::string getHttpErrorMessage(int code);
 const std::string getMimeType(const std::string& ext);
+
+const std::string respStateToText(ResponseState s);

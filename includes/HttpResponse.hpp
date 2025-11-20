@@ -50,6 +50,8 @@ private:
 	void setBody(const std::vector<char> &body);
 
 	void setError(int code);
+	
+	void setDirectory();
 
 	void serializeHeader();
 	
@@ -57,7 +59,7 @@ private:
 
 public:
 	HttpResponse(HttpRequest &req)
-		: req_(req), status_code_(500), send_state_(NOT_SENT), res_ready_(false) {}
+		: req_(req), status_code_(500), file_status_(NONE), send_state_(NOT_SENT), res_ready_(false) {}
 	~HttpResponse() { clear(); }
 	
 	void create();
