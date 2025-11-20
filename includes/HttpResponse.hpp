@@ -52,24 +52,15 @@ private:
 	void setError(int code);
 
 	void serializeHeader();
-
-	void sendHeader(int socket_fd);
-	void sendBody(int socket_fd);
-	void sendFileDirect(const std::string &path, int socket_fd);
 	
 	bool sendFileDirectPart(int socket_fd);
 
 public:
 	HttpResponse(HttpRequest &req)
-		: req_(req), status_code_(500), send_state_(NOT_SENT), res_ready_(false) {
-			Logger::warn(req.getTarget());
-		}
+		: req_(req), status_code_(500), send_state_(NOT_SENT), res_ready_(false) {}
 	~HttpResponse() { clear(); }
-
-	std::vector<char> serialize() const;
 	
 	void create();
-	void sendResponse(int socket_fd);
 	ResponseState sendResponsePart(int socket_fd);
 
 	void clear();
