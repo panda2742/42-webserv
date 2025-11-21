@@ -50,26 +50,19 @@ private:
 	void setBody(const std::vector<char> &body);
 
 	void setError(int code);
+	
+	void setDirectory();
 
 	void serializeHeader();
-
-	void sendHeader(int socket_fd);
-	void sendBody(int socket_fd);
-	void sendFileDirect(const std::string &path, int socket_fd);
 	
 	bool sendFileDirectPart(int socket_fd);
 
 public:
 	HttpResponse(HttpRequest &req)
-		: req_(req), status_code_(500), send_state_(NOT_SENT), res_ready_(false) {
-			Logger::warn(req.getTarget());
-		}
+		: req_(req), status_code_(500), file_(NULL), file_status_(NONE), send_state_(NOT_SENT), send_index_(0), direct_file_fd_(-1), direct_file_n_(-1), res_ready_(false) {}
 	~HttpResponse() { clear(); }
-
-	std::vector<char> serialize() const;
 	
 	void create();
-	void sendResponse(int socket_fd);
 	ResponseState sendResponsePart(int socket_fd);
 
 	void clear();

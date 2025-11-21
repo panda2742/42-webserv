@@ -1,31 +1,12 @@
 #include "FileCacheManager.hpp"
 #include "Logger.hpp"
+#include "utils.hpp"
 #include <sys/stat.h>
 #include <iostream>
 #include <ctime>
 #include <fstream>
 #include <string.h>
 #include <errno.h>
-
-static const std::pair<const std::string, std::string> mime_init[] = {
-	std::pair<const std::string, std::string>(".html", "text/html"),
-	std::pair<const std::string, std::string>(".htm",  "text/html"),
-	std::pair<const std::string, std::string>(".css",  "text/css"),
-	std::pair<const std::string, std::string>(".js",   "application/javascript"),
-	std::pair<const std::string, std::string>(".png",  "image/png"),
-	std::pair<const std::string, std::string>(".jpg",  "image/jpeg"),
-	std::pair<const std::string, std::string>(".jpeg", "image/jpeg"),
-	std::pair<const std::string, std::string>(".gif",  "image/gif"),
-	std::pair<const std::string, std::string>(".svg",  "image/svg+xml"),
-	std::pair<const std::string, std::string>(".json", "application/json"),
-	std::pair<const std::string, std::string>(".txt",  "text/plain"),
-	std::pair<const std::string, std::string>(".pdf",  "application/pdf"),
-};
-
-const std::map<std::string, std::string> MIME_TABLE(
-	mime_init,
-	mime_init + sizeof(mime_init) / sizeof(mime_init[0])
-);
 
 size_t FileCacheManager::cache_size_ = 0;
 std::map<std::string, CachedFile> FileCacheManager::cache_;
@@ -83,7 +64,7 @@ bool readFileToVector(const std::string& path, std::vector<char>& out)
 	std::streamsize size = file.tellg();
 	file.seekg(0, std::ios::beg);
 
-	if (size <= 0)
+	if (size < 0)
 		return false;
 
 	out.resize(size);
@@ -97,7 +78,7 @@ bool readFileToVector(const std::string& path, std::vector<char>& out)
 FileStatus FileCacheManager::getFile(std::string path, CachedFile*& file, struct stat &fileInfo, std::string &full_path)
 {
 	file = NULL;
-	std::string basepath = "./www/";
+	std::string basepath = path[0] == '/' ? "./www" : "./www/";
 	full_path = basepath + path;
 
 	if (path.find("..") != std::string::npos) return PATH_FORBIDDEN;
@@ -130,8 +111,7 @@ FileStatus FileCacheManager::getFile(std::string path, CachedFile*& file, struct
 		CachedFile& file_tmp = it->second;
 
 		file_tmp.mtime = fileInfo.st_mtime;
-		std::map<std::string, std::string>::const_iterator mime = MIME_TABLE.find(getExtension(path));
-		file_tmp.mime = mime == MIME_TABLE.end() ? "application/octet-stream" : mime->second;
+		file_tmp.mime = getMimeType(getExtension(path));
 		
 		if (!readFileToVector(full_path, file_tmp.data))
 		{

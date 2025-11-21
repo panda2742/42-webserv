@@ -9,6 +9,7 @@ SOURCES					:=	main \
 							Logger \
 							Server \
 							FileCacheManager \
+							http_utils \
 							HttpConnection \
 							HttpRequest \
 							HttpResponse

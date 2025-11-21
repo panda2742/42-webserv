@@ -11,12 +11,11 @@
 #define MAX_CACHE_FILE_SIZE 10000 // 4194304
 #define MAX_CACHE_SIZE 1073741824 // 2^30
 
-extern const std::map<std::string, std::string> MIME_TABLE;
-
 std::string getExtension(const std::string &path);
 
 enum FileStatus
 {
+	NONE,
 	FILE_OK,
 	FILE_STREAM_DIRECT,
 	FILE_IS_DIR,
