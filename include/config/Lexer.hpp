@@ -23,8 +23,8 @@ enum Token
 
 struct TokenNode
 {
-	Token				type;
-	const std::string	value;
+	Token		type;
+	std::string	value;
 	TokenNode(const Token type_, const std::string& value_)
 		: type(type_), value(value_) {}
 };

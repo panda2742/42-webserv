@@ -2,6 +2,7 @@
 #include <iostream>
 #include "config/ConfigLogger.hpp"
 #include "config/Utils.hpp"
+#include <cstdlib>
 
 namespace Config
 {
@@ -207,6 +208,7 @@ void	HttpConfig::generate(const std::vector<Lexer::TokenNode>& nodes) throw(Pars
 			Node_::Value::DataType	type = dataType_(it, nodes.end());
 			Node_					*node = createNode(type);
 
+			node->name = it->value;
 			node->parent = parent;
 
 			if (parent->first_child == NULL)
@@ -220,9 +222,9 @@ void	HttpConfig::generate(const std::vector<Lexer::TokenNode>& nodes) throw(Pars
 				node->prev_sibling = last;
 			}
 
-
             std::vector<Lexer::TokenNode>::const_iterator current = it;
             bool shouldBreak = false;
+			size_t	i = 0;
 
             while (current != nodes.end() && !shouldBreak)
             {
@@ -245,16 +247,66 @@ void	HttpConfig::generate(const std::vector<Lexer::TokenNode>& nodes) throw(Pars
                     case Lexer::TokenDelimiter:
                         shouldBreak = true;
                         break;
-
                     default:
                         break;
                 }
 
+				switch (type)
+				{
+					case Node_::Value::TYPE_STRING:
+						node->value.setAs<std::string>(current->value);
+						break;
+					case Node_::Value::TYPE_UINT:
+						node->value.setAs<unsigned int>(std::atoi(current->value.c_str()));
+						break;
+					case Node_::Value::TYPE_STRING_VECTOR:
+						if (i)
+							node->value.getAs<std::vector<std::string> >()->push_back(current->value);
+						else
+							node->value.setAs<std::vector<std::string> >(std::vector<std::string>(1, current->value));
+						break;
+					case Node_::Value::TYPE_UINT_VECTOR:
+						if (i)
+							node->value.getAs<std::vector<unsigned int> >()->push_back(std::atol(current->value.c_str()));
+						else
+							node->value.setAs<std::vector<unsigned int> >(std::vector<unsigned int>(1, std::atoi(current->value.c_str())));
+						break;
+					case Node_::Value::TYPE_MAP_UINT_STRING:
+						if (i)
+						{
+							std::map<unsigned int, std::string>	*m = node->value.getAs<std::map<unsigned int, std::string> >();
+							m->begin()->second = current->value;
+						}
+						else
+						{
+							std::map<unsigned int, std::string>	m;
+							m.insert(std::make_pair(std::atoi(current->value.c_str()), ""));
+							node->value.setAs<std::map<unsigned int, std::string> >(m);
+						}
+						break;
+					case Node_::Value::TYPE_MAP_UINT_STRING_VECTOR:
+						if (i)
+						{
+							std::map<unsigned int, std::vector<std::string> >	*m = node->value.getAs<std::map<unsigned int, std::vector<std::string> > >();
+							m->begin()->second.push_back(current->value);
+						}
+						else
+						{
+							std::map<unsigned int, std::vector<std::string> >	m;
+							m.insert(std::make_pair(std::atoi(current->value.c_str()), std::vector<std::string>()));
+							node->value.setAs<std::map<unsigned int, std::vector<std::string> > >(m);
+						}
+						break;
+					case Node_::Value::TYPE_NULL:
+					default:
+						break;
+				}
                 if (!shouldBreak) {
                     ++current;
                     if (current == nodes.end())
 						break;
                 }
+				++i;
             }
 
             if (current > it)

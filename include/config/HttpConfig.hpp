@@ -44,10 +44,11 @@ class HttpConfig
 			}
 			void	deleteData(void);
 		}		value;
-		Node_	*parent;
-		Node_	*first_child;
-		Node_	*prev_sibling;
-		Node_	*next_sibling;
+		std::string	name;
+		Node_		*parent;
+		Node_		*first_child;
+		Node_		*prev_sibling;
+		Node_		*next_sibling;
 
 		Node_(Value::DataType type_id)
 			: parent(NULL), first_child(NULL), prev_sibling(NULL), next_sibling(NULL)
