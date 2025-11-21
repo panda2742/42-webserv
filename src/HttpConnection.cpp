@@ -96,20 +96,21 @@ void HttpConnection::receiveContent(char *content, size_t size)
 	}
 }
 
-void HttpConnection::handleRequest()
+bool HttpConnection::handleRequest()
 {
 	raw_.push_back('\0');
 	requests_.push_back(HttpRequest());
 	HttpRequest& req = requests_.back();
 
 	req.init(raw_, header_size_, content_size_);
-	req.parse();
+
+	if (!req.parse()) return false;
 
 	responses_.push_back(HttpResponse(req));
 	HttpResponse& res = responses_.back();
 	res.create();
 	clear();
-	// res_ready_ = true;
+	return true;
 }
 
 bool HttpConnection::sendResponse()

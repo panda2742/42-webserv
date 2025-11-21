@@ -25,7 +25,7 @@ private:
 	std::deque<HttpRequest> requests_;
 	std::deque<HttpResponse> responses_;
 
-	void handleRequest();
+	bool handleRequest();
 	
 public:
 	HttpConnection(int socket_fd);

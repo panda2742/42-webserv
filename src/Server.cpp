@@ -22,9 +22,9 @@ int Server::removeFdEpoll(int fd)
     return epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, fd, &ev);
 }
 
-void Server::removeClient(int fd)
+void Server::removeClient(int fd, Logger::Level lvl)
 {
-	Logger::info("Disconnect client (fd: " + to_string(fd) + std::string(")"));
+	Logger::log(lvl ,"Disconnect client (fd: " + to_string(fd) + std::string(")"));
 	removeFdEpoll(fd);
 	close(fd);
 	std::map<int, HttpConnection>::iterator it = connections_.find(fd);
@@ -49,7 +49,7 @@ void Server::handleClientIN(int fd)
 		size += r;
 	}
 
-	if (r == 0) return removeClient(fd);
+	if (r == 0) return removeClient(fd, Logger::INFO);
 
 	std::map<int, HttpConnection>::iterator it = connections_.find(fd);
 	if (it != connections_.end()) {
@@ -64,7 +64,7 @@ void Server::handleClientOUT(int fd)
 	std::map<int, HttpConnection>::iterator it = connections_.find(fd);
 	if (it == connections_.end()) return ;
 
-	if (!it->second.sendResponse()) removeClient(fd);
+	if (!it->second.sendResponse()) removeClient(fd, Logger::WARN);
 }
 
 void Server::handleClient(struct epoll_event& epoll)

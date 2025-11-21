@@ -95,7 +95,7 @@ void HttpResponse::serializeHeader()
 	serialized_header_ += "\r\n";
 }
 
-void HttpResponse::create()
+void HttpResponse::createDefault()
 {
 	if (req_.getMethod() == GET)
 	{
@@ -128,11 +128,15 @@ void HttpResponse::create()
 			// std::vector<char> body_vec(body.begin(), body.end());
 			// setBody(body_vec);
 		}
+		else if (file_status_ == PATH_FORBIDDEN)
+		{
+			setError(400);
+		}
 		else if (file_status_ == FILE_NOT_FOUND)
 		{
 			setError(404);
 		}
-		else if (file_status_ == FILE_FORBIDDEN || file_status_ == PATH_FORBIDDEN)
+		else if (file_status_ == FILE_FORBIDDEN)
 		{
 			setError(403);
 		}
@@ -152,6 +156,25 @@ void HttpResponse::create()
 		std::string body = "Unknown method";
 		std::vector<char> body_vec(body.begin(), body.end());
 		setBody(body_vec);
+	}
+}
+
+void HttpResponse::create()
+{
+	switch (req_.getRequestError())
+	{
+	case NO_REQ_ERROR:
+	case NO_HTTP_VERSION:
+		createDefault(); break;
+	case NOT_HTTP_HEADER:
+		return ;
+	case UNKNOWN_METHOD:
+		setError(405); break;
+	case UNSUPPORTED_HTTP_VERSION:
+		setError(505); break;
+	case BAD_REQUEST:
+	default:
+		setError(400); break;
 	}
 
 	serializeHeader();
@@ -196,6 +219,8 @@ ResponseState HttpResponse::sendResponsePart(int socket_fd)
 	if (send_state_ == NOT_SENT)
 	{
 		send_state_ = HEADER;
+		if (req_.getRequestError() == NOT_HTTP_HEADER) send_state_ = BODY;
+
 		send_index_ = 0;
 	}
 

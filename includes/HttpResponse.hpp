@@ -49,6 +49,8 @@ private:
 	void setStatus(int code, const std::string &message);
 	void setBody(const std::vector<char> &body);
 
+	void createDefault();
+
 	void setError(int code);
 	
 	void setDirectory();
@@ -59,7 +61,8 @@ private:
 
 public:
 	HttpResponse(HttpRequest &req)
-		: req_(req), status_code_(500), file_(NULL), file_status_(NONE), send_state_(NOT_SENT), send_index_(0), direct_file_fd_(-1), direct_file_n_(-1), res_ready_(false) {}
+		: req_(req), status_code_(500), file_(NULL), file_status_(NONE),
+		send_state_(NOT_SENT), send_index_(0), direct_file_fd_(-1), direct_file_n_(-1), res_ready_(false) {}
 	~HttpResponse() { clear(); }
 	
 	void create();
