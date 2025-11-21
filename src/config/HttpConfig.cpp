@@ -3,6 +3,7 @@
 #include "config/ConfigLogger.hpp"
 #include "config/Utils.hpp"
 #include <cstdlib>
+#include <sstream>
 
 namespace Config
 {
@@ -61,6 +62,60 @@ HttpConfig::Node_::~Node_(void)
 		parent->first_child = next_sibling;
 
 	value.deleteData();
+}
+
+std::string	HttpConfig::Node_::fastStr(void)
+{
+	std::stringstream	ss;
+	ss << "Node " RED << (void *)this << " " << name << RESET << " = ";
+	switch (value.type)
+	{
+		case Value::TYPE_STRING:
+			ss << ORANGE "STRING " << *value.getAs<std::string>() << RESET;
+			break;
+		case Value::TYPE_UINT:
+			ss << LIGHT_GREEN "UINT " << *value.getAs<unsigned int>() << RESET;
+			break;
+		case Value::TYPE_STRING_VECTOR:
+			ss << GREEN "STRINGVEC " << value.getAs<std::vector<std::string> >() << RESET;
+			break;
+		case Value::TYPE_UINT_VECTOR:
+			ss << CYAN "UINTVEC " << value.getAs<std::vector<unsigned int> >() << RESET;
+			break;
+		case Value::TYPE_MAP_UINT_STRING:
+			ss << BLURPLE "UINT_STRING " << value.getAs<std::map<unsigned int, std::string> >() << RESET;
+			break;
+		case Value::TYPE_MAP_UINT_STRING_VECTOR:
+			ss << PINK "UINT_STRINGVEC " << value.getAs<std::map<unsigned int, std::vector<std::string> > >() << RESET;
+			break;
+		case Value::TYPE_NULL:
+		default:
+			ss << GREY "EMPTY" RESET;
+			break;
+	}
+	ss << std::endl;
+	return ss.str();
+}
+
+std::string	HttpConfig::Node_::toString(unsigned int tabs = 0)
+{
+	std::stringstream	ss;
+	ss << std::string(tabs, '\t') << fastStr();
+	Node_	*brother = next_sibling;
+	while (brother)
+	{
+		ss << brother->fastStr();
+		brother = brother->next_sibling;
+	}
+	ss << std::endl;
+	Node_	*child = first_child;
+	while (child)
+	{
+		ss << child->toString(tabs + 1);
+		child = child->next_sibling;
+	}
+	ss << std::endl;
+	return ss.str();
 }
 
 HttpConfig::Node_	*HttpConfig::createNode(Node_::Value::DataType type)
@@ -321,6 +376,8 @@ void	HttpConfig::generate(const std::vector<Lexer::TokenNode>& nodes) throw(Pars
 			}
 		}
 	}
+
+	std::cout << root_->toString() << std::endl;
 }
 
 // #########################################################

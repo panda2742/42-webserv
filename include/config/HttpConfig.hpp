@@ -58,6 +58,9 @@ class HttpConfig
 			}
 
 		~Node_(void);
+
+		std::string	fastStr(void);
+		std::string	toString(unsigned int tabs);
 	};
 
 	Node_	*root_;
