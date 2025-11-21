@@ -32,7 +32,7 @@ public:
 	~HttpConnection();
 
 	void receiveContent(char *content, size_t size);
-	void sendResponse();
+	bool sendResponse();
 	void clear();
 
 };

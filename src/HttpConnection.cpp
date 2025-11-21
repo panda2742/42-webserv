@@ -112,7 +112,7 @@ void HttpConnection::handleRequest()
 	// res_ready_ = true;
 }
 
-void HttpConnection::sendResponse()
+bool HttpConnection::sendResponse()
 {
 	if (!responses_.empty())
 	{
@@ -129,9 +129,9 @@ void HttpConnection::sendResponse()
 		{
 			responses_.pop_front();
 			requests_.pop_front();
-			// gerer la deco du client
+			return false;
 		}
 	}
-	// clear();
+	return true;
 }
 

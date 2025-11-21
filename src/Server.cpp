@@ -22,6 +22,19 @@ int Server::removeFdEpoll(int fd)
     return epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, fd, &ev);
 }
 
+void Server::removeClient(int fd)
+{
+	Logger::info("Disconnect client (fd: " + to_string(fd) + std::string(")"));
+	removeFdEpoll(fd);
+	close(fd);
+	std::map<int, HttpConnection>::iterator it = connections_.find(fd);
+	if (it != connections_.end())
+	{
+		it->second.clear();
+		connections_.erase(it);
+	}
+}
+
 void Server::handleClientIN(int fd)
 {
 	std::vector<char> request_buffer;
@@ -36,18 +49,7 @@ void Server::handleClientIN(int fd)
 		size += r;
 	}
 
-	if (r == 0)
-	{
-		Logger::info("Disconnect client (fd: " + to_string(fd) + std::string(")"));
-		removeFdEpoll(fd);
- 		close(fd);
- 		std::map<int, HttpConnection>::iterator it = connections_.find(fd);
- 		if (it != connections_.end()) {
- 			it->second.clear();
- 			connections_.erase(it);
- 		}
-		return;
-	}
+	if (r == 0) return removeClient(fd);
 
 	std::map<int, HttpConnection>::iterator it = connections_.find(fd);
 	if (it != connections_.end()) {
@@ -59,14 +61,10 @@ void Server::handleClientIN(int fd)
 
 void Server::handleClientOUT(int fd)
 {
-	// std::cout << "OUT" << std::endl;
 	std::map<int, HttpConnection>::iterator it = connections_.find(fd);
-	if (it == connections_.end()) {
-		// Logger::warn("unknown fd is ready for out (fd: " + to_string(fd) + std::string(")"));
-		return ;
-	}
+	if (it == connections_.end()) return ;
 
-	it->second.sendResponse();
+	if (!it->second.sendResponse()) removeClient(fd);
 }
 
 void Server::handleClient(struct epoll_event& epoll)

@@ -22,6 +22,7 @@ private:
 	void handleClientOUT(int fd);
 
 	int removeFdEpoll(int fd);
+	void removeClient(int fd);
 
 public:
 	Server();

@@ -207,7 +207,7 @@ ResponseState HttpResponse::sendResponsePart(int socket_fd)
 		{
 			ssize_t sent = send(socket_fd, serialized_header_.c_str() + send_index_, to_send - send_index_, 0);
 
-			if (sent <= 0) return ERROR; // gerer erreur pour de vrai
+			if (sent <= 0) return ERROR;
 
 			send_index_ += sent;
 		}
@@ -229,7 +229,7 @@ ResponseState HttpResponse::sendResponsePart(int socket_fd)
 				if (send_index_ < to_send)
 				{
 					ssize_t sent = send(socket_fd, file_->data.data() + send_index_, to_send - send_index_, 0);
-					if (sent <= 0) return ERROR; // ON GERE CORRECTEMENT LES ERREURS STP
+					if (sent <= 0) return ERROR;
 					send_index_ += sent;
 				}
 				else
@@ -239,11 +239,7 @@ ResponseState HttpResponse::sendResponsePart(int socket_fd)
 			}
 			else if (file_status_ == FILE_STREAM_DIRECT)
 			{
-				if (!sendFileDirectPart(socket_fd))
-				{
-					return ERROR;
-					// gerer l'errreurrrr iciii aussi
-				}
+				if (!sendFileDirectPart(socket_fd)) return ERROR;
 			}
 			else
 			{
@@ -252,7 +248,7 @@ ResponseState HttpResponse::sendResponsePart(int socket_fd)
 				if (send_index_ < to_send)
 				{
 					ssize_t sent = send(socket_fd, body_.data() + send_index_, to_send - send_index_, 0);
-					if (sent <= 0) return ERROR; // gerer erreur pour de vrai
+					if (sent <= 0) return ERROR;
 					send_index_ += sent;
 				}
 				else
