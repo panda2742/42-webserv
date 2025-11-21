@@ -10,6 +10,7 @@
 
 size_t FileCacheManager::cache_size_ = 0;
 std::map<std::string, CachedFile> FileCacheManager::cache_;
+std::priority_queue<Entry, std::vector<Entry>, std::greater<Entry> > FileCacheManager::lru_heap_;
 
 FileCacheManager::FileCacheManager()
 {
@@ -30,14 +31,10 @@ void debug_log_file(struct stat fileInfo)
 		std::cout << "File\n";
 	}
 
-	std::cout << "Size          : " <<
-		fileInfo.st_size << '\n';               // Size in bytes
-	std::cout << "Device        : " <<
-		(char)(fileInfo.st_dev + 'A') << '\n';  // Device number
-	std::cout << "Created       : " <<
-		std::ctime(&fileInfo.st_ctim.tv_sec);         // Creation time
-	std::cout << "Modified      : " <<
-		std::ctime(&fileInfo.st_mtim.tv_sec);         // Last mod time
+	std::cout << "Size          : " << fileInfo.st_size << '\n';
+	std::cout << "Device        : " << (char)(fileInfo.st_dev + 'A') << '\n';
+	std::cout << "Created       : " << std::ctime(&fileInfo.st_ctim.tv_sec);
+	std::cout << "Modified      : " << std::ctime(&fileInfo.st_mtim.tv_sec);
 }
 
 std::string getExtension(const std::string &path)
@@ -102,8 +99,12 @@ FileStatus FileCacheManager::getFile(std::string path, CachedFile*& file, struct
 	// debug_log_file(fileInfo);
 
 	std::map<std::string, CachedFile>::iterator it = cache_.find(path);
-	if (it == cache_.end())
+	if (it == cache_.end() || it->second.mtime < fileInfo.st_mtime)
 	{
+		if (it != cache_.end() && it->second.mtime < fileInfo.st_mtime) cache_.erase(it);
+
+		freeMinimumSize(fileInfo.st_size);
+
 		cache_.insert(std::make_pair(path, CachedFile()));
 
 		it = cache_.find(path);
@@ -120,11 +121,44 @@ FileStatus FileCacheManager::getFile(std::string path, CachedFile*& file, struct
 		}
 
 		file_tmp.size = file_tmp.data.size();
+		cache_size_ += file_tmp.size;
 
 		Logger::info("file " + path + " cached");
 	}
 
 	file = &it->second;
 
+	touch(path);
+
 	return FILE_OK;
+}
+
+void FileCacheManager::touch(const std::string& path)
+{
+    std::map<std::string, CachedFile>::iterator it = cache_.find(path);
+    if (it == cache_.end()) return;
+
+    it->second.last_open = time(0);
+    lru_heap_.push((Entry){ path, it->second.last_open });
+}
+
+void FileCacheManager::freeMinimumSize(size_t required)
+{
+	if (cache_size_ + required <= MAX_CACHE_SIZE) return ;
+
+	while (!lru_heap_.empty() && cache_size_ + required > MAX_CACHE_SIZE)
+	{
+		const Entry& top = lru_heap_.top();
+		lru_heap_.pop();
+
+		std::map<std::string, CachedFile>::iterator it = cache_.find(top.path);
+		if (it == cache_.end()) continue;
+
+		if (it->second.last_open != top.last_open) continue;
+
+		Logger::info("file " + top.path + " cleared from cache");
+
+		cache_size_ -= it->second.size;
+		cache_.erase(it);
+	}
 }
