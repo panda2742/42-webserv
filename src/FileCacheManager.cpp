@@ -64,7 +64,7 @@ bool readFileToVector(const std::string& path, std::vector<char>& out)
 	std::streamsize size = file.tellg();
 	file.seekg(0, std::ios::beg);
 
-	if (size <= 0)
+	if (size < 0)
 		return false;
 
 	out.resize(size);

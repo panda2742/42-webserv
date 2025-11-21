@@ -191,7 +191,7 @@ ResponseState HttpResponse::sendResponsePart(int socket_fd)
 {
 	if (!res_ready_) return ERROR;
 
-	std::cout << "Send state " << respStateToText(send_state_) << std::endl;
+	// std::cout << "Send state " << respStateToText(send_state_) << std::endl;
 
 	if (send_state_ == NOT_SENT)
 	{
@@ -278,7 +278,10 @@ void HttpResponse::clear()
 	headers_.clear();
 	body_.clear();
 
-	if (direct_file_fd_ >= 0) close(direct_file_fd_);
+	if (direct_file_fd_ >= 0) {
+		close(direct_file_fd_);
+		direct_file_fd_ = -1;
+	}
 
 	file_ = NULL;
 	file_status_ = FILE_OK;

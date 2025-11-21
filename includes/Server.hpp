@@ -21,6 +21,8 @@ private:
 	void handleClientIN(int fd);
 	void handleClientOUT(int fd);
 
+	int removeFdEpoll(int fd);
+
 public:
 	Server();
 	~Server() {}

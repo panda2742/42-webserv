@@ -16,6 +16,12 @@
 #define BASEPORT 8080
 #define MAX_EVENTS 64
 
+int Server::removeFdEpoll(int fd)
+{
+    struct epoll_event ev;
+    return epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, fd, &ev);
+}
+
 void Server::handleClientIN(int fd)
 {
 	std::vector<char> request_buffer;
@@ -32,6 +38,8 @@ void Server::handleClientIN(int fd)
 
 	if (r == 0)
 	{
+		Logger::info("Disconnect client (fd: " + to_string(fd) + std::string(")"));
+		removeFdEpoll(fd);
  		close(fd);
  		std::map<int, HttpConnection>::iterator it = connections_.find(fd);
  		if (it != connections_.end()) {
@@ -45,7 +53,7 @@ void Server::handleClientIN(int fd)
 	if (it != connections_.end()) {
 		it->second.receiveContent(request_buffer.data(), size);
 	} else {
-		Logger::warn("received data for unknown fd");
+		Logger::warn("received data for unknown fd (fd: " + to_string(fd) + std::string(")"));
 	}
 }
 
@@ -54,7 +62,7 @@ void Server::handleClientOUT(int fd)
 	// std::cout << "OUT" << std::endl;
 	std::map<int, HttpConnection>::iterator it = connections_.find(fd);
 	if (it == connections_.end()) {
-		Logger::warn("received data for unknown fd");
+		// Logger::warn("unknown fd is ready for out (fd: " + to_string(fd) + std::string(")"));
 		return ;
 	}
 
@@ -63,19 +71,12 @@ void Server::handleClientOUT(int fd)
 
 void Server::handleClient(struct epoll_event& epoll)
 {
-	if (epoll.events & (EPOLLERR | EPOLLHUP))
-	{
-		std::cout << "Co closed" << std::endl;
-		// closeConnection(epoll.data.fd); gerer une deco
-		return;
-	}
-
 	if (epoll.events & EPOLLIN) {
-		handleClientIN(epoll.data.fd);   // lecture + parsing + queue des requêtes
+		handleClientIN(epoll.data.fd);
 	}
 
 	if (epoll.events & EPOLLOUT) {
-		handleClientOUT(epoll.data.fd);  // machine à états d'envoi
+		handleClientOUT(epoll.data.fd);
 	}
 }
 
@@ -137,7 +138,7 @@ void Server::run()
 				fcntl(client_fd, F_SETFL, O_NONBLOCK);
 
 				struct epoll_event client_ev;
-				client_ev.events = EPOLLIN | EPOLLOUT | EPOLLERR | EPOLLHUP;
+				client_ev.events = EPOLLIN | EPOLLOUT;
 				client_ev.data.fd = client_fd;
 				epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, client_fd, &client_ev);
 
