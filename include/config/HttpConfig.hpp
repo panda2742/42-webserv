@@ -35,7 +35,13 @@ class HttpConfig
 			{
 				return static_cast<T *>(data);
 			}
-
+			template <typename T>
+			void	setAs(T data_)
+			{
+				if (data)
+					deleteData();
+				data = new T(data_);
+			}
 			void	deleteData(void);
 		}		value;
 		Node_	*parent;
@@ -56,20 +62,23 @@ class HttpConfig
 	Node_	*root_;
 
 	static Node_::Value::DataType	dataType_(std::vector<Lexer::TokenNode>::const_iterator node, std::vector<Lexer::TokenNode>::const_iterator end);
+	static Node_					*createNode(Node_::Value::DataType type);
 	static Node_					*createNullNode_(void);
-	static Node_					*createStringNode_(const std::string& str);
-	static Node_					*createUintNode_(unsigned int value);
+	static Node_					*createStringNode_(void);
+	static Node_					*createUintNode_(void);
 	static Node_					*createStringVectorNode_(void);
 	static Node_					*createUintVectorNode_(void);
 	static Node_					*createMapUintStringNode_(void);
 	static Node_					*createMapUintStringVectorNode_(void);
 
 	public:
-	HttpConfig(void): root_(NULL) {}
+	HttpConfig(void): root_(createStringNode_())
+	{
+		root_->value.setAs<std::string>("http");
+	}
 	~HttpConfig(void)
 	{
-		if (root_)
-			delete root_;
+		delete root_;
 	}
 
 	void	generate(const std::vector<Lexer::TokenNode>& nodes) throw (ParsingException);

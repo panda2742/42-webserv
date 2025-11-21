@@ -26,13 +26,14 @@ void	Parser::saveRaw_(void) throw(ParsingException)
 void	Parser::tokenize_(void) throw(ParsingException)
 {
 	const char	*raw = raw_config_.c_str();
-	size_t	i = 0;
+	size_t	i = 0,
+			raw_length = raw_config_.length();
 	std::vector<std::string>	shards;
-	while (raw[i])
+	while (i < raw_length)
 	{
 		size_t	j = i;
 
-		while (raw[j])
+		while (j < raw_length)
 		{
 			if (Utils::isInCharset(raw[j], " \n\t\r\v"))
 			{
@@ -78,7 +79,7 @@ void	Parser::parse(void) throw(ParsingException)
 {
 	saveRaw_();
 	tokenize_();
-	Utils::printTokens_(lexer_nodes_);
+	// Utils::printTokens_(lexer_nodes_);
 }
 
 // #########################################################

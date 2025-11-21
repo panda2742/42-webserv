@@ -62,6 +62,46 @@ HttpConfig::Node_::~Node_(void)
 	value.deleteData();
 }
 
+HttpConfig::Node_	*HttpConfig::createNode(Node_::Value::DataType type)
+{
+	try
+	{
+		switch (type)
+		{
+			case Node_::Value::TYPE_NULL:
+				return createNullNode_();
+				break;
+			case Node_::Value::TYPE_STRING:
+				return createStringNode_();
+				break;
+			case Node_::Value::TYPE_UINT:
+				return createUintNode_();
+				break;
+			case Node_::Value::TYPE_STRING_VECTOR:
+				return createStringVectorNode_();
+				break;
+			case Node_::Value::TYPE_UINT_VECTOR:
+				return createUintVectorNode_();
+				break;
+			case Node_::Value::TYPE_MAP_UINT_STRING:
+				return createMapUintStringNode_();
+				break;
+			case Node_::Value::TYPE_MAP_UINT_STRING_VECTOR:
+				return createMapUintStringVectorNode_();
+				break;
+			default:
+				return NULL;
+				break;
+		}
+	}
+	catch (const std::bad_alloc& e)
+	{
+		log.error("Memory allocation failed in createNode: " + std::string(e.what()));
+		return NULL;
+	}
+	return NULL;
+}
+
 HttpConfig::Node_	*HttpConfig::createNullNode_(void)
 {
 	Node_	*node = new Node_(Node_::Value::TYPE_NULL);
@@ -69,17 +109,17 @@ HttpConfig::Node_	*HttpConfig::createNullNode_(void)
 	return node;
 }
 
-HttpConfig::Node_	*HttpConfig::createStringNode_(const std::string& str)
+HttpConfig::Node_	*HttpConfig::createStringNode_()
 {
 	Node_	*node = new Node_(Node_::Value::TYPE_STRING);
-	node->value.data = new std::string(str);
+	node->value.data = new std::string();
 	return node;
 }
 
-HttpConfig::Node_	*HttpConfig::createUintNode_(unsigned int value)
+HttpConfig::Node_	*HttpConfig::createUintNode_()
 {
 	Node_	*node = new Node_(Node_::Value::TYPE_UINT);
-	node->value.data = new unsigned int(value);
+	node->value.data = new unsigned int();
 	return node;
 }
 
@@ -118,26 +158,20 @@ HttpConfig::Node_::Value::DataType	HttpConfig::dataType_(std::vector<Lexer::Toke
 		log.error("Trying to access the type of a non-directive attribute '" + node->value + "'.");
 		return Node_::Value::TYPE_NULL;
 	}
-	log.debug("Directive key name: " + node->value);
 	bool					nb_starts = false;
 	bool					only_nb = true;
 	unsigned int			nb_arguments = 0;
-	++node;
-	const std::vector<Lexer::TokenNode>::const_iterator	start = node;
-	while (node != end)
+	const std::vector<Lexer::TokenNode>::const_iterator	start = ++node;
+	std::vector<Lexer::TokenNode>::const_iterator		current = start;
+	while (current != end && current->type == Lexer::TokenArgument)
 	{
-		if (node->type != Lexer::TokenArgument)
-			break;
 		++nb_arguments;
-		if (Utils::isNumber(node->value) && start == node)
+		if (Utils::isNumber(current->value) && start == current)
 			nb_starts = true;
-		else
-		{
-			if (start != node)
-				only_nb = false;
-		}
-		log.info("Argument: " + node->value);
-		++node;
+		else if (start != current)
+			only_nb = false;
+
+		++current;
 	}
 	if (nb_arguments == 0)
 		return Node_::Value::TYPE_NULL;
@@ -165,12 +199,74 @@ HttpConfig::Node_::Value::DataType	HttpConfig::dataType_(std::vector<Lexer::Toke
 
 void	HttpConfig::generate(const std::vector<Lexer::TokenNode>& nodes) throw(ParsingException)
 {
+	Node_	*parent = root_;
 	for (std::vector<Lexer::TokenNode>::const_iterator it = nodes.begin(); it != nodes.end(); ++it)
 	{
 		if (it->type == Lexer::TokenParent || it->type == Lexer::TokenDirective)
 		{
-			HttpConfig::Node_::Value::DataType	type = dataType_(it, nodes.end());
-			std::cout << "Identified type is " RED << type << RESET << std::endl << std::endl;
+			Node_::Value::DataType	type = dataType_(it, nodes.end());
+			Node_					*node = createNode(type);
+
+			node->parent = parent;
+
+			if (parent->first_child == NULL)
+				parent->first_child = node;
+			else
+			{
+				Node_	*last = parent->first_child;
+				while (last->next_sibling != NULL)
+					last = last->next_sibling;
+				last->next_sibling = node;
+				node->prev_sibling = last;
+			}
+
+
+            std::vector<Lexer::TokenNode>::const_iterator current = it;
+            bool shouldBreak = false;
+
+            while (current != nodes.end() && !shouldBreak)
+            {
+                switch (current->type) {
+                    case Lexer::TokenSymbolClose:
+                        if (parent->parent == NULL) {
+                            log.error("Unexpected token '}'. Cannot unfold current element.");
+                            delete node;
+                            return;
+                        }
+                        parent = parent->parent;
+                        shouldBreak = true;
+                        break;
+
+                    case Lexer::TokenSymbolOpen:
+                        parent = node;
+                        shouldBreak = true;
+                        break;
+
+                    case Lexer::TokenDelimiter:
+                        shouldBreak = true;
+                        break;
+
+                    default:
+                        break;
+                }
+
+                if (!shouldBreak) {
+                    ++current;
+                    if (current == nodes.end())
+						break;
+                }
+            }
+
+            if (current > it)
+			{
+				if (current == nodes.end())
+				{
+					it = nodes.end();
+					break;
+				}
+                it = current;
+				--it;
+			}
 		}
 	}
 }

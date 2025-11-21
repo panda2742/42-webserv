@@ -69,6 +69,6 @@ run: all
 .PHONY: vg
 vg: all
 	@clear
-	$(VG) $(VGFLAGS) ./$(NAME) samples/webserv.conf
+	$(VG) $(VGFLAGS) ./$(NAME) samples/webserv_crash.conf
 
 -include $(DEPS)
