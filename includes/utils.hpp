@@ -12,5 +12,6 @@ std::string to_string(const T& value)
 
 const std::string getHttpErrorMessage(int code);
 const std::string getMimeType(const std::string& ext);
+const std::string getMethodName(Method m);
 
 const std::string respStateToText(ResponseState s);

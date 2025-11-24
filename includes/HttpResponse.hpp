@@ -51,6 +51,7 @@ private:
 	void setDirectory();
 	void setError(int code);
 	void setRedirect(int code, const std::string& target);
+	void useCGI(const std::string& cgi_prog, const std::string& script_path);
 
 	void createDefault();
 

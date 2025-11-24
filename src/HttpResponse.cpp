@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <dirent.h>
+#include <algorithm>
 
 void HttpResponse::setStatus(int code, const std::string &message) {
 	status_code_ = code;
@@ -91,6 +92,150 @@ void HttpResponse::setRedirect(int code, const std::string& target)
 	headers_["Location"] = target;
 }
 
+static inline std::string trim(const std::string &s)
+{
+    size_t start = s.find_first_not_of(" \t\r\n");
+    if (start == std::string::npos) return "";
+    size_t end = s.find_last_not_of(" \t\r\n");
+    return s.substr(start, end - start + 1);
+}
+
+void HttpResponse::useCGI(const std::string& cgi_prog, const std::string& script_path)
+{
+	int pipe_in[2];
+	int pipe_out[2];
+
+	if (pipe(pipe_in) < 0)
+	{
+		setError(500);
+		return ;
+	}
+	if (pipe(pipe_out) < 0)
+	{
+		close(pipe_in[0]);
+		close(pipe_in[1]);
+		setError(500);
+		return ;
+	}
+	
+	pid_t pid = fork();
+	if (pid < 0)
+	{
+		close(pipe_in[0]);
+		close(pipe_in[1]);
+		close(pipe_out[0]);
+		close(pipe_out[1]);
+		setError(500);
+		return ;
+	}
+	else if (pid == 0)
+	{
+		close(pipe_in[1]);
+		close(pipe_out[0]);
+		dup2(pipe_out[1], STDOUT_FILENO); // GERER LES ERREURS
+		dup2(pipe_in[0], STDIN_FILENO);
+
+		std::vector<std::string> env_strings;
+		env_strings.push_back("REQUEST_METHOD=" + getMethodName(req_.getMethod()));
+		env_strings.push_back("QUERY_STRING="); // pas encore gere
+		env_strings.push_back("CONTENT_LENGTH=" + to_string(req_.getContentSize()));
+		env_strings.push_back("CONTENT_TYPE="); // JSP faut mettre quoi
+		env_strings.push_back("SCRIPT_FILENAME=" + script_path);
+		env_strings.push_back("SERVER_PROTOCOL=HTTP/1.1");
+		const std::string* host = req_.getHeaderInfo("Host");
+		if (host) env_strings.push_back("SERVER_NAME=" + *host);
+		else env_strings.push_back("SERVER_NAME=");
+		env_strings.push_back("SERVER_PORT="); // Je gererai un jour
+		env_strings.push_back("REMOTE_ADDR="); // Faut vraiment gerer ca ?
+		env_strings.push_back("REDIRECT_STATUS=200");
+		// HTTP_USER_AGENT=...
+		// HTTP_COOKIE=...
+		// HTTP_CONNECTION=...
+
+		std::vector<char*> envp;
+		for (size_t i = 0; i < env_strings.size(); ++i)
+			envp.push_back(const_cast<char*>(env_strings[i].c_str()));
+		envp.push_back(NULL);
+
+		std::vector<char*> args;
+		envp.push_back(const_cast<char*>(cgi_prog.c_str()));
+		envp.push_back(const_cast<char*>(script_path.c_str()));
+		envp.push_back(NULL);
+
+		execve(cgi_prog.c_str(), args.data(), envp.data());
+	}
+
+	close(pipe_in[0]);
+	close(pipe_out[1]);
+
+	close(pipe_in[1]); // ECRIRE DEDANS LE BODY DE LA REQ
+
+	char buf[4096];
+	ssize_t n;
+	while ((n = read(pipe_out[0], buf, sizeof(buf))) > 0) {
+		body_.insert(body_.end(), buf, buf + n);
+	}
+	close(pipe_out[0]);
+
+	setStatus(200, "OK");
+
+	static const std::string sep = "\r\n\r\n";
+
+	std::vector<char>::iterator it = std::search(
+		body_.begin(), body_.begin() + body_.size(),
+		sep.begin(), sep.end()
+	);
+
+	if (it == body_.begin() + body_.size())
+	{
+		body_.clear();
+		setError(500);
+		return ;
+	}
+
+	size_t header_len = it - body_.begin();
+
+	std::string header_str(body_.begin(), body_.begin() + header_len);
+
+	body_.erase(body_.begin(), it + 2);
+
+	size_t start = 0;
+	while (true)
+	{
+		size_t end = header_str.find("\r\n", start);
+		std::string line;
+		if (end == std::string::npos) line = header_str.substr(start);
+		else line = header_str.substr(start, end - start);
+
+		if (!line.empty())
+		{
+			size_t colon = line.find(':');
+			if (colon != std::string::npos)
+			{
+				std::string key = trim(line.substr(0, colon));
+				std::string val = trim(line.substr(colon + 1));
+				if (!key.empty())
+				{
+					if (key == "Status")
+					{
+						size_t space = val.find(' ');
+						if (space != std::string::npos)
+							setStatus(std::atoi(val.substr(0, space).c_str()), trim(val.substr(space + 1)));
+					}
+					headers_[key] = val;
+				}
+			}
+		}
+
+		if (end == std::string::npos)
+			break;
+		start = end + 2;
+	}
+
+	headers_["Content-Length"] = to_string(body_.size());
+	
+}
+
 void HttpResponse::serializeHeader()
 {
 	serialized_header_ = "HTTP/1.1 " + to_string(status_code_) + " " + status_message_ + "\r\n";
@@ -111,6 +256,10 @@ const std::string HttpResponse::getBodySize() const
 void HttpResponse::createDefault()
 {
 	headers_["Content-Length"] = "0";
+
+	useCGI("/usr/bin/php-cgi", "/home/lilefebv/Documents/cursus/42-webserv/www/script.php");
+	return ;
+
 	// if (req_.getTarget() == "/abc")
 	// {
 	// 	setRedirect(302, "/OEOEOEOE");
