@@ -64,58 +64,124 @@ HttpConfig::Node_::~Node_(void)
 	value.deleteData();
 }
 
+std::string vecStr(const std::vector<std::string>& v)
+{
+	std::stringstream s;
+	s << "[";
+	for (size_t i = 0; i < v.size(); ++i)
+	{
+		if (i)
+			s << ", ";
+		s << v[i];
+	}
+	s << "]";
+	return s.str();
+}
+
+std::string vecUIntStr(const std::vector<unsigned int>& v)
+{
+	std::stringstream s;
+	s << "[";
+	for (size_t i = 0; i < v.size(); ++i)
+	{
+		if (i)
+			s << ", ";
+		s << v[i];
+	}
+	s << "]";
+	return s.str();
+}
+
+std::string mapStr(const std::map<unsigned int, std::string>& m)
+{
+	std::stringstream s;
+	s << "{";
+	for (std::map<unsigned int, std::string>::const_iterator it = m.begin(); it != m.end(); ++it)
+	{
+		if (it != m.begin())
+			s << ", ";
+		s << it->first << ": " << it->second;
+	}
+	s << "}";
+	return s.str();
+}
+
+std::string mapVecStr(const std::map<unsigned int, std::vector<std::string> >& m)
+{
+	std::stringstream s;
+	s << "{";
+	for (std::map<unsigned int, std::vector<std::string> >::const_iterator it = m.begin(); it != m.end(); ++it)
+	{
+		if (it != m.begin())
+			s << ", ";
+		s << it->first << ": " << vecStr(it->second);
+	}
+	s << "}";
+	return s.str();
+}
+
 std::string	HttpConfig::Node_::fastStr(void)
 {
 	std::stringstream	ss;
-	ss << "Node " RED << (void *)this << " " << name << RESET << " = ";
+
+	if (parent)
+		ss << BLURPLE "" << parent->name << RESET " |";
+	ss << " " RED << name << " " RESET;
+
 	switch (value.type)
 	{
 		case Value::TYPE_STRING:
-			ss << ORANGE "STRING " << *value.getAs<std::string>() << RESET;
+			ss << ORANGE << "STRING" << RESET << "=" << ORANGE << *value.getAs<std::string>() << RESET;
 			break;
 		case Value::TYPE_UINT:
-			ss << LIGHT_GREEN "UINT " << *value.getAs<unsigned int>() << RESET;
+			ss << LIGHT_GREEN << "UINT" << RESET << "=" << LIGHT_GREEN << *value.getAs<unsigned int>() << RESET;
 			break;
 		case Value::TYPE_STRING_VECTOR:
-			ss << GREEN "STRINGVEC " << value.getAs<std::vector<std::string> >() << RESET;
+			ss << GREEN << "STRINGVEC" << RESET << "=" << GREEN << vecStr(*value.getAs<std::vector<std::string> >()) << RESET;
 			break;
 		case Value::TYPE_UINT_VECTOR:
-			ss << CYAN "UINTVEC " << value.getAs<std::vector<unsigned int> >() << RESET;
+			ss << CYAN << "UINTVEC" << RESET << "=" << CYAN << vecUIntStr(*value.getAs<std::vector<unsigned int> >()) << RESET;
 			break;
 		case Value::TYPE_MAP_UINT_STRING:
-			ss << BLURPLE "UINT_STRING " << value.getAs<std::map<unsigned int, std::string> >() << RESET;
+			ss << BLURPLE << "UINT_STRING" << RESET << "=" << BLURPLE << mapStr(*value.getAs<std::map<unsigned int, std::string> >()) << RESET;
 			break;
 		case Value::TYPE_MAP_UINT_STRING_VECTOR:
-			ss << PINK "UINT_STRINGVEC " << value.getAs<std::map<unsigned int, std::vector<std::string> > >() << RESET;
+			ss << PINK << "UINT_STRINGVEC" << RESET << "=" << PINK << mapVecStr(*value.getAs<std::map<unsigned int, std::vector<std::string> > >()) << RESET;
 			break;
 		case Value::TYPE_NULL:
 		default:
-			ss << GREY "EMPTY" RESET;
+			ss << GREY << " EMPTY" << RESET;
 			break;
 	}
+	if (next_sibling)
+		ss << GREY "\t\t-> " << next_sibling->name << " ";
+	ss << RESET;
 	ss << std::endl;
+
 	return ss.str();
 }
 
-std::string	HttpConfig::Node_::toString(unsigned int tabs = 0)
+std::string	HttpConfig::Node_::toString(void)
 {
-	std::stringstream	ss;
-	ss << std::string(tabs, '\t') << fastStr();
-	Node_	*brother = next_sibling;
-	while (brother)
+	unsigned int	tabs = 0;
+	Node_	*p = parent;
+	while (p)
 	{
-		ss << brother->fastStr();
-		brother = brother->next_sibling;
+		p = p->parent;
+		++tabs;
 	}
-	ss << std::endl;
-	Node_	*child = first_child;
-	while (child)
-	{
-		ss << child->toString(tabs + 1);
-		child = child->next_sibling;
-	}
-	ss << std::endl;
-	return ss.str();
+    std::stringstream	ss;
+    ss << std::string(tabs, '\t') << fastStr();
+
+	if (first_child)
+		ss << first_child->toString();
+
+    if (next_sibling)
+        ss << next_sibling->toString();
+	else
+		ss << std::endl;
+
+    return ss.str();
 }
 
 HttpConfig::Node_	*HttpConfig::createNode(Node_::Value::DataType type)
@@ -277,92 +343,106 @@ void	HttpConfig::generate(const std::vector<Lexer::TokenNode>& nodes) throw(Pars
 				node->prev_sibling = last;
 			}
 
-            std::vector<Lexer::TokenNode>::const_iterator current = it;
+            std::vector<Lexer::TokenNode>::const_iterator current = ++it;
             bool shouldBreak = false;
 			size_t	i = 0;
 
-            while (current != nodes.end() && !shouldBreak)
-            {
-                switch (current->type) {
-                    case Lexer::TokenSymbolClose:
-                        if (parent->parent == NULL) {
-                            log.error("Unexpected token '}'. Cannot unfold current element.");
-                            delete node;
-                            return;
-                        }
-                        parent = parent->parent;
-                        shouldBreak = true;
-                        break;
+			while (current != nodes.end() && !shouldBreak)
+			{
+				/* decide if we must stop unfolding (encountered symbols or delimiter) */
+				switch (current->type) {
+					case Lexer::TokenSymbolClose:
+						if (parent->parent == NULL) {
+							log.error("Unexpected token '}'. Cannot unfold current element.");
+							delete node;
+							return;
+						}
+						parent = parent->parent;
+						shouldBreak = true;
+						break;
 
-                    case Lexer::TokenSymbolOpen:
-                        parent = node;
-                        shouldBreak = true;
-                        break;
+					case Lexer::TokenSymbolOpen:
+						parent = node;
+						shouldBreak = true;
+						break;
 
-                    case Lexer::TokenDelimiter:
-                        shouldBreak = true;
-                        break;
-                    default:
-                        break;
-                }
-
-				switch (type)
-				{
-					case Node_::Value::TYPE_STRING:
-						node->value.setAs<std::string>(current->value);
+					case Lexer::TokenDelimiter:
+						shouldBreak = true;
 						break;
-					case Node_::Value::TYPE_UINT:
-						node->value.setAs<unsigned int>(std::atoi(current->value.c_str()));
-						break;
-					case Node_::Value::TYPE_STRING_VECTOR:
-						if (i)
-							node->value.getAs<std::vector<std::string> >()->push_back(current->value);
-						else
-							node->value.setAs<std::vector<std::string> >(std::vector<std::string>(1, current->value));
-						break;
-					case Node_::Value::TYPE_UINT_VECTOR:
-						if (i)
-							node->value.getAs<std::vector<unsigned int> >()->push_back(std::atol(current->value.c_str()));
-						else
-							node->value.setAs<std::vector<unsigned int> >(std::vector<unsigned int>(1, std::atoi(current->value.c_str())));
-						break;
-					case Node_::Value::TYPE_MAP_UINT_STRING:
-						if (i)
-						{
-							std::map<unsigned int, std::string>	*m = node->value.getAs<std::map<unsigned int, std::string> >();
-							m->begin()->second = current->value;
-						}
-						else
-						{
-							std::map<unsigned int, std::string>	m;
-							m.insert(std::make_pair(std::atoi(current->value.c_str()), ""));
-							node->value.setAs<std::map<unsigned int, std::string> >(m);
-						}
-						break;
-					case Node_::Value::TYPE_MAP_UINT_STRING_VECTOR:
-						if (i)
-						{
-							std::map<unsigned int, std::vector<std::string> >	*m = node->value.getAs<std::map<unsigned int, std::vector<std::string> > >();
-							m->begin()->second.push_back(current->value);
-						}
-						else
-						{
-							std::map<unsigned int, std::vector<std::string> >	m;
-							m.insert(std::make_pair(std::atoi(current->value.c_str()), std::vector<std::string>()));
-							node->value.setAs<std::map<unsigned int, std::vector<std::string> > >(m);
-						}
-						break;
-					case Node_::Value::TYPE_NULL:
 					default:
 						break;
 				}
-                if (!shouldBreak) {
-                    ++current;
-                    if (current == nodes.end())
+
+				/* Only consume/assign token values when the token is an argument.
+				   This prevents assigning "{" , "}" or ";" as values (which would
+				   lead to empty strings or zeros when converted with atoi).
+				*/
+				if (current->type == Lexer::TokenArgument && !shouldBreak)
+				{
+					switch (type)
+					{
+						case Node_::Value::TYPE_STRING:
+							node->value.setAs<std::string>(current->value);
+							break;
+						case Node_::Value::TYPE_UINT:
+							node->value.setAs<unsigned int>(std::atoi(current->value.c_str()));
+							break;
+						case Node_::Value::TYPE_STRING_VECTOR:
+							if (i)
+								node->value.getAs<std::vector<std::string> >()->push_back(current->value);
+							else
+								node->value.setAs<std::vector<std::string> >(std::vector<std::string>(1, current->value));
+							break;
+						case Node_::Value::TYPE_UINT_VECTOR:
+							if (i)
+								node->value.getAs<std::vector<unsigned int> >()->push_back(std::atol(current->value.c_str()));
+							else
+								node->value.setAs<std::vector<unsigned int> >(std::vector<unsigned int>(1, std::atoi(current->value.c_str())));
+							break;
+						case Node_::Value::TYPE_MAP_UINT_STRING:
+							if (i)
+							{
+								std::map<unsigned int, std::string>    *m = node->value.getAs<std::map<unsigned int, std::string> >();
+								m->begin()->second = current->value;
+							}
+							else
+							{
+								std::map<unsigned int, std::string>    m;
+								m.insert(std::make_pair(std::atoi(current->value.c_str()), ""));
+								node->value.setAs<std::map<unsigned int, std::string> >(m);
+							}
+							break;
+						case Node_::Value::TYPE_MAP_UINT_STRING_VECTOR:
+							if (i)
+							{
+								std::map<unsigned int, std::vector<std::string> >    *m = node->value.getAs<std::map<unsigned int, std::vector<std::string> > >();
+								m->begin()->second.push_back(current->value);
+							}
+							else
+							{
+								std::map<unsigned int, std::vector<std::string> >    m;
+								m.insert(std::make_pair(std::atoi(current->value.c_str()), std::vector<std::string>()));
+								node->value.setAs<std::map<unsigned int, std::vector<std::string> > >(m);
+							}
+							break;
+						case Node_::Value::TYPE_NULL:
+						default:
+							break;
+					}
+
+					/* we consumed an argument token, advance to next token */
+					++current;
+					if (current == nodes.end())
 						break;
-                }
-				++i;
-            }
+					++i;
+				}
+				else
+				{
+					/* don't consume tokens that are symbols/delimiters here; the outer
+					   loop/logic will handle unfolding/parent changes */
+					break;
+				}
+			}
 
             if (current > it)
 			{
@@ -374,6 +454,14 @@ void	HttpConfig::generate(const std::vector<Lexer::TokenNode>& nodes) throw(Pars
                 it = current;
 				--it;
 			}
+		}
+		else if (it->type == Lexer::TokenSymbolClose)
+		{
+			if (parent->parent == NULL) {
+				log.error("Unexpected token '}'. Cannot unfold current element.");
+				return;
+			}
+			parent = parent->parent;
 		}
 	}
 

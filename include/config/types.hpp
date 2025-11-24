@@ -8,7 +8,7 @@
 #define CYAN "\033[38;2;66;211;242m"
 #define BLURPLE "\033[38;2;124;134;255m"
 #define PINK "\033[38;2;251;100;69m"
-#define GREY "\033[38;2;202;213;226m"
+#define GREY "\033[38;2;70;70;70m"
 #define RESET "\033[0m"
 
 #define PARSING_ERROR_MSG "Parsing error: "

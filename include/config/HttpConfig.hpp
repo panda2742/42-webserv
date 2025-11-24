@@ -60,7 +60,7 @@ class HttpConfig
 		~Node_(void);
 
 		std::string	fastStr(void);
-		std::string	toString(unsigned int tabs);
+		std::string	toString(void);
 	};
 
 	Node_	*root_;
@@ -76,9 +76,9 @@ class HttpConfig
 	static Node_					*createMapUintStringVectorNode_(void);
 
 	public:
-	HttpConfig(void): root_(createStringNode_())
+	HttpConfig(void): root_(createNullNode_())
 	{
-		root_->value.setAs<std::string>("http");
+		root_->name = "http";
 	}
 	~HttpConfig(void)
 	{
