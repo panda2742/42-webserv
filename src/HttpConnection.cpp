@@ -126,7 +126,7 @@ bool HttpConnection::sendResponse()
 			HttpRequest& req = requests_.front();
 			const std::string* keepalive = req.getHeaderInfo("Connection");
 			if (keepalive && *keepalive == "close") return false;
-			
+
 			responses_.pop_front();
 			requests_.pop_front();
 		}

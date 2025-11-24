@@ -85,6 +85,12 @@ void HttpResponse::setDirectory()
 	setBody(body_vec);
 }
 
+void HttpResponse::setRedirect(int code, const std::string& target)
+{
+	setStatus(code, getHttpErrorMessage(code));
+	headers_["Location"] = target;
+}
+
 void HttpResponse::serializeHeader()
 {
 	serialized_header_ = "HTTP/1.1 " + to_string(status_code_) + " " + status_message_ + "\r\n";
@@ -104,6 +110,12 @@ const std::string HttpResponse::getBodySize() const
 
 void HttpResponse::createDefault()
 {
+	headers_["Content-Length"] = "0";
+	// if (req_.getTarget() == "/abc")
+	// {
+	// 	setRedirect(302, "/OEOEOEOE");
+	// 	return ;
+	// } // Redirection example
 	if (req_.getMethod() == GET)
 	{
 		if (file_status_ == NONE) file_status_ = FileCacheManager::getFile(req_.getTarget(), file_, file_info_, file_path_);

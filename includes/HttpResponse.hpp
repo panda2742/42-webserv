@@ -50,6 +50,7 @@ private:
 	void setBody(const std::vector<char> &body);
 	void setDirectory();
 	void setError(int code);
+	void setRedirect(int code, const std::string& target);
 
 	void createDefault();
 
