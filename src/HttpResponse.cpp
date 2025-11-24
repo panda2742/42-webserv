@@ -120,34 +120,12 @@ void HttpResponse::createDefault()
 				headers_["Content-Length"] = to_string(file_info_.st_size);
 			}
 		}
-		else if (file_status_ == FILE_IS_DIR)
-		{
-			setDirectory();
-			// setHeader("Content-Type", "text/plain");
-			// std::string body = "Rholala la grosse galere je gere pas encore les directory :/\nJe fais ca au plus vite mon bébou";
-			// std::vector<char> body_vec(body.begin(), body.end());
-			// setBody(body_vec);
-		}
-		else if (file_status_ == PATH_FORBIDDEN)
-		{
-			setError(400);
-		}
-		else if (file_status_ == FILE_NOT_FOUND)
-		{
-			setError(404);
-		}
-		else if (file_status_ == FILE_FORBIDDEN)
-		{
-			setError(403);
-		}
-		else if (file_status_ == PATH_TO_LONG)
-		{
-			setError(414);
-		}
-		else
-		{
-			setError(500);
-		}
+		else if (file_status_ == FILE_IS_DIR) setDirectory();
+		else if (file_status_ == PATH_FORBIDDEN) setError(400);
+		else if (file_status_ == FILE_NOT_FOUND) setError(404);
+		else if (file_status_ == FILE_FORBIDDEN) setError(403);
+		else if (file_status_ == PATH_TO_LONG) setError(414);
+		else setError(500);
 
 	}
 	else
@@ -219,7 +197,7 @@ ResponseState HttpResponse::sendResponsePart(int socket_fd)
 	if (send_state_ == NOT_SENT)
 	{
 		send_state_ = HEADER;
-		if (req_.getRequestError() == NOT_HTTP_HEADER) send_state_ = BODY;
+		if (req_.getRequestError() == NO_HTTP_VERSION) send_state_ = BODY;
 
 		send_index_ = 0;
 	}
@@ -257,10 +235,7 @@ ResponseState HttpResponse::sendResponsePart(int socket_fd)
 					if (sent <= 0) return ERROR;
 					send_index_ += sent;
 				}
-				else
-				{
-					send_state_ = SENT;
-				}
+				else send_state_ = SENT;
 			}
 			else if (file_status_ == FILE_STREAM_DIRECT)
 			{
@@ -276,10 +251,7 @@ ResponseState HttpResponse::sendResponsePart(int socket_fd)
 					if (sent <= 0) return ERROR;
 					send_index_ += sent;
 				}
-				else
-				{
-					send_state_ = SENT;
-				}
+				else send_state_ = SENT;
 			}
 		}
 		else

@@ -55,8 +55,6 @@ bool HttpRequest::checkHttpVersion()
 				create_error_ = BAD_REQUEST;
 				return false;
 			}
-
-			return false;
 		}
 		else
 		{
@@ -92,6 +90,24 @@ bool HttpRequest::checkHttpVersion()
 	}
 }
 
+std::string getNextPart(std::string& input, const std::string& sep)
+{
+	size_t next_space = input.find(sep);
+	std::string res;
+
+	if (next_space == std::string::npos)
+	{
+		res = input.substr(0, input.size());
+		input.erase(0, input.size());
+	}
+	else
+	{
+		res = input.substr(0, next_space);
+		input.erase(0, next_space + 1);
+	}
+	return res;
+}
+
 bool HttpRequest::parse()
 {
 	try
@@ -107,10 +123,9 @@ bool HttpRequest::parse()
 			header.erase(0, pos + 2);
 		}
 
-		std::string first_line = lines[0];
+		Logger::info(lines[0]);
 		
-		std::string method = lines[0].substr(0, lines[0].find(" ")); lines[0].erase(0, lines[0].find(" ") + 1);
-		
+		std::string method = getNextPart(lines[0], " ");
 
 		if (method == "GET") method_ = GET;
 		else if (method == "POST") method_ = POST;
@@ -122,7 +137,7 @@ bool HttpRequest::parse()
 			return true;
 		}
 
-		target_ = lines[0].substr(0, lines[0].find(" ")); lines[0].erase(0, lines[0].find(" ") + 1);
+		target_ = getNextPart(lines[0], " ");
 		if (target_.empty())
 		{
 			create_error_ = NOT_HTTP_HEADER;
@@ -134,7 +149,7 @@ bool HttpRequest::parse()
 			return true;
 		}
 
-		version_ = lines[0];
+		version_ = getNextPart(lines[0], " ");
 		if (!checkHttpVersion()) return true;
 
 		lines.erase(lines.begin());
@@ -152,13 +167,19 @@ bool HttpRequest::parse()
 			infos_.insert(std::make_pair(key, lines[i]));
 		}
 
+		std::map<std::string, std::string>::iterator it = infos_.find("Host");
+		if (it == infos_.end())
+		{
+			create_error_ = BAD_REQUEST;
+			return true;
+		}
+
 		// for (std::map<std::string, std::string>::const_iterator it = infos_.begin();
 		// 	it != infos_.end();
 		// 	++it)
 		// {
 		// 	std::cout << it->first << ": " << it->second << std::endl;
 		// }
-		Logger::info(first_line);
 
 	}
 	catch(const std::exception& e)
