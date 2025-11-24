@@ -32,6 +32,7 @@ private:
 	size_t header_size_;
 	size_t content_size_;
 
+	std::string first_line_;
 	Method method_;
 	std::string target_;
 	std::string version_;
@@ -53,6 +54,8 @@ public:
 	Method getMethod() { return method_; }
 	size_t getContentSize() { return content_size_; }
 	RequestError getRequestError() { return create_error_; }
+	std::string& getFirstLine() { return first_line_; }
+	const std::string* getHeaderInfo(const std::string& key) const;
 
 	void clear();
 

@@ -95,6 +95,13 @@ void HttpResponse::serializeHeader()
 	serialized_header_ += "\r\n";
 }
 
+const std::string HttpResponse::getBodySize() const
+{
+	std::map<std::string, std::string>::const_iterator it = headers_.find("Content-Length");
+	if (it == headers_.end()) return "0";
+	return it->second;
+}
+
 void HttpResponse::createDefault()
 {
 	if (req_.getMethod() == GET)
@@ -157,6 +164,7 @@ void HttpResponse::create()
 
 	serializeHeader();
 	res_ready_ = true;
+	Logger::info("\"" + req_.getFirstLine() + "\" " + to_string(status_code_) + " " + getBodySize());
 }
 
 bool HttpResponse::sendFileDirectPart(int socket_fd)

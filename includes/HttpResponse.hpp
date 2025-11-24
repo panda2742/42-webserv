@@ -48,16 +48,15 @@ private:
 	void setHeader(const std::string &name, const std::string &value);
 	void setStatus(int code, const std::string &message);
 	void setBody(const std::vector<char> &body);
+	void setDirectory();
+	void setError(int code);
 
 	void createDefault();
 
-	void setError(int code);
-	
-	void setDirectory();
-
 	void serializeHeader();
-	
 	bool sendFileDirectPart(int socket_fd);
+
+	const std::string getBodySize() const;
 
 public:
 	HttpResponse(HttpRequest &req)

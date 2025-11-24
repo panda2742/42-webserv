@@ -17,6 +17,13 @@ void HttpRequest::init(std::vector<char>& raw, size_t header_size, size_t conten
 	content_size_ = content_size;
 }
 
+const std::string* HttpRequest::getHeaderInfo(const std::string& key) const
+{
+	std::map<std::string, std::string>::const_iterator it = infos_.find(key);
+	if (it == infos_.end()) return NULL;
+	return &it->second;
+}
+
 bool isOnlyDigits(const std::string &s)
 {
 	for (size_t i = 0; i < s.size(); ++i)
@@ -123,7 +130,7 @@ bool HttpRequest::parse()
 			header.erase(0, pos + 2);
 		}
 
-		Logger::info(lines[0]);
+		first_line_ = lines[0];
 		
 		std::string method = getNextPart(lines[0], " ");
 
