@@ -59,8 +59,10 @@ class HttpConfig
 
 		~Node_(void);
 
-		std::string	fastStr(void);
-		std::string	toString(void);
+		std::string				fastStr(void);
+		std::string				toString(void);
+		std::vector<Node_ *>	access(const std::string& child_name);
+		std::vector<Node_ *>	access(const std::string& child_name) const;
 	};
 
 	Node_	*root_;
@@ -75,7 +77,23 @@ class HttpConfig
 	static Node_					*createMapUintStringNode_(void);
 	static Node_					*createMapUintStringVectorNode_(void);
 
+	static Node_::Value::DataType	typeToEnum_(std::string) { return Node_::Value::TYPE_STRING; };
+	static Node_::Value::DataType	typeToEnum_(unsigned int) { return Node_::Value::TYPE_UINT; };
+	static Node_::Value::DataType	typeToEnum_(std::vector<std::string>) { return Node_::Value::TYPE_STRING_VECTOR; };
+	static Node_::Value::DataType	typeToEnum_(std::vector<unsigned int>) { return Node_::Value::TYPE_UINT_VECTOR; };
+	static Node_::Value::DataType	typeToEnum_(std::map<unsigned int, std::string>) { return Node_::Value::TYPE_MAP_UINT_STRING; };
+	static Node_::Value::DataType	typeToEnum_(std::map<unsigned int, std::vector<std::string> >) { return Node_::Value::TYPE_MAP_UINT_STRING_VECTOR; };
+
 	public:
+	typedef Node_	PublicNode_;
+	template <typename T>
+	struct Node_t
+	{
+		T		value;
+		Node_	*node_parent;
+		Node_t(T value_, Node_ *node_parent_): value(value_), node_parent(node_parent_) {}
+		~Node_t(void) {}
+	};
 	HttpConfig(void): root_(createNullNode_())
 	{
 		root_->name = "http";
@@ -86,10 +104,32 @@ class HttpConfig
 	}
 
 	void	generate(const std::vector<Lexer::TokenNode>& nodes) throw (ParsingException);
-};
+	template <typename T>
+	std::vector<Node_t<T> >	get(const std::string& prop_name, const Node_ *parent = NULL);
+	const Node_	*getRoot(void) const { return root_; }
 
+	private:
+	template <typename T>
+	struct DepthData_
+	{
+		const std::string&		prop_name;
+		const Node_				*parent;
+		std::vector<Node_t<T> >	local_res;
+		int						depth;
+		Node_::Value::DataType	type;
+		DepthData_(const std::string& prop_name_, const Node_ *parent_, unsigned int depth_)
+			: prop_name(prop_name_), parent(parent_), depth(depth_) { type = typeToEnum_(T()); }
+		DepthData_(const DepthData_& other)
+			: prop_name(other.prop_name), parent(other.parent), local_res(other.local_res), depth(other.depth), type(other.type) {}
+		~DepthData_(void) {}
+	};
+	template <typename T>
+	std::vector<Node_t<T> >	get_(DepthData_<T>& ddata);
+};
 
 // #########################################################
 };
+
+#include "HttpConfig.tpp"
 
 #endif

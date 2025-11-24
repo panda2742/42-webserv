@@ -39,6 +39,36 @@ void	HttpConfig::Node_::Value::deleteData(void)
 	data = NULL;
 }
 
+std::vector<HttpConfig::Node_ *>	HttpConfig::Node_::access(const std::string& child_name)
+{
+	std::vector<Node_ *>	res;
+
+	Node_	*c = this->first_child;
+	while (c)
+	{
+		if (c->name == child_name)
+			res.push_back(c);
+		c = c->next_sibling;
+	}
+
+	return res;
+}
+
+std::vector<HttpConfig::Node_ *>	HttpConfig::Node_::access(const std::string& child_name) const
+{
+	std::vector<Node_ *>	res;
+
+	Node_	*c = this->first_child;
+	while (c)
+	{
+		if (c->name == child_name)
+			res.push_back(c);
+		c = c->next_sibling;
+	}
+
+	return res;
+}
+
 HttpConfig::Node_::~Node_(void)
 {
 	Node_	*child = first_child;
@@ -349,7 +379,6 @@ void	HttpConfig::generate(const std::vector<Lexer::TokenNode>& nodes) throw(Pars
 
 			while (current != nodes.end() && !shouldBreak)
 			{
-				/* decide if we must stop unfolding (encountered symbols or delimiter) */
 				switch (current->type) {
 					case Lexer::TokenSymbolClose:
 						if (parent->parent == NULL) {
@@ -373,10 +402,6 @@ void	HttpConfig::generate(const std::vector<Lexer::TokenNode>& nodes) throw(Pars
 						break;
 				}
 
-				/* Only consume/assign token values when the token is an argument.
-				   This prevents assigning "{" , "}" or ";" as values (which would
-				   lead to empty strings or zeros when converted with atoi).
-				*/
 				if (current->type == Lexer::TokenArgument && !shouldBreak)
 				{
 					switch (type)
@@ -430,7 +455,6 @@ void	HttpConfig::generate(const std::vector<Lexer::TokenNode>& nodes) throw(Pars
 							break;
 					}
 
-					/* we consumed an argument token, advance to next token */
 					++current;
 					if (current == nodes.end())
 						break;
@@ -438,8 +462,6 @@ void	HttpConfig::generate(const std::vector<Lexer::TokenNode>& nodes) throw(Pars
 				}
 				else
 				{
-					/* don't consume tokens that are symbols/delimiters here; the outer
-					   loop/logic will handle unfolding/parent changes */
 					break;
 				}
 			}
@@ -464,9 +486,8 @@ void	HttpConfig::generate(const std::vector<Lexer::TokenNode>& nodes) throw(Pars
 			parent = parent->parent;
 		}
 	}
-
-	std::cout << root_->toString() << std::endl;
 }
+
 
 // #########################################################
 };

@@ -21,6 +21,30 @@ void	Parser::saveRaw_(void) throw(ParsingException)
 
 	if (size > 0)
 		file.read(&raw_config_[0], size);
+
+	raw_config_ += "\n";
+
+	bool		in_comment = false;
+	std::string	result;
+    for (std::string::size_type i = 0; i < raw_config_.length(); ++i) {
+        if (in_comment)
+		{
+            if (raw_config_[i] == '\n')
+			{
+                in_comment = false;
+                result += '\n';
+            }
+        }
+		else
+		{
+            if (raw_config_[i] == '#')
+                in_comment = true;
+            else
+                result += raw_config_[i];
+        }
+    }
+
+	raw_config_ = result;
 }
 
 void	Parser::tokenize_(void) throw(ParsingException)
