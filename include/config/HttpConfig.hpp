@@ -56,7 +56,6 @@ class HttpConfig
 				value.type = type_id;
 				value.data = NULL;
 			}
-
 		~Node_(void);
 
 		std::string				fastStr(void);

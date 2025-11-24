@@ -1,0 +1,52 @@
+Date : 2025-11-24 18:47:15
+Directory : /home/ehosta/code/42-webserv
+Total : 19 files,  1155 codes, 26 comments, 197 blanks, all 1378 lines
+
+Languages
++------------+------------+------------+------------+------------+------------+
+| language   | files      | code       | comment    | blank      | total      |
++------------+------------+------------+------------+------------+------------+
+| C++        |         16 |        975 |         25 |        150 |      1,150 |
+| NGINX Conf |          2 |        123 |          1 |         30 |        154 |
+| Makefile   |          1 |         57 |          0 |         17 |         74 |
++------------+------------+------------+------------+------------+------------+
+
+Directories
++--------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                         | files      | code       | comment    | blank      | total      |
++--------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                            |         19 |      1,155 |         26 |        197 |      1,378 |
+| . (Files)                                                    |          1 |         57 |          0 |         17 |         74 |
+| include                                                      |          9 |        302 |         14 |         66 |        382 |
+| include/config                                               |          9 |        302 |         14 |         66 |        382 |
+| samples                                                      |          2 |        123 |          1 |         30 |        154 |
+| src                                                          |          7 |        673 |         11 |         84 |        768 |
+| src (Files)                                                  |          1 |         25 |          0 |          5 |         30 |
+| src/config                                                   |          6 |        648 |         11 |         79 |        738 |
++--------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++--------------------------------------------------------------+------------+------------+------------+------------+------------+
+| filename                                                     | language   | code       | comment    | blank      | total      |
++--------------------------------------------------------------+------------+------------+------------+------------+------------+
+| /home/ehosta/code/42-webserv/Makefile                        | Makefile   |         57 |          0 |         17 |         74 |
+| /home/ehosta/code/42-webserv/include/config/ConfigLogger.hpp | C++        |         35 |          2 |         10 |         47 |
+| /home/ehosta/code/42-webserv/include/config/HttpConfig.hpp   | C++        |        117 |          2 |         16 |        135 |
+| /home/ehosta/code/42-webserv/include/config/HttpConfig.tpp   | C++        |         54 |          2 |          9 |         65 |
+| /home/ehosta/code/42-webserv/include/config/Lexer.hpp        | C++        |         29 |          2 |          7 |         38 |
+| /home/ehosta/code/42-webserv/include/config/Node4.hpp        | C++        |          0 |          0 |          1 |          1 |
+| /home/ehosta/code/42-webserv/include/config/Node4.tpp        | C++        |          0 |          0 |          1 |          1 |
+| /home/ehosta/code/42-webserv/include/config/Parser.hpp       | C++        |         37 |          2 |          9 |         48 |
+| /home/ehosta/code/42-webserv/include/config/Utils.hpp        | C++        |         14 |          2 |          5 |         21 |
+| /home/ehosta/code/42-webserv/include/config/types.hpp        | C++        |         16 |          2 |          8 |         26 |
+| /home/ehosta/code/42-webserv/samples/webserv.conf            | NGINX Conf |         33 |          1 |          8 |         42 |
+| /home/ehosta/code/42-webserv/samples/webserv_crash.conf      | NGINX Conf |         90 |          0 |         22 |        112 |
+| /home/ehosta/code/42-webserv/src/config/ConfigLogger.cpp     | C++        |          5 |          2 |          3 |         10 |
+| /home/ehosta/code/42-webserv/src/config/HttpConfig.cpp       | C++        |        445 |          2 |         47 |        494 |
+| /home/ehosta/code/42-webserv/src/config/Lexer.cpp            | C++        |         36 |          2 |          5 |         43 |
+| /home/ehosta/code/42-webserv/src/config/Node4.cpp            | C++        |          0 |          0 |          1 |          1 |
+| /home/ehosta/code/42-webserv/src/config/Parser.cpp           | C++        |         95 |          3 |         12 |        110 |
+| /home/ehosta/code/42-webserv/src/config/Utils.cpp            | C++        |         67 |          2 |         11 |         80 |
+| /home/ehosta/code/42-webserv/src/main.cpp                    | C++        |         25 |          0 |          5 |         30 |
+| Total                                                        |            |      1,155 |         26 |        197 |      1,378 |
++--------------------------------------------------------------+------------+------------+------------+------------+------------+

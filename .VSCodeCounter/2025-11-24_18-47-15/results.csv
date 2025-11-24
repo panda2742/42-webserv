@@ -1,0 +1,21 @@
+"filename", "language", "NGINX Conf", "C++", "Makefile", "comment", "blank", "total"
+"/home/ehosta/code/42-webserv/Makefile", "Makefile", 0, 0, 57, 0, 17, 74
+"/home/ehosta/code/42-webserv/include/config/ConfigLogger.hpp", "C++", 0, 35, 0, 2, 10, 47
+"/home/ehosta/code/42-webserv/include/config/HttpConfig.hpp", "C++", 0, 117, 0, 2, 16, 135
+"/home/ehosta/code/42-webserv/include/config/HttpConfig.tpp", "C++", 0, 54, 0, 2, 9, 65
+"/home/ehosta/code/42-webserv/include/config/Lexer.hpp", "C++", 0, 29, 0, 2, 7, 38
+"/home/ehosta/code/42-webserv/include/config/Node4.hpp", "C++", 0, 0, 0, 0, 1, 1
+"/home/ehosta/code/42-webserv/include/config/Node4.tpp", "C++", 0, 0, 0, 0, 1, 1
+"/home/ehosta/code/42-webserv/include/config/Parser.hpp", "C++", 0, 37, 0, 2, 9, 48
+"/home/ehosta/code/42-webserv/include/config/Utils.hpp", "C++", 0, 14, 0, 2, 5, 21
+"/home/ehosta/code/42-webserv/include/config/types.hpp", "C++", 0, 16, 0, 2, 8, 26
+"/home/ehosta/code/42-webserv/samples/webserv.conf", "NGINX Conf", 33, 0, 0, 1, 8, 42
+"/home/ehosta/code/42-webserv/samples/webserv_crash.conf", "NGINX Conf", 90, 0, 0, 0, 22, 112
+"/home/ehosta/code/42-webserv/src/config/ConfigLogger.cpp", "C++", 0, 5, 0, 2, 3, 10
+"/home/ehosta/code/42-webserv/src/config/HttpConfig.cpp", "C++", 0, 445, 0, 2, 47, 494
+"/home/ehosta/code/42-webserv/src/config/Lexer.cpp", "C++", 0, 36, 0, 2, 5, 43
+"/home/ehosta/code/42-webserv/src/config/Node4.cpp", "C++", 0, 0, 0, 0, 1, 1
+"/home/ehosta/code/42-webserv/src/config/Parser.cpp", "C++", 0, 95, 0, 3, 12, 110
+"/home/ehosta/code/42-webserv/src/config/Utils.cpp", "C++", 0, 67, 0, 2, 11, 80
+"/home/ehosta/code/42-webserv/src/main.cpp", "C++", 0, 25, 0, 0, 5, 30
+"Total", "-", 123, 975, 57, 26, 197, 1378
