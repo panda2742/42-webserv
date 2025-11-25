@@ -1,11 +1,15 @@
 override NAME		:=	webserv
 
-override INCLUDE_DIR	:=	includes/
-override TEMPLATE_DIR	:=	includes/
+CONFIG_HEADERS		:= $(addprefix config/, ConfigLogger ContainerImproved HttpConfig Lexer Node4 Parser types Utils)
+CONFIG_TEMPLATES	:= $(addprefix config/, HttpConfig Node4)
+CONFIG_SOURCES		:= $(addprefix config/, ConfigLogger ContainerImproved HttpConfig Lexer Node4 Node4Utils Parser Utils)
+
+override INCLUDE_DIR	:=	include/
+override TEMPLATE_DIR	:=	include/
 override SOURCE_DIR		:=	src/
-INCLUDES				:=
-TEMPLATES				:=
-SOURCES					:=	main \
+INCLUDES				:=  $(CONFIG_HEADERS)
+TEMPLATES				:=  $(CONFIG_TEMPLATES)
+SOURCES					:=	$(CONFIG_SOURCES) main \
 							Logger \
 							Server \
 							FileCacheManager \
