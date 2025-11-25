@@ -92,6 +92,17 @@ void HttpResponse::setRedirect(int code, const std::string& target)
 	headers_["Location"] = target;
 }
 
+void HttpResponse::addCookie(const std::string& name,
+							const std::string& value,
+							bool httpOnly = false,
+							bool secure = false,
+							ssize_t maxAge = -1,
+							const std::string& path = "",
+							const std::string& sameSite = "")
+{
+	cookies_.push_back((ResCookie){name, value, httpOnly, secure, maxAge, path, sameSite});
+}
+
 static inline std::string trim(const std::string &s)
 {
     size_t start = s.find_first_not_of(" \t\r\n");
@@ -243,7 +254,22 @@ void HttpResponse::serializeHeader()
 	for (std::map<std::string, std::string>::const_iterator it = headers_.begin(); it != headers_.end(); ++it)
 		serialized_header_ += it->first + ": " + it->second + "\r\n";
 
+	for (std::vector<ResCookie>::const_iterator it = cookies_.begin(); it != cookies_.end(); ++it)
+	{
+		std::string cookie = "Set-Cookie: "+ it->name +"="+ it->value;
+
+		if (it->httpOnly) cookie += "; HttpOnly";
+		if (it->secure) cookie += "; Secure";
+		if (it->maxAge > 0) cookie += "; Max-Age=" + to_string(it->maxAge);
+		if (!it->path.empty()) cookie += "; Path=" + it->path;
+		if (!it->sameSite.empty()) cookie += "; SameSite=" + it->sameSite;
+
+		serialized_header_ += cookie + "\r\n";
+	}
+
 	serialized_header_ += "\r\n";
+
+	std::cout << serialized_header_ << std::endl;
 }
 
 const std::string HttpResponse::getBodySize() const
@@ -257,8 +283,11 @@ void HttpResponse::createDefault()
 {
 	headers_["Content-Length"] = "0";
 
-	useCGI("/usr/bin/php-cgi", "/home/lilefebv/Documents/cursus/42-webserv/www/script.php");
-	return ;
+	// addCookie("test", "kakoukakou");
+	// addCookie("test2", "kakoukakou2", true, true, 3600, "/", "Lax");
+
+	// useCGI("/usr/bin/php-cgi", "/home/lilefebv/Documents/cursus/42-webserv/www/script.php");
+	// return ;
 
 	// if (req_.getTarget() == "/abc")
 	// {

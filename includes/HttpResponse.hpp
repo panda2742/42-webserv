@@ -22,12 +22,24 @@ class HttpResponse
 {
 
 private:
+	struct ResCookie
+	{
+		std::string name;
+		std::string value;
+		bool httpOnly;
+		bool secure;
+		ssize_t maxAge;
+		std::string path;
+		std::string sameSite;
+	};
+
 	HttpRequest& req_;
 
 	int status_code_;
 	std::string status_message_;
 
 	std::map<std::string, std::string> headers_;
+	std::vector<ResCookie> cookies_;
 	std::vector<char> body_;
 
 	CachedFile *file_;
@@ -52,6 +64,7 @@ private:
 	void setError(int code);
 	void setRedirect(int code, const std::string& target);
 	void useCGI(const std::string& cgi_prog, const std::string& script_path);
+	void addCookie(const std::string& name, const std::string& value, bool httpOnly, bool secure, ssize_t maxAge, const std::string& path, const std::string& sameSite);
 
 	void createDefault();
 
