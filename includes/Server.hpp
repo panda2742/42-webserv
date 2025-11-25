@@ -1,0 +1,34 @@
+#ifndef __SERVER_HPP__
+# define __SERVER_HPP__
+
+#include <vector>
+#include <cstdlib>
+#include <map>
+#include "HttpConnection.hpp"
+#include "program.hpp"
+
+class Server
+{
+
+private:
+	bool running_;
+	int listen_fd_;
+	int epoll_fd_;
+
+	std::map<int, HttpConnection> connections_;
+
+	void handleClient(struct epoll_event& epoll);
+	void handleClientIN(int fd);
+	void handleClientOUT(int fd);
+
+	int removeFdEpoll(int fd);
+	void removeClient(int fd, Logger::Level lvl);
+
+public:
+	Server();
+	~Server() {}
+
+	void run();
+};
+
+#endif

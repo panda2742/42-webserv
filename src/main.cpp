@@ -26,5 +26,16 @@ int	main(int argc, char **argv)
 		for (std::vector<Config::HttpConfig::Directive<unsigned int> >::iterator jt = ports.begin(); jt != ports.end(); ++jt)
 			std::cout << BLURPLE << (*jt).value << RESET << ", ";
 		std::cout << std::endl;
+  }
+  /*
+	try {
+		Server server;
+		server.run();
 	}
+	catch (const std::exception& e) {
+		Logger::error(e.what());
+		// std::cerr << "Erreur: " << e.what() << std::endl;
+		return 1;
+	}
+  */
 }

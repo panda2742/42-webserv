@@ -7,9 +7,16 @@ CONFIG_SOURCES		:= $(addprefix config/, ConfigLogger ContainerImproved HttpConfi
 override INCLUDE_DIR	:=	include/
 override TEMPLATE_DIR	:=	include/
 override SOURCE_DIR		:=	src/
-INCLUDES				:=	$(CONFIG_HEADERS)
-TEMPLATES				:=	$(CONFIG_TEMPLATES)
-SOURCES					:=	$(CONFIG_SOURCES) main
+INCLUDES				:=  $(CONFIG_HEADERS)
+TEMPLATES				:=  $(CONFIG_TEMPLATES)
+SOURCES					:=	$(CONFIG_SOURCES) main \
+							Logger \
+							Server \
+							FileCacheManager \
+							http_utils \
+							HttpConnection \
+							HttpRequest \
+							HttpResponse
 override INCLUDE		:=	$(addprefix $(INCLUDE_DIR), $(addsuffix .hpp, $(INCLUDES)))
 override TEMPLATE		:=	$(addprefix $(TEMPLATE_DIR), $(addsuffix .tpp, $(TEMPLATES)))
 override SOURCE			:=	$(addprefix $(SOURCE_DIR), $(addsuffix .cpp, $(SOURCES)))

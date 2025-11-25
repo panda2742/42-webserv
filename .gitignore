@@ -1,2 +1,13 @@
 .dist
+.vscode
+
 webserv
+external_functions.txt
+a.out
+www/ebini.jpeg
+www/test/
+webserv.conf
+utils/fuzzer/fuzzer
+utils/fuzzer/requests/random2
+
+*.o
