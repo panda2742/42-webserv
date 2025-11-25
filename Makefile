@@ -1,8 +1,8 @@
 override NAME		:=	webserv
 
-CONFIG_HEADERS		:= $(addprefix config/, ConfigLogger HttpConfig Lexer Parser types Utils)
-CONFIG_TEMPLATES	:= $(addprefix config/, HttpConfig)
-CONFIG_SOURCES		:= $(addprefix config/, ConfigLogger HttpConfig Lexer Parser Utils)
+CONFIG_HEADERS		:= $(addprefix config/, ConfigLogger ContainerImproved HttpConfig Lexer Node4 Parser types Utils)
+CONFIG_TEMPLATES	:= $(addprefix config/, HttpConfig Node4)
+CONFIG_SOURCES		:= $(addprefix config/, ConfigLogger ContainerImproved HttpConfig Lexer Node4 Node4Utils Parser Utils)
 
 override INCLUDE_DIR	:=	include/
 override TEMPLATE_DIR	:=	include/
@@ -69,6 +69,6 @@ run: all
 .PHONY: vg
 vg: all
 	@clear
-	$(VG) $(VGFLAGS) ./$(NAME) samples/webserv_crash.conf
+	$(VG) $(VGFLAGS) ./$(NAME) samples/webserv.conf
 
 -include $(DEPS)

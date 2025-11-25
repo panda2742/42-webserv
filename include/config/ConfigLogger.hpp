@@ -18,25 +18,21 @@ namespace Config
 class ConfigLogger
 {
 	private:
-	void	printMsg_(const std::string& msg, std::ostream& os)
-	{
-		os << "CONFIG *    " << msg << std::endl;
-		std::flush(os);
-	}
+	void	printMsg_(const std::string& msg, std::ostream& os);
 
 	public:
-	ConfigLogger(void) {}
-	~ConfigLogger(void) {}
+	ConfigLogger(void);
+	~ConfigLogger(void);
 
-	void	info(const std::string& msg) { printMsg_(std::string(INFO_PRFX) + msg, std::cout); }
-	void	warn(const std::string& msg) { printMsg_(std::string(WARN_PRFX) + msg, std::cout); }
-	void	debug(const std::string& msg) { printMsg_(std::string(DEBUG_PRFX) + msg, std::cout); }
-	void	error(const std::string& msg) { printMsg_(std::string(ERROR_PRFX) + msg, std::cerr); }
+	void	info(const std::string& msg);
+	void	warn(const std::string& msg);
+	void	debug(const std::string& msg);
+	void	error(const std::string& msg);
 
-	void	info(const char *cstr) { info(std::string(cstr)); }
-	void	warn(const char *cstr) { warn(std::string(cstr)); }
-	void	debug(const char *cstr) { debug(std::string(cstr)); }
-	void	error(const char *cstr) { error(std::string(cstr)); }
+	void	info(const char *cstr);
+	void	warn(const char *cstr);
+	void	debug(const char *cstr);
+	void	error(const char *cstr);
 };
 
 extern ConfigLogger	log;
