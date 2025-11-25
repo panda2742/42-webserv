@@ -52,8 +52,6 @@ void	Node4::Value::deleteData(void)
 {
 	switch (type)
 	{
-		case TYPE_NULL:
-			break;
 		case TYPE_STRING:
 			delete getAs<std::string>();
 			break;
@@ -106,7 +104,6 @@ std::string	Node4::fastStr(void)
 		case TYPE_MAP_UINT_STRING_VECTOR:
 			ss << PINK << "UINT_STRINGVEC" << RESET << "=" << PINK << ContainerImproved::mapVecStr(*value.getAs<std::map<unsigned int, std::vector<std::string> > >()) << RESET;
 			break;
-		case TYPE_NULL:
 		default:
 			ss << GREY << " EMPTY" << RESET;
 			break;

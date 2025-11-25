@@ -25,7 +25,7 @@ void HttpResponse::setBody(const std::vector<char> &body) {
 void HttpResponse::setError(int code)
 {
 	setStatus(code, getHttpErrorMessage(code));
-	
+
 	// try load configurated error page
 	// + set file status a FILE_OK si y'a bien un fichier / FILE_STREAM_DIRECT si trop lourd
 
@@ -119,7 +119,7 @@ void HttpResponse::createDefault()
 	if (req_.getMethod() == GET)
 	{
 		if (file_status_ == NONE) file_status_ = FileCacheManager::getFile(req_.getTarget(), file_, file_info_, file_path_);
-		
+
 		if (file_status_ == FILE_OK)
 		{
 			setStatus(200, "OK");
@@ -129,7 +129,7 @@ void HttpResponse::createDefault()
 		else if (file_status_ == FILE_STREAM_DIRECT)
 		{
 			direct_file_fd_ = open(file_path_.c_str(), O_RDONLY);
-			
+
 			if (direct_file_fd_ < 0)
 				setError(500);
 			else
@@ -195,7 +195,7 @@ bool HttpResponse::sendFileDirectPart(int socket_fd)
 		else
 			send_index_ = 0;
 	}
-	
+
 	direct_file_n_ = read(direct_file_fd_, direct_file_buffer_, sizeof(direct_file_buffer_));
 	if (direct_file_n_ > 0)
 	{
@@ -276,7 +276,7 @@ ResponseState HttpResponse::sendResponsePart(int socket_fd)
 		}
 		else
 		{
-			
+
 		}
 	}
 

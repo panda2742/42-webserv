@@ -10,7 +10,7 @@ namespace Config
 {
 // #########################################################
 
-HttpConfig::HttpConfig(void): root_(Node4Utils::createNullNode4())
+HttpConfig::HttpConfig(void): root_(Node4Utils::createStringNode4())
 {
 	root_->name = "http";
 }
@@ -20,9 +20,9 @@ HttpConfig::~HttpConfig(void)
 	delete root_;
 }
 
-const Node4	*HttpConfig::getRoot(void) const
+Directive<std::string>	HttpConfig::http(void)
 {
-	return root_;
+	return Directive<std::string>(*root_->value.getAs<std::string>(), root_);
 }
 
 void	HttpConfig::generate(const std::vector<Lexer::TokenNode>& nodes) throw(ParsingException)
@@ -126,7 +126,6 @@ void	HttpConfig::generate(const std::vector<Lexer::TokenNode>& nodes) throw(Pars
 								node->value.setAs<std::map<unsigned int, std::vector<std::string> > >(m);
 							}
 							break;
-						case Node4::TYPE_NULL:
 						default:
 							break;
 					}

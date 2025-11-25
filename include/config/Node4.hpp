@@ -18,7 +18,6 @@ class Node4
 	public:
 	enum ValueType
 	{
-		TYPE_NULL,
 		TYPE_STRING,
 		TYPE_UINT,
 		TYPE_STRING_VECTOR,
@@ -59,9 +58,11 @@ class Node4
 
 namespace Node4Utils
 {
-	Node4::ValueType	dataType_(std::vector<Lexer::TokenNode>::const_iterator node, std::vector<Lexer::TokenNode>::const_iterator end);
+	Node4::ValueType	dataType_(
+		std::vector<Lexer::TokenNode>::const_iterator node,
+		std::vector<Lexer::TokenNode>::const_iterator end
+	);
 	Node4				*createNode4(Node4::ValueType type);
-	Node4				*createNullNode4(void);
 	Node4				*createStringNode4(void);
 	Node4				*createUintNode4(void);
 	Node4				*createStringVectorNode4(void);

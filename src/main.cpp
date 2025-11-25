@@ -1,6 +1,7 @@
 #include <iostream>
 #include "config/Parser.hpp"
 #include "config/HttpConfig.hpp"
+#include "config/ContainerImproved.hpp"
 #include "Logger.hpp"
 #include "Server.hpp"
 
@@ -17,17 +18,20 @@ int	main(int argc, char **argv)
 	parser.parse();
 	httpconf.generate(parser.getNodes());
 
-	const Config::Node4				*root = httpconf.getRoot();
-	std::vector<Config::Node4 *>	servers = root->access("server");
+	// Directive "root" donc http
+	Directive<std::string>					root = httpconf.http();
+	// Dans http, je recup toutes les directives server
+	std::vector<Directive<std::string> >	servers = root.find<std::string>("server");
 
-	for (std::vector<Config::Node4 *>::const_iterator it = servers.begin(); it != servers.end(); ++it)
+	for (std::vector<Directive<std::string> >::const_iterator it = servers.begin(); it != servers.end(); ++it)
 	{
-		std::vector<Config::HttpConfig::Directive<unsigned int> >	ports = httpconf.get<unsigned int>("listen", *it);
+		// Getting each server
+		Directive<std::string>	server = (*it);
+		// Getting ports for each server
+		std::vector<Directive<unsigned int> >	ports = server.find<unsigned int>("listen");
 
-		std::cout << "For server " RED << &(*it) << RESET ", listening on ports: ";
-		for (std::vector<Config::HttpConfig::Directive<unsigned int> >::iterator jt = ports.begin(); jt != ports.end(); ++jt)
-			std::cout << BLURPLE << (*jt).value << RESET << ", ";
-		std::cout << std::endl;
+		// Displaying first port
+		std::cout << ports.size() << std::endl;
 	}
 
 	try {

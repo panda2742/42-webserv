@@ -14,9 +14,6 @@ Node4	*createNode4(Node4::ValueType type)
 	{
 		switch (type)
 		{
-			case Node4::TYPE_NULL:
-				return createNullNode4();
-				break;
 			case Node4::TYPE_STRING:
 				return createStringNode4();
 				break;
@@ -46,13 +43,6 @@ Node4	*createNode4(Node4::ValueType type)
 		return NULL;
 	}
 	return NULL;
-}
-
-Node4	*createNullNode4(void)
-{
-	Node4	*node = new Node4(Node4::TYPE_NULL);
-	node->value.data = NULL;
-	return node;
 }
 
 Node4	*createStringNode4()
@@ -102,7 +92,7 @@ Node4::ValueType	dataType_(std::vector<Lexer::TokenNode>::const_iterator node, s
 	if (node == end || (node->type != Lexer::TokenParent && node->type != Lexer::TokenDirective))
 	{
 		log.error("Trying to access the type of a non-directive attribute '" + node->value + "'.");
-		return Node4::TYPE_NULL;
+		return Node4::TYPE_STRING;
 	}
 	bool					nb_starts = false;
 	bool					only_nb = true;
@@ -120,7 +110,7 @@ Node4::ValueType	dataType_(std::vector<Lexer::TokenNode>::const_iterator node, s
 		++current;
 	}
 	if (nb_arguments == 0)
-		return Node4::TYPE_NULL;
+		return Node4::TYPE_STRING;
 	if (nb_starts)
 	{
 		if (nb_arguments == 1)
@@ -140,7 +130,7 @@ Node4::ValueType	dataType_(std::vector<Lexer::TokenNode>::const_iterator node, s
 			return Node4::TYPE_STRING_VECTOR;
 	}
 	log.warn("Could not identify type for directive '" + node->value + "'.");
-	return Node4::TYPE_NULL;
+	return Node4::TYPE_STRING;
 }
 
 Node4::ValueType	typeToEnum_(std::string)

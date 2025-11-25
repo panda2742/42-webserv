@@ -7,6 +7,19 @@
 #include "Lexer.hpp"
 #include "Parser.hpp"
 #include "Node4.hpp"
+#include "types.hpp"
+
+template <typename T>
+struct Directive
+{
+	T				value;
+	Config::Node4	*node;
+	Directive(T value_, Config::Node4 *node_);
+	Directive(const Directive& other);
+	~Directive(void);
+	template <typename R>
+	std::vector<Directive<R> >	find(const std::string& prop_name);
+};
 
 namespace Config
 {
@@ -15,32 +28,25 @@ namespace Config
 class HttpConfig
 {
 	public:
-	template <typename T>
-	struct Directive
-	{
-		T		value;
-		Node4	*node;
-		Directive(T value_, Node4 *node_);
-		~Directive(void);
-	};
-
 	HttpConfig(void);
 	~HttpConfig(void);
 
 	template <typename T>
 	std::vector<Directive<T> >	get(const std::string& prop_name, const Node4 *parent = NULL);
+	template <typename T, typename P>
+	std::vector<Directive<T> >	get(const std::string& prop_name, const Directive<P>& directive);
 	void						generate(const std::vector<Lexer::TokenNode>& nodes) throw (ParsingException);
-	const Node4					*getRoot(void) const;
+	Directive<std::string>		http(void);
 
 	private:
 	template <typename T>
 	struct GetData
 	{
-		int							depth;
-		const Node4					*parent;
-		Node4::ValueType			type;
-		const std::string&			prop_name;
-		std::vector<Directive<T> >	local_res;
+		int								depth;
+		const Node4						*parent;
+		Node4::ValueType				type;
+		const std::string&				prop_name;
+		std::vector<Directive<T> >		local_res;
 
 		GetData(const std::string& prop_name_, const Node4 *parent_, unsigned int depth_);
 		GetData(const GetData& other);

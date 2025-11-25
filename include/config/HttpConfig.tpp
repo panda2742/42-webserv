@@ -2,15 +2,31 @@
 #include <iostream>
 #include "config/Node4.hpp"
 
+template <typename T>
+Directive<T>::Directive(T value_, Config::Node4 *node_): value(value_), node(node_) {}
+
+template <typename T>
+Directive<T>::Directive(const Directive& other): value(other.value), node(other.node) {}
+
+template <typename T>
+Directive<T>::~Directive(void) {}
+
+template <typename T>
+template <typename R>
+std::vector<Directive<R> >	Directive<T>::find(const std::string& prop_name)
+{
+	std::vector<Config::Node4 *>	nodes = node->access(prop_name);
+	std::vector<Directive<R> >		res;
+
+	for (std::vector<Config::Node4 *>::const_iterator it = nodes.begin(); it != nodes.end(); ++it)
+		res.push_back(Directive<R>(*(*it)->value.getAs<R>(), *it));
+
+	return res;
+}
+
 namespace Config
 {
 // #########################################################
-
-template <typename T>
-HttpConfig::Directive<T>::Directive(T value_, Node4 *node_): value(value_), node(node_) {}
-
-template <typename T>
-HttpConfig::Directive<T>::~Directive(void) {}
 
 template <typename T>
 HttpConfig::GetData<T>::GetData(const std::string& prop_name_, const Node4 *parent_, unsigned int depth_)
@@ -20,12 +36,16 @@ HttpConfig::GetData<T>::GetData(const std::string& prop_name_, const Node4 *pare
 }
 
 template <typename T>HttpConfig::GetData<T>::GetData(const GetData& other)
-	: depth(other.depth), parent(other.parent), type(other.type), prop_name(other.prop_name), local_res(other.local_res) {}
+	: depth(other.depth),
+	  parent(other.parent),
+	  type(other.type),
+	  prop_name(other.prop_name),
+	  local_res(other.local_res) {}
 
 template <typename T>HttpConfig::GetData<T>::~GetData(void) {}
 
 template <typename T>
-std::vector<HttpConfig::Directive<T> >	HttpConfig::get_(GetData<T>& ddata)
+std::vector<Directive<T> >	HttpConfig::get_(GetData<T>& ddata)
 {
 	std::vector<GetData<T> >	results;
 
@@ -70,13 +90,19 @@ std::vector<HttpConfig::Directive<T> >	HttpConfig::get_(GetData<T>& ddata)
 }
 
 template <typename T>
-std::vector<HttpConfig::Directive<T> >	HttpConfig::get(const std::string& prop_name, const Node4 *parent)
+std::vector<Directive<T> >	HttpConfig::get(const std::string& prop_name, const Node4 *parent)
 {
 	if (!parent)
 		parent = root_;
 
 	GetData<T>	ddata(prop_name, parent, 0);
 	return get_(ddata);
+}
+
+template <typename T, typename P>
+std::vector<Directive<T> >	HttpConfig::get(const std::string& prop_name, const Directive<P>& directive)
+{
+	return get(prop_name, directive.node);
 }
 
 // #########################################################
