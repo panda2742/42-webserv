@@ -27,7 +27,7 @@ int	main(int argc, char **argv)
 			std::cout << BLURPLE << (*jt).value << RESET << ", ";
 		std::cout << std::endl;
 	}
-	/*
+
 	try {
 		Server server;
 		server.run();
@@ -37,5 +37,5 @@ int	main(int argc, char **argv)
 		// std::cerr << "Erreur: " << e.what() << std::endl;
 		return 1;
 	}
-	*/
+
 }
