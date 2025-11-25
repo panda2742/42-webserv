@@ -10,6 +10,9 @@ std::string to_string(const T& value)
 	return oss.str();
 }
 
+std::string toUpper(const std::string& str);
+std::string getNextPart(std::string& input, const std::string& sep);
+
 const std::string getHttpErrorMessage(int code);
 const std::string getMimeType(const std::string& ext);
 const std::string getMethodName(Method m);

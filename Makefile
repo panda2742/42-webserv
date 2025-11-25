@@ -6,6 +6,7 @@ override SOURCE_DIR		:=	src/
 INCLUDES				:=
 TEMPLATES				:=
 SOURCES					:=	main \
+							utils \
 							Logger \
 							Server \
 							FileCacheManager \
