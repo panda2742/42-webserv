@@ -1,14 +1,8 @@
 override NAME		:=	webserv
 
-CONFIG_HEADERS		:= $(addprefix config/, ConfigLogger ContainerImproved HttpConfig Lexer Node4 Parser types Utils)
-CONFIG_TEMPLATES	:= $(addprefix config/, HttpConfig Node4)
-CONFIG_SOURCES		:= $(addprefix config/, ConfigLogger ContainerImproved HttpConfig Lexer Node4 Node4Utils Parser Utils)
-
 override INCLUDE_DIR	:=	include/
 override TEMPLATE_DIR	:=	include/
 override SOURCE_DIR		:=	src/
-INCLUDES				:=  $(CONFIG_HEADERS)
-TEMPLATES				:=  $(CONFIG_TEMPLATES)
 SOURCES					:=	$(CONFIG_SOURCES) main \
 							Logger \
 							Server \
@@ -16,9 +10,9 @@ SOURCES					:=	$(CONFIG_SOURCES) main \
 							http_utils \
 							HttpConnection \
 							HttpRequest \
-							HttpResponse
-override INCLUDE		:=	$(addprefix $(INCLUDE_DIR), $(addsuffix .hpp, $(INCLUDES)))
-override TEMPLATE		:=	$(addprefix $(TEMPLATE_DIR), $(addsuffix .tpp, $(TEMPLATES)))
+							HttpResponse \
+							$(addprefix config/, ConfigLogger ContainerImproved HttpConfig Lexer Node4 Node4Utils Parser Utils)
+
 override SOURCE			:=	$(addprefix $(SOURCE_DIR), $(addsuffix .cpp, $(SOURCES)))
 
 CPPFLAGS	:=	-Wall -Wextra -Werror -MD -Wshadow -g3 -std=c++98 -pthread
@@ -46,7 +40,7 @@ all: $(NAME)
 $(NAME): $(OBJ)
 	$(GCC) $(CPPFLAGS) $(OBJ) -o $(NAME)
 
-$(BUILD_DIR)%.o: $(SOURCE_DIR)%.cpp $(INCLUDE) $(TEMPLATE) | $(DIRS)
+$(BUILD_DIR)%.o: $(SOURCE_DIR)%.cpp | $(DIRS)
 	$(GCC) $(CPPFLAGS) -c -I$(INCLUDE_DIR) -I$(TEMPLATE_DIR) $< -o $@
 
 $(DIRS):
