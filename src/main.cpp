@@ -1,6 +1,8 @@
 #include <iostream>
 #include "config/Parser.hpp"
 #include "config/HttpConfig.hpp"
+#include "Logger.hpp"
+#include "Server.hpp"
 
 int	main(int argc, char **argv)
 {
