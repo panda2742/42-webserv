@@ -145,6 +145,8 @@ void HttpResponse::useCGI(const std::string& cgi_prog, const std::string& script
 		close(pipe_out[0]);
 		dup2(pipe_out[1], STDOUT_FILENO); // GERER LES ERREURS
 		dup2(pipe_in[0], STDIN_FILENO);
+		close(pipe_in[0]);
+		close(pipe_out[1]);
 
 		std::vector<std::string> env_strings;
 		
@@ -199,7 +201,10 @@ void HttpResponse::useCGI(const std::string& cgi_prog, const std::string& script
 		envp.push_back(NULL);
 
 		execve(cgi_prog.c_str(), args.data(), envp.data());
-		std::exit(1);
+		close(STDIN_FILENO);
+		close(STDOUT_FILENO);
+		throw std::runtime_error("CGI execve failed");
+		// _exit(1);
 	}
 
 	close(pipe_in[0]);
@@ -310,7 +315,7 @@ void HttpResponse::createDefault()
 	// addCookie("test", "kakoukakou");
 	// addCookie("test2", "kakoukakou2", true, true, 3600, "/", "Lax");
 
-	useCGI("/usr/bin/php-cgi", "/home/lilefebv/Documents/cursus/42-webserv/www/script.php");
+	useCGI("/usr/bin/php-cgid", "/home/lilefebv/Documents/cursus/42-webserv/www/script.php");
 	return ;
 
 	// if (req_.getTarget() == "/abc")

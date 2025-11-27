@@ -12,19 +12,28 @@
 #include <iostream>
 #include <unistd.h>
 #include <errno.h>
+#include <signal.h>
 
 #define BASEPORT 8080
 #define MAX_EVENTS 64
 
+bool siginted = false;
+
+void exit_signal(int sig)
+{
+	if (sig == SIGINT)
+		siginted = true;
+}
+
 int Server::removeFdEpoll(int fd)
 {
-    struct epoll_event ev;
-    return epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, fd, &ev);
+	struct epoll_event ev;
+	return epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, fd, &ev);
 }
 
 void Server::removeClient(int fd, Logger::Level lvl)
 {
-	Logger::log(lvl ,"Disconnect client (fd: " + to_string(fd) + std::string(")"));
+	Logger::log(lvl, "Disconnect client (fd: " + to_string(fd) + std::string(")"));
 	removeFdEpoll(fd);
 	close(fd);
 	std::map<int, HttpConnection>::iterator it = connections_.find(fd);
@@ -49,12 +58,16 @@ void Server::handleClientIN(int fd)
 		size += r;
 	}
 
-	if (r == 0) return removeClient(fd, Logger::INFO);
+	if (r == 0)
+		return removeClient(fd, Logger::INFO);
 
 	std::map<int, HttpConnection>::iterator it = connections_.find(fd);
-	if (it != connections_.end()) {
+	if (it != connections_.end())
+	{
 		it->second.receiveContent(request_buffer.data(), size);
-	} else {
+	}
+	else
+	{
 		Logger::warn("received data for unknown fd (fd: " + to_string(fd) + std::string(")"));
 	}
 }
@@ -62,23 +75,25 @@ void Server::handleClientIN(int fd)
 void Server::handleClientOUT(int fd)
 {
 	std::map<int, HttpConnection>::iterator it = connections_.find(fd);
-	if (it == connections_.end()) return ;
+	if (it == connections_.end())
+		return;
 
-	if (!it->second.sendResponse()) removeClient(fd, Logger::WARN);
+	if (!it->second.sendResponse())
+		removeClient(fd, Logger::WARN);
 }
 
-void Server::handleClient(struct epoll_event& epoll)
+void Server::handleClient(struct epoll_event &epoll)
 {
-	if (epoll.events & EPOLLIN) {
+	if (epoll.events & EPOLLIN)
+	{
 		handleClientIN(epoll.data.fd);
 	}
 
-	if (epoll.events & EPOLLOUT) {
+	if (epoll.events & EPOLLOUT)
+	{
 		handleClientOUT(epoll.data.fd);
 	}
 }
-
-
 
 Server::Server()
 	: running_(false)
@@ -97,7 +112,8 @@ Server::Server()
 	addr.sin_port = htons(BASEPORT);
 	addr.sin_addr.s_addr = INADDR_ANY;
 
-	if (bind(listen_fd_, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+	if (bind(listen_fd_, (struct sockaddr *)&addr, sizeof(addr)) < 0)
+	{
 		throw std::runtime_error("Socket binding: " + std::string(strerror(errno)));
 	}
 
@@ -114,7 +130,6 @@ Server::Server()
 	ev.events = EPOLLIN;
 	ev.data.fd = listen_fd_;
 	epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, listen_fd_, &ev);
-
 }
 
 void Server::run()
@@ -123,7 +138,7 @@ void Server::run()
 
 	Logger::info("server running, version " + std::string(VERSION));
 
-	while (running_)
+	while (running_ && !siginted)
 	{
 		struct epoll_event events[MAX_EVENTS];
 		int n = epoll_wait(epoll_fd_, events, MAX_EVENTS, -1);
@@ -148,5 +163,14 @@ void Server::run()
 				handleClient(events[i]);
 			}
 		}
+	}
+}
+
+Server::~Server()
+{
+	for (std::map<int, HttpConnection>::iterator it = connections_.begin(); it != connections_.end(); ++it)
+	{
+		removeFdEpoll(it->first);
+		close(it->first);
 	}
 }

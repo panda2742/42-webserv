@@ -1,5 +1,5 @@
 #ifndef __SERVER_HPP__
-# define __SERVER_HPP__
+#define __SERVER_HPP__
 
 #include <vector>
 #include <cstdlib>
@@ -17,7 +17,7 @@ private:
 
 	std::map<int, HttpConnection> connections_;
 
-	void handleClient(struct epoll_event& epoll);
+	void handleClient(struct epoll_event &epoll);
 	void handleClientIN(int fd);
 	void handleClientOUT(int fd);
 
@@ -26,7 +26,7 @@ private:
 
 public:
 	Server();
-	~Server() {}
+	~Server();
 
 	void run();
 };

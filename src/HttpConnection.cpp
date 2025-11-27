@@ -1,4 +1,3 @@
-
 #include "HttpConnection.hpp"
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
@@ -13,7 +12,11 @@ HttpConnection::HttpConnection(int socket_fd) : socket_fd_(socket_fd), header_(f
 
 HttpConnection::~HttpConnection()
 {
-	
+	// requests_.clear();
+	// std::deque<HttpRequest>().swap(requests_);
+	// responses_.clear();
+	// std::deque<HttpResponse>().swap(responses_);
+	// raw_.clear();
 }
 
 void HttpConnection::clear()
@@ -21,7 +24,6 @@ void HttpConnection::clear()
 	raw_.clear();
 	header_ = false;
 	content_size_ = 0;
-	// res_ready_ = false;
 }
 
 ssize_t HttpConnection::find(const std::string& search, size_t range)
