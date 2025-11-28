@@ -204,7 +204,6 @@ void HttpResponse::useCGI(const std::string& cgi_prog, const std::string& script
 		close(STDIN_FILENO);
 		close(STDOUT_FILENO);
 		throw std::runtime_error("CGI execve failed");
-		// _exit(1);
 	}
 
 	close(pipe_in[0]);

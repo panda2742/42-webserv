@@ -173,4 +173,6 @@ Server::~Server()
 		removeFdEpoll(it->first);
 		close(it->first);
 	}
+	close(listen_fd_);
+	close(epoll_fd_);
 }
