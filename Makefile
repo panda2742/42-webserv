@@ -10,10 +10,10 @@ SOURCES					:=	main \
 							Logger \
 							Server \
 							FileCacheManager \
-							http_utils \
-							HttpConnection \
-							HttpRequest \
-							HttpResponse
+							http/http_utils \
+							http/HttpConnection \
+							http/HttpRequest \
+							http/HttpResponse
 override INCLUDE		:=	$(addprefix $(INCLUDE_DIR), $(addsuffix .hpp, $(INCLUDES)))
 override TEMPLATE		:=	$(addprefix $(TEMPLATE_DIR), $(addsuffix .tpp, $(TEMPLATES)))
 override SOURCE			:=	$(addprefix $(SOURCE_DIR), $(addsuffix .cpp, $(SOURCES)))

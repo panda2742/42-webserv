@@ -74,10 +74,8 @@ private:
 	const std::string getBodySize() const;
 
 public:
-	HttpResponse(HttpRequest &req)
-		: req_(req), status_code_(500), file_(NULL), file_status_(NONE),
-		send_state_(NOT_SENT), send_index_(0), direct_file_fd_(-1), direct_file_n_(-1), res_ready_(false) {}
-	~HttpResponse() { clear(); }
+	HttpResponse(HttpRequest &req);
+	~HttpResponse();
 	
 	void create();
 	ResponseState sendResponsePart(int socket_fd);
