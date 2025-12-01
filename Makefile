@@ -13,7 +13,10 @@ SOURCES					:=	main \
 							http/http_utils \
 							http/HttpConnection \
 							http/HttpRequest \
-							http/HttpResponse
+							http/HttpResponse \
+							http/HttpResponseCreate \
+							http/HttpResponseSend \
+							http/HttpResponseCGI
 override INCLUDE		:=	$(addprefix $(INCLUDE_DIR), $(addsuffix .hpp, $(INCLUDES)))
 override TEMPLATE		:=	$(addprefix $(TEMPLATE_DIR), $(addsuffix .tpp, $(TEMPLATES)))
 override SOURCE			:=	$(addprefix $(SOURCE_DIR), $(addsuffix .cpp, $(SOURCES)))
