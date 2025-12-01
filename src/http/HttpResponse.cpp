@@ -1,18 +1,24 @@
 #include "HttpResponse.hpp"
+#include "Server.hpp"
 #include "utils.hpp"
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
-HttpResponse::HttpResponse(HttpRequest &req)
-		: req_(req),
+HttpResponse::HttpResponse(HttpRequest &req, Server& server)
+		: server_(server),
+		req_(req),
 		status_code_(500),
 		file_(NULL),
 		file_status_(NONE),
 		send_state_(NOT_SENT),
+		cgi_state_(NO_CGI),
 		send_index_(0),
 		direct_file_fd_(-1),
 		direct_file_n_(-1),
+		cgi_in_(-1),
+		cgi_out_(-1),
+		waiting_cgi_(false),
 		res_ready_(false)
 {}
 
@@ -62,6 +68,19 @@ void HttpResponse::clear()
 	if (direct_file_fd_ >= 0) {
 		close(direct_file_fd_);
 		direct_file_fd_ = -1;
+	}
+
+	if (cgi_in_ >= 0)
+	{
+		server_.removeCgiFd(cgi_in_);
+		close(cgi_in_);
+		cgi_in_ = -1;
+	}
+	if (cgi_out_ >= 0)
+	{
+		server_.removeCgiFd(cgi_out_);
+		close(cgi_out_);
+		cgi_out_ = -1;
 	}
 
 	file_ = NULL;

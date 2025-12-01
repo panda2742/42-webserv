@@ -3,6 +3,56 @@
 #include "utils.hpp"
 #include <unistd.h>
 #include <algorithm>
+#include "Server.hpp"
+#include <fcntl.h>
+
+void HttpResponse::sendBodyCGI()
+{
+	if (cgi_state_ != SEND_BODY) return ;
+
+	size_t body_size = req_.getContentSize();
+
+	if (body_size - send_index_ > 0)
+	{
+		ssize_t written = write(cgi_in_, req_.getBody() + send_index_, body_size - send_index_);
+
+		if (written > 0)
+		{
+			send_index_ += written;
+			return ;
+		}
+	}
+
+	server_.removeCgiFd(cgi_in_);
+	close(cgi_in_);
+	cgi_in_ = -1;
+	cgi_state_ = WAIT_CONTENT;
+}
+
+void HttpResponse::getContentCGI()
+{
+	if (cgi_state_ != WAIT_CONTENT) return ;
+
+	char buf[4096];
+
+	ssize_t n = read(cgi_out_, buf, sizeof(buf));
+	if (n > 0)
+	{
+		body_.insert(body_.end(), buf, buf + n);
+	}
+	else
+	{
+		server_.removeCgiFd(cgi_out_);
+		close(cgi_out_);
+		cgi_out_ = -1;
+
+		handleResultCGI();
+
+		cgi_state_ = CGI_FINISHED;
+	}
+	
+}
+
 
 void HttpResponse::useCGI(const std::string& cgi_prog, const std::string& script_path)
 {
@@ -36,82 +86,106 @@ void HttpResponse::useCGI(const std::string& cgi_prog, const std::string& script
 	{
 		close(pipe_in[1]);
 		close(pipe_out[0]);
-		dup2(pipe_out[1], STDOUT_FILENO); // GERER LES ERREURS
-		dup2(pipe_in[0], STDIN_FILENO);
+		if (dup2(pipe_out[1], STDOUT_FILENO) < 0
+			|| dup2(pipe_in[0], STDIN_FILENO) < 0)
+		{
+			close(pipe_in[0]);
+			close(pipe_out[1]);
+			throw std::runtime_error("CGI failed (dup2 failed)");
+		}
 		close(pipe_in[0]);
 		close(pipe_out[1]);
 
-		std::vector<std::string> env_strings;
-		
-		// SERVER
-		env_strings.push_back("SERVER_SOFTWARE=webserv/"+ std::string(VERSION));
-		const std::string* host = req_.getHeaderInfo("Host");
-		if (host) env_strings.push_back("SERVER_NAME=" + *host);
-		else env_strings.push_back("SERVER_NAME=");
-		env_strings.push_back("GATEWAY_INTERFACE=CGI/1.1");
-		
-		// Request
-		env_strings.push_back("SERVER_PROTOCOL=HTTP/1.1");
-		env_strings.push_back("SERVER_PORT="); // A FAIRE mais flemme maintenant
-		env_strings.push_back("REQUEST_METHOD=" + getMethodName(req_.getMethod()));
-		env_strings.push_back("PATH_INFO="); // A FAIRE mais infernal, genre faut tester la route / par / pour verifier si y'a pas une cgi avant et que c'est pas un path apres genre
-		// env_strings.push_back("PATH_TRANSLATED="); // En vrai belek
-		env_strings.push_back("SCRIPT_FILENAME=" + script_path);
-		env_strings.push_back("SCRIPT_NAME=" + script_path.substr(script_path.find_last_of('/') + 1));
-		const std::map<std::string, std::string> queries;
-		std::string queries_str = "";
-		for (std::map<std::string, std::string>::const_iterator it = queries.begin(); it != queries.end(); ++it)
-		{
-			if (it == queries.begin()) queries_str += it->first + "=" + it->second;
-			else queries_str += "&"+ it->first +"="+ it->second;
-		}
-		env_strings.push_back("QUERY_STRING="+ queries_str);
-		env_strings.push_back("REMOTE_ADDR="); // Faut que je stoque l'ip du client jsp comment
-		// env_strings.push_back("AUTH_TYPE="); // Basic/Digest, pas compris a quoi ca sert
-		// env_strings.push_back("REMOTE_USER="); // en rapport avec l'auth je crois
-		env_strings.push_back("CONTENT_TYPE=" + *req_.getHeaderInfo("Content-Type"));
-		env_strings.push_back("CONTENT_LENGTH=" + to_string(req_.getContentSize()));
-		env_strings.push_back("REDIRECT_STATUS=200");
-
-		// HTTP
-		const std::map<std::string, std::string>& headers = req_.getHeaders();
-		for (std::map<std::string, std::string>::const_iterator it = headers.begin();
-			it != headers.end();
-			++it)
-		{
-			env_strings.push_back("HTTP_"+ toUpper(it->first) +"="+ it->second);
-			std::cout << it->first << ": " << it->second << std::endl;
-		}
-
-		std::vector<char*> envp;
-		for (size_t i = 0; i < env_strings.size(); ++i)
-			envp.push_back(const_cast<char*>(env_strings[i].c_str()));
-		envp.push_back(NULL);
-
-		std::vector<char*> args;
-		envp.push_back(const_cast<char*>(cgi_prog.c_str()));
-		envp.push_back(const_cast<char*>(script_path.c_str()));
-		envp.push_back(NULL);
-
-		execve(cgi_prog.c_str(), args.data(), envp.data());
-		close(STDIN_FILENO);
-		close(STDOUT_FILENO);
-		throw std::runtime_error("CGI execve failed");
+		execChildCGI(cgi_prog, script_path);
 	}
 
 	close(pipe_in[0]);
 	close(pipe_out[1]);
 
-	close(pipe_in[1]); // ECRIRE DEDANS LE BODY DE LA REQ
+	cgi_in_ = pipe_in[1];
+	fcntl(cgi_in_, F_SETFL, O_NONBLOCK);
+	fd_context_in_.type = CGI_IN;
+	fd_context_in_.cgi_owner_response = this;
+	server_.addCgiInFd(cgi_in_, &fd_context_in_);
+	cgi_out_ = pipe_out[0];
+	fcntl(cgi_out_, F_SETFL, O_NONBLOCK);
+	fd_context_out_.type = CGI_OUT;
+	fd_context_out_.cgi_owner_response = this;
+	server_.addCgiOutFd(cgi_out_, &fd_context_out_);
 
-	char buf[4096];
-	ssize_t n;
-	while ((n = read(pipe_out[0], buf, sizeof(buf))) > 0) {
-		body_.insert(body_.end(), buf, buf + n);
+	cgi_state_ = SEND_BODY;
+	send_index_ = 0;
+	waiting_cgi_ = true;
+}
+
+void HttpResponse::execChildCGI(const std::string& cgi_prog, const std::string& script_path)
+{
+	std::vector<std::string> env_strings;
+	
+	// SERVER
+	env_strings.push_back("SERVER_SOFTWARE=webserv/"+ std::string(VERSION));
+	const std::string* host = req_.getHeaderInfo("Host");
+	if (host) env_strings.push_back("SERVER_NAME=" + *host);
+	else env_strings.push_back("SERVER_NAME=");
+	env_strings.push_back("GATEWAY_INTERFACE=CGI/1.1");
+	
+	// Request
+	env_strings.push_back("SERVER_PROTOCOL=HTTP/1.1");
+	env_strings.push_back("SERVER_PORT="); // A FAIRE mais flemme maintenant
+	env_strings.push_back("REQUEST_METHOD=" + getMethodName(req_.getMethod()));
+	env_strings.push_back("PATH_INFO="); // A FAIRE mais infernal, genre faut tester la route / par / pour verifier si y'a pas une cgi avant et que c'est pas un path apres genre
+	// env_strings.push_back("PATH_TRANSLATED="); // En vrai belek
+	env_strings.push_back("SCRIPT_FILENAME=" + script_path);
+	env_strings.push_back("SCRIPT_NAME=" + script_path.substr(script_path.find_last_of('/') + 1));
+	const std::map<std::string, std::string> queries;
+	std::string queries_str = "";
+	for (std::map<std::string, std::string>::const_iterator it = queries.begin(); it != queries.end(); ++it)
+	{
+		if (it == queries.begin()) queries_str += it->first + "=" + it->second;
+		else queries_str += "&"+ it->first +"="+ it->second;
 	}
-	close(pipe_out[0]);
+	env_strings.push_back("QUERY_STRING="+ queries_str);
+	env_strings.push_back("REMOTE_ADDR="); // Faut que je stoque l'ip du client jsp comment
+	// env_strings.push_back("AUTH_TYPE="); // Basic/Digest, pas compris a quoi ca sert
+	// env_strings.push_back("REMOTE_USER="); // en rapport avec l'auth je crois
+	env_strings.push_back("CONTENT_TYPE=" + *req_.getHeaderInfo("Content-Type"));
+	env_strings.push_back("CONTENT_LENGTH=" + to_string(req_.getContentSize()));
+	env_strings.push_back("REDIRECT_STATUS=200");
 
+	// HTTP
+	const std::map<std::string, std::string>& headers = req_.getHeaders();
+	for (std::map<std::string, std::string>::const_iterator it = headers.begin();
+		it != headers.end();
+		++it)
+	{
+		env_strings.push_back("HTTP_"+ toUpper(it->first) +"="+ it->second);
+		std::cout << it->first << ": " << it->second << std::endl;
+	}
+
+	std::vector<char*> envp;
+	for (size_t i = 0; i < env_strings.size(); ++i)
+		envp.push_back(const_cast<char*>(env_strings[i].c_str()));
+	envp.push_back(NULL);
+
+	std::vector<char*> args;
+	args.push_back(const_cast<char*>(cgi_prog.c_str()));
+	args.push_back(const_cast<char*>(script_path.c_str()));
+	args.push_back(NULL);
+
+	std::cerr << cgi_prog.c_str() << " " << args.data() << " " << envp.data() << std::endl;
+	execve(cgi_prog.c_str(), args.data(), envp.data());
+	close(STDIN_FILENO);
+	close(STDOUT_FILENO);
+	throw std::runtime_error("CGI execve failed");
+}
+
+void HttpResponse::handleResultCGI()
+{
 	setStatus(200, "OK");
+
+	Logger::info("CGI out handling");
+	body_.push_back('\0');
+	std::cout << body_.data() << std::endl;
 
 	static const std::string sep = "\r\n\r\n";
 
@@ -167,5 +241,6 @@ void HttpResponse::useCGI(const std::string& cgi_prog, const std::string& script
 	}
 
 	headers_["Content-Length"] = to_string(body_.size());
-	
+	waiting_cgi_ = false;
 }
+

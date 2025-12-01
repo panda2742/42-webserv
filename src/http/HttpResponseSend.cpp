@@ -36,9 +36,13 @@ bool HttpResponse::sendFileDirectPart(int socket_fd)
 
 ResponseState HttpResponse::sendResponsePart(int socket_fd)
 {
+
+	// std::cout << "Je veux envoyer " << res_ready_ << ", " << waiting_cgi_ << std::endl;
+
+	if (waiting_cgi_) return NOT_SENT;
 	if (!res_ready_) return ERROR;
 
-	// std::cout << "Send state " << respStateToText(send_state_) << std::endl;
+	std::cout << "Send state " << respStateToText(send_state_) << std::endl;
 
 	if (send_state_ == NOT_SENT)
 	{

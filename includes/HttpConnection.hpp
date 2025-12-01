@@ -7,12 +7,18 @@
 #include <sys/types.h>
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
+#include "utils_structs.hpp"
+
+class Server;
 
 class HttpConnection
 {
 
 private:
 	int socket_fd_;
+	FdContext context_;
+	
+	Server& server_;
 
 	std::vector<char> raw_;
 	bool header_;
@@ -28,9 +34,10 @@ private:
 	bool handleRequest();
 	
 public:
-	HttpConnection(int socket_fd);
+	HttpConnection(int socket_fd, Server& server);
 	~HttpConnection();
 
+	FdContext* getContext() { return &context_; }
 	void receiveContent(char *content, size_t size);
 	bool sendResponse();
 	void clear();

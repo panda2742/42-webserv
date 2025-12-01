@@ -5,9 +5,11 @@
 #include <vector>
 #include <sys/socket.h>
 
-HttpConnection::HttpConnection(int socket_fd) : socket_fd_(socket_fd), header_(false), content_size_(0)
+HttpConnection::HttpConnection(int socket_fd, Server& server)
+	: socket_fd_(socket_fd), server_(server), header_(false), content_size_(0)
 {
-
+	context_.type = CLIENT;
+	context_.fd = socket_fd;
 }
 
 HttpConnection::~HttpConnection()
@@ -108,7 +110,7 @@ bool HttpConnection::handleRequest()
 
 	if (!req.parse()) return false;
 
-	responses_.push_back(HttpResponse(req));
+	responses_.push_back(HttpResponse(req, server_));
 	HttpResponse& res = responses_.back();
 	res.create();
 	clear();

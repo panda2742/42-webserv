@@ -55,6 +55,7 @@ public:
 	std::string getTarget() { return target_; }
 	Method getMethod() { return method_; }
 	size_t getContentSize() { return content_size_; }
+	char* getBody() { return raw_.data() + header_size_; }
 	RequestError getRequestError() { return create_error_; }
 	std::string& getFirstLine() { return first_line_; }
 	const std::string* getHeaderInfo(const std::string& key) const;
