@@ -159,7 +159,6 @@ void HttpResponse::execChildCGI(const std::string& cgi_prog, const std::string& 
 		++it)
 	{
 		env_strings.push_back("HTTP_"+ toUpper(it->first) +"="+ it->second);
-		std::cout << it->first << ": " << it->second << std::endl;
 	}
 
 	std::vector<char*> envp;
@@ -172,7 +171,8 @@ void HttpResponse::execChildCGI(const std::string& cgi_prog, const std::string& 
 	args.push_back(const_cast<char*>(script_path.c_str()));
 	args.push_back(NULL);
 
-	std::cerr << cgi_prog.c_str() << " " << args.data() << " " << envp.data() << std::endl;
+	server_.clean();
+
 	execve(cgi_prog.c_str(), args.data(), envp.data());
 	close(STDIN_FILENO);
 	close(STDOUT_FILENO);
@@ -185,7 +185,6 @@ void HttpResponse::handleResultCGI()
 
 	Logger::info("CGI out handling");
 	body_.push_back('\0');
-	std::cout << body_.data() << std::endl;
 
 	static const std::string sep = "\r\n\r\n";
 
@@ -198,6 +197,8 @@ void HttpResponse::handleResultCGI()
 	{
 		body_.clear();
 		setError(500);
+		waiting_cgi_ = false;
+		serializeHeader();
 		return ;
 	}
 
@@ -242,5 +243,6 @@ void HttpResponse::handleResultCGI()
 
 	headers_["Content-Length"] = to_string(body_.size());
 	waiting_cgi_ = false;
+	serializeHeader();
 }
 

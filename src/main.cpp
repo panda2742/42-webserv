@@ -16,6 +16,7 @@ int main()
 		sigaction(SIGINT, &sigint_sa, NULL);
 		
 		Server server;
+		server.init();
 		server.run();
 	}
 	catch (const std::exception& e)

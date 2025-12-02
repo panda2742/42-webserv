@@ -68,8 +68,7 @@ void Server::handleClientIN(int fd)
 		size += r;
 	}
 
-	if (r == 0)
-		return removeClient(fd, Logger::INFO);
+	if (r == 0) return removeClient(fd, Logger::INFO);
 
 	std::map<int, HttpConnection>::iterator it = connections_.find(fd);
 	if (it != connections_.end())
@@ -152,6 +151,12 @@ int Server::removeCgiFd(int fd)
 
 Server::Server()
 	: running_(false)
+{
+	listen_fd_ = -1;
+	epoll_fd_ = -1;
+}
+
+void Server::init()
 {
 	Logger::info("server starting");
 
@@ -244,8 +249,18 @@ Server::~Server()
 	for (std::map<int, HttpConnection>::iterator it = connections_.begin(); it != connections_.end(); ++it)
 	{
 		removeFdEpoll(it->first);
-		close(it->first);
 	}
-	close(listen_fd_);
-	close(epoll_fd_);
+	clean();
+}
+
+void Server::clean()
+{
+	for (std::map<int, HttpConnection>::iterator it = connections_.begin(); it != connections_.end(); ++it)
+	{
+		if (it->first >= 0) close(it->first);
+	}
+	if (listen_fd_ >= 0) close(listen_fd_);
+	listen_fd_ = -1;
+	if (epoll_fd_ >= 0) close(epoll_fd_);
+	epoll_fd_ = -1;
 }

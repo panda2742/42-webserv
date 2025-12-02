@@ -35,7 +35,9 @@ public:
 	Server();
 	~Server();
 
+	void init();
 	void run();
+	void clean();
 
 	int addCgiInFd(int fd, FdContext* fd_context);
 	int addCgiOutFd(int fd, FdContext* fd_context);
