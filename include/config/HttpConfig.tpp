@@ -3,7 +3,11 @@
 #include "config/Node4.hpp"
 
 template <typename T>
-Directive<T>::Directive(T value_, Config::Node4 *node_): value(value_), node(node_) {}
+Directive<T>::Directive(T value_, Config::Node4 *node_): value(value_), node(node_)
+{
+	if (node || Config::Node4Utils::typeToEnum_(T()) != node->value.type)
+		throw std::runtime_error("The type is not corresponding.");
+}
 
 template <typename T>
 Directive<T>::Directive(const Directive& other): value(other.value), node(other.node) {}
@@ -19,7 +23,11 @@ std::vector<Directive<R> >	Directive<T>::find(const std::string& prop_name)
 	std::vector<Directive<R> >		res;
 
 	for (std::vector<Config::Node4 *>::const_iterator it = nodes.begin(); it != nodes.end(); ++it)
+	{
+		if (Config::Node4Utils::typeToEnum_(R()) != ((*it)->value.type))
+			throw std::runtime_error("The type is not corresponding.");
 		res.push_back(Directive<R>(*(*it)->value.getAs<R>(), *it));
+	}
 
 	return res;
 }

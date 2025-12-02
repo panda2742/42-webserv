@@ -3,7 +3,7 @@ override NAME		:=	webserv
 override INCLUDE_DIR	:=	include/
 override TEMPLATE_DIR	:=	include/
 override SOURCE_DIR		:=	src/
-SOURCES					:=	$(CONFIG_SOURCES) main \
+SOURCES					:=	main \
 							Logger \
 							Server \
 							FileCacheManager \
@@ -11,7 +11,7 @@ SOURCES					:=	$(CONFIG_SOURCES) main \
 							HttpConnection \
 							HttpRequest \
 							HttpResponse \
-							$(addprefix config/, ConfigLogger ContainerImproved HttpConfig Lexer Node4 Node4Utils Parser Utils)
+							$(addprefix config/, ConfigLogger HttpConfig Lexer MagicCast Node4 Node4Utils Parser Utils)
 
 override SOURCE			:=	$(addprefix $(SOURCE_DIR), $(addsuffix .cpp, $(SOURCES)))
 
