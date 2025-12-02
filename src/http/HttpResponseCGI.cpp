@@ -172,6 +172,7 @@ void HttpResponse::execChildCGI(const std::string& cgi_prog, const std::string& 
 	args.push_back(NULL);
 
 	server_.clean();
+	server_.setChild();
 
 	execve(cgi_prog.c_str(), args.data(), envp.data());
 	close(STDIN_FILENO);

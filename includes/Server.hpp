@@ -15,6 +15,7 @@ class Server
 
 private:
 	bool running_;
+	bool is_child_;
 	int listen_fd_;
 	FdContext listen_context_;
 	int epoll_fd_;
@@ -42,6 +43,8 @@ public:
 	int addCgiInFd(int fd, FdContext* fd_context);
 	int addCgiOutFd(int fd, FdContext* fd_context);
 	int removeCgiFd(int fd);
+
+	void setChild() { is_child_ = true; }
 };
 
 #endif

@@ -150,7 +150,7 @@ int Server::removeCgiFd(int fd)
 }
 
 Server::Server()
-	: running_(false)
+	: running_(false), is_child_(false)
 {
 	listen_fd_ = -1;
 	epoll_fd_ = -1;
@@ -246,6 +246,8 @@ void Server::run()
 
 Server::~Server()
 {
+	if (is_child_) return ;
+	
 	for (std::map<int, HttpConnection>::iterator it = connections_.begin(); it != connections_.end(); ++it)
 	{
 		removeFdEpoll(it->first);
