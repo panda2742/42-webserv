@@ -1,11 +1,9 @@
 override NAME		:=	webserv
 
-override INCLUDE_DIR	:=	includes/
-override TEMPLATE_DIR	:=	includes/
+override INCLUDE_DIR	:=	include/
+override TEMPLATE_DIR	:=	include/
 override SOURCE_DIR		:=	src/
-INCLUDES				:=
-TEMPLATES				:=
-SOURCES					:=	main \
+SOURCES					:=	$(CONFIG_SOURCES) main \
 							utils \
 							Logger \
 							Server \
@@ -16,7 +14,9 @@ SOURCES					:=	main \
 							http/HttpResponse \
 							http/HttpResponseCreate \
 							http/HttpResponseSend \
-							http/HttpResponseCGI
+							http/HttpResponseCGI \
+							$(addprefix config/, ConfigLogger ContainerImproved HttpConfig Lexer Node4 Node4Utils Parser Utils)
+
 override INCLUDE		:=	$(addprefix $(INCLUDE_DIR), $(addsuffix .hpp, $(INCLUDES)))
 override TEMPLATE		:=	$(addprefix $(TEMPLATE_DIR), $(addsuffix .tpp, $(TEMPLATES)))
 override SOURCE			:=	$(addprefix $(SOURCE_DIR), $(addsuffix .cpp, $(SOURCES)))
@@ -46,7 +46,7 @@ all: $(NAME)
 $(NAME): $(OBJ)
 	$(GCC) $(CPPFLAGS) $(OBJ) -o $(NAME)
 
-$(BUILD_DIR)%.o: $(SOURCE_DIR)%.cpp $(INCLUDE) $(TEMPLATE) | $(DIRS)
+$(BUILD_DIR)%.o: $(SOURCE_DIR)%.cpp | $(DIRS)
 	$(GCC) $(CPPFLAGS) -c -I$(INCLUDE_DIR) -I$(TEMPLATE_DIR) $< -o $@
 
 $(DIRS):

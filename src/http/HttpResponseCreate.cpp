@@ -109,8 +109,8 @@ void HttpResponse::createDefault()
 	// addCookie("test", "kakoukakou");
 	// addCookie("test2", "kakoukakou2", true, true, 3600, "/", "Lax");
 
-	// useCGI("/usr/bin/php-cgi", "/home/lilefebv/Documents/cursus/42-webserv/www/script.php");
-	// return ;
+	useCGI("/usr/bin/php-cgi", "/home/lilefebv/Documents/cursus/42-webserv/www/script.php");
+	return ;
 
 	// if (req_.getTarget() == "/abc")
 	// {

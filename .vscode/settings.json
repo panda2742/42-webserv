@@ -1,9 +1,9 @@
 {
 	"files.associations": {
+		"*.embeddedhtml": "html",
+		".tpp": "cpp",
 		"vector": "cpp",
-		"cstring": "cpp",
-		"stdexcept": "cpp",
-		"ostream": "cpp",
+		"string": "cpp",
 		"array": "cpp",
 		"atomic": "cpp",
 		"bit": "cpp",
@@ -31,7 +31,6 @@
 		"numeric": "cpp",
 		"optional": "cpp",
 		"random": "cpp",
-		"string": "cpp",
 		"string_view": "cpp",
 		"system_error": "cpp",
 		"tuple": "cpp",
