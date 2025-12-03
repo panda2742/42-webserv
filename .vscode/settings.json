@@ -53,6 +53,9 @@
 		"sstream": "cpp",
 		"fstream": "cpp",
 		"chrono": "cpp",
-		"ratio": "cpp"
+		"ratio": "cpp",
+		"cstring": "cpp",
+		"ostream": "cpp",
+		"stdexcept": "cpp"
 	}
 }

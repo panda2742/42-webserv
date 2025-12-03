@@ -72,6 +72,15 @@ void HttpConnection::receiveContent(char *content, size_t size)
 
 	if (!header_)
 	{
+		if (raw_.size() > 3)
+		{
+			if (raw_[0] == 0x16 && raw_[1] == 0x03 && (raw_[2] == 0x01 || raw_[2] == 0x02 || raw_[2] == 0x03))
+			{
+				handleRequest();
+				return ;
+			}
+		}
+
 		ssize_t pos = find("\r\n\r\n", raw_.size());
 
 		if (pos == -1) return ;

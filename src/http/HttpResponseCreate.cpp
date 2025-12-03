@@ -170,6 +170,8 @@ void HttpResponse::create()
 		setError(405); break;
 	case UNSUPPORTED_HTTP_VERSION:
 		setError(505); break;
+	case HTTPS_REQUEST:
+		setError(501); break;
 	case BAD_REQUEST:
 	default:
 		setError(400); break;

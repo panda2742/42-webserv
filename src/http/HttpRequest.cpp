@@ -133,6 +133,12 @@ bool HttpRequest::parse()
 {
 	try
 	{
+		if (raw_.size() > 3 && raw_[0] == 0x16 && raw_[1] == 0x03 && (raw_[2] == 0x01 || raw_[2] == 0x02 || raw_[2] == 0x03))
+		{
+			create_error_ = HTTPS_REQUEST;
+			return true;
+		}
+
 		std::string header = std::string(raw_.begin(), raw_.begin() + header_size_ - 2);
 
 		std::vector<std::string> lines;
