@@ -4,15 +4,21 @@ override INCLUDE_DIR	:=	include/
 override TEMPLATE_DIR	:=	include/
 override SOURCE_DIR		:=	src/
 SOURCES					:=	$(CONFIG_SOURCES) main \
+							utils \
 							Logger \
 							Server \
 							FileCacheManager \
-							http_utils \
-							HttpConnection \
-							HttpRequest \
-							HttpResponse \
+							http/http_utils \
+							http/HttpConnection \
+							http/HttpRequest \
+							http/HttpResponse \
+							http/HttpResponseCreate \
+							http/HttpResponseSend \
+							http/HttpResponseCGI \
 							$(addprefix config/, ConfigLogger ContainerImproved HttpConfig Lexer Node4 Node4Utils Parser Utils)
 
+override INCLUDE		:=	$(addprefix $(INCLUDE_DIR), $(addsuffix .hpp, $(INCLUDES)))
+override TEMPLATE		:=	$(addprefix $(TEMPLATE_DIR), $(addsuffix .tpp, $(TEMPLATES)))
 override SOURCE			:=	$(addprefix $(SOURCE_DIR), $(addsuffix .cpp, $(SOURCES)))
 
 CPPFLAGS	:=	-Wall -Wextra -Werror -MD -Wshadow -g3 -std=c++98 -pthread

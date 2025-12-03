@@ -1,5 +1,6 @@
 .dist
 .vscode
+.VSCodeCounter
 
 webserv
 external_functions.txt

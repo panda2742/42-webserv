@@ -116,3 +116,14 @@ const std::string respStateToText(ResponseState s)
 	if (s == ERROR) return "err";
 	return ("Bah wsh");
 }
+
+const std::string getMethodName(Method m)
+{
+	switch (m)
+	{
+		case GET: return "GET";
+		case POST: return "POST";
+		case DELETE: return "DELETE";
+		default: return "UNKNOWN";
+	}
+}

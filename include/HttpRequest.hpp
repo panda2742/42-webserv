@@ -38,10 +38,12 @@ private:
 	std::string version_;
 
 	RequestError create_error_;
-
-	std::map<std::string, std::string>infos_;
+	
+	std::map<std::string, std::string> queries_;
+	std::map<std::string, std::string> infos_;
 
 	bool checkHttpVersion();
+	bool parseTarget();
 
 public:
 	HttpRequest();
@@ -53,9 +55,12 @@ public:
 	std::string getTarget() { return target_; }
 	Method getMethod() { return method_; }
 	size_t getContentSize() { return content_size_; }
+	char* getBody() { return raw_.data() + header_size_; }
 	RequestError getRequestError() { return create_error_; }
 	std::string& getFirstLine() { return first_line_; }
 	const std::string* getHeaderInfo(const std::string& key) const;
+	const std::map<std::string, std::string>& getHeaders() const { return infos_; }
+	const std::map<std::string, std::string>& getQueries() const { return queries_; }
 
 	void clear();
 

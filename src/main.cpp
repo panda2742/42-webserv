@@ -3,14 +3,18 @@
 #include "config/HttpConfig.hpp"
 #include "Logger.hpp"
 #include "Server.hpp"
+#include <signal.h>
 
-int	main(int argc, char **argv)
+void exit_signal(int sig);
+
+int main(int argc, char **argv)
 {
 	if (argc ^ 2)
 	{
 		std::cout << "Provide a unique configuration file." << std::endl;
 		return 1;
 	}
+
 	Config::Parser		parser(argv[1]);
 	Config::HttpConfig	httpconf;
 
@@ -29,14 +33,22 @@ int	main(int argc, char **argv)
 			std::cout << BLURPLE << (*jt).value << RESET << ", ";
 		std::cout << std::endl;
 	}
-
-	try {
+	
+	try
+	{
+		struct sigaction	sigint_sa;
+		sigint_sa.sa_flags = 0;
+		sigint_sa.sa_handler = exit_signal;
+		sigemptyset(&sigint_sa.sa_mask);
+		sigaction(SIGINT, &sigint_sa, NULL);
+		
 		Server server;
+		server.init();
 		server.run();
 	}
-	catch (const std::exception& e) {
+	catch (const std::exception& e)
+	{
 		Logger::error(e.what());
-		// std::cerr << "Erreur: " << e.what() << std::endl;
 		return 1;
 	}
 

@@ -37,5 +37,22 @@
 		"type_traits": "cpp",
 		"utility": "cpp",
 		"initializer_list": "cpp",
-		"iosfwd": "cpp"
+		"iosfwd": "cpp",
+		"iostream": "cpp",
+		"istream": "cpp",
+		"limits": "cpp",
+		"new": "cpp",
+		"numbers": "cpp",
+		"ranges": "cpp",
+		"span": "cpp",
+		"streambuf": "cpp",
+		"cinttypes": "cpp",
+		"typeinfo": "cpp",
+		"ctime": "cpp",
+		"iomanip": "cpp",
+		"sstream": "cpp",
+		"fstream": "cpp",
+		"chrono": "cpp",
+		"ratio": "cpp"
+	}
 }

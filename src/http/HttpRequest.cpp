@@ -1,13 +1,14 @@
 
 #include "FileCacheManager.hpp"
 #include "HttpRequest.hpp"
+#include "utils.hpp"
 #include "Logger.hpp"
 #include <algorithm>
 
 HttpRequest::HttpRequest()
 	: create_error_(NO_REQ_ERROR)
 {
-	
+	infos_["Content-Type"] = "";
 }
 
 void HttpRequest::init(std::vector<char>& raw, size_t header_size, size_t content_size)
@@ -97,22 +98,35 @@ bool HttpRequest::checkHttpVersion()
 	}
 }
 
-std::string getNextPart(std::string& input, const std::string& sep)
+bool HttpRequest::parseTarget()
 {
-	size_t next_space = input.find(sep);
-	std::string res;
+	if (target_.empty())
+	{
+		create_error_ = NOT_HTTP_HEADER;
+		return false;
+	}
+	else if (target_[0] != '/')
+	{
+		create_error_ = BAD_REQUEST;
+		return false;
+	}
 
-	if (next_space == std::string::npos)
+	size_t queries_start = target_.find("?");
+	if (queries_start == std::string::npos) return true;
+
+	std::string raw_queries = target_.substr(queries_start + 1);
+	target_ = target_.substr(0, queries_start);
+
+	while (!raw_queries.empty())
 	{
-		res = input.substr(0, input.size());
-		input.erase(0, input.size());
+		std::string query = getNextPart(raw_queries, "&");
+
+		size_t equal = query.find("=");
+
+		if (equal == std::string::npos) queries_[query] = "";
+		else queries_[query.substr(0, equal)] = query.substr(equal + 1);
 	}
-	else
-	{
-		res = input.substr(0, next_space);
-		input.erase(0, next_space + 1);
-	}
-	return res;
+	return true;
 }
 
 bool HttpRequest::parse()
@@ -145,16 +159,7 @@ bool HttpRequest::parse()
 		}
 
 		target_ = getNextPart(lines[0], " ");
-		if (target_.empty())
-		{
-			create_error_ = NOT_HTTP_HEADER;
-			return true;
-		}
-		else if (target_[0] != '/')
-		{
-			create_error_ = BAD_REQUEST;
-			return true;
-		}
+		if (!parseTarget()) return true;
 
 		version_ = getNextPart(lines[0], " ");
 		if (!checkHttpVersion()) return true;
@@ -188,6 +193,12 @@ bool HttpRequest::parse()
 		// 	std::cout << it->first << ": " << it->second << std::endl;
 		// }
 
+		// for (std::map<std::string, std::string>::const_iterator itt = queries_.begin();
+		// 	itt != queries_.end();
+		// 	++itt)
+		// {
+		// 	std::cout << itt->first << ": " << itt->second << std::endl;
+		// }
 	}
 	catch(const std::exception& e)
 	{
