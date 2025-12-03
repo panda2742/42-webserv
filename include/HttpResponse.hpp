@@ -10,6 +10,16 @@
 #include "utils_structs.hpp"
 #include <sys/stat.h>
 
+/**
+ * @enum ResponseState
+ * @brief State of a response -> what I need to send.
+ *
+ * - NOT_SENT : Nothing have been sent
+ * - HEADER : sending the header
+ * - BODY : sending the body
+ * - SENT : the response have been sent
+ * - ERROR : an error occured while sending the request
+ */
 enum ResponseState
 {
 	NOT_SENT,
@@ -19,6 +29,15 @@ enum ResponseState
 	ERROR,
 };
 
+/**
+ * @enum CGIState
+ * @brief State of CGI handling for a response.
+ *
+ * - NO_CGI : no CGI associated
+ * - SEND_BODY : send request body to the CGI process
+ * - WAIT_CONTENT : waiting for content produced by the CGI
+ * - CGI_FINISHED : CGI has finished producing output
+ */
 enum CGIState
 {
 	NO_CGI,
@@ -30,6 +49,9 @@ enum CGIState
 class Server;
 struct FdContext;
 
+/**
+ * @class HttpResponse
+ */
 class HttpResponse
 {
 
@@ -99,6 +121,40 @@ public:
 	HttpResponse(HttpRequest &req, Server &server);
 	~HttpResponse();
 	
+	/**
+	 * @brief Build the response from the associated request.
+	 *	This method prepares headers and body according to the request and
+	 *	the server configuration (static files, redirects, CGI, etc.). It does
+	 *	not send any data on the socket itself.
+	 */
+	void create();
+
+	/**
+	 * @brief Send part of the response to the provided file descriptor.
+	 * @param socket_fd Socket file descriptor to write to.
+	 * @return the ResponseState after the operation.
+	 *
+	 * This function is intended to be called iteratively by the event loop:
+	 * it may send the header first and then chunks of the body.
+	 */
+	ResponseState sendResponsePart(int socket_fd);
+
+	/**
+	 * @brief Release internal resources and reset the object to a clean state.
+	 */
+	void clear();
+
+	/**
+	 * @brief Send the request body to the CGI process (if used).
+	 */
+	void sendBodyCGI();
+
+	/**
+	 * @brief Read/collect the content produced by the CGI and integrate it into
+	 * the response.
+	 */
+	void getContentCGI();
+
 	void create();
 	ResponseState sendResponsePart(int socket_fd);
 
