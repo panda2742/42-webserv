@@ -3,7 +3,11 @@
 
 #include "Parser.hpp"
 
-#define INVALID_CAST_EXCEPTION "the value cannot be converted from a string to an unsigned int, to prevent data loss."
+#define INVALID_STRING_EXCEPTION "a string can only be casted to: vector<string>"
+#define INVALID_VECTOR_STRING_EXCEPTION "a vector<string> can only be casted to: string"
+#define INVALID_VECTOR_UINT_EXCEPTION "a vector<unsigned int> can only be casted to: string, vector<string>, map<unsigned int, string>, map<unsigned int, vector<string>>"
+#define INVALID_MAP_STRING_EXCEPTION "a map<unsigned int, string> can only be casted to: string, vector<string>, map<unsigned int, vector<string>>"
+#define INVALID_MAP_VECTOR_STRING_EXCEPTION "a map<unsigned int, vector<string>> can only be casted to: string, vector<string>, map<unsigned int, string>"
 
 namespace Config
 {
@@ -15,10 +19,34 @@ class MagicCastException: public std::runtime_error
 	MagicCastException(const std::string& err_msg);
 };
 
-class InvalidCastException: public MagicCastException
+class InvalidStringException: public MagicCastException
 {
 	public:
-	InvalidCastException(void);
+	InvalidStringException(void);
+};
+
+class InvalidVectorStringException: public MagicCastException
+{
+	public:
+	InvalidVectorStringException(void);
+};
+
+class InvalidVectorUintException: public MagicCastException
+{
+	public:
+	InvalidVectorUintException(void);
+};
+
+class InvalidMapStringException: public MagicCastException
+{
+	public:
+	InvalidMapStringException(void);
+};
+
+class InvalidMapVectorStringException: public MagicCastException
+{
+	public:
+	InvalidMapVectorStringException(void);
 };
 
 /**
