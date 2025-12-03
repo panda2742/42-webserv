@@ -49,21 +49,12 @@ R	magic_cast(T value) throw(MagicCastException)
 	if (r_type == t_type)
 		return as<R>(value);
 
-	const std::string	r_id = typeid(R).name(),
-						t_id = typeid(T).name();
-
 	std::stringstream									string;
 	unsigned int										uint;
 	std::vector<std::string>							vector_string;
 	std::vector<unsigned int>							vector_uint;
 	std::map<unsigned int, std::string>					map1;
 	std::map<unsigned int, std::vector<std::string> >	map2;
-
-	(void)uint;
-	(void)vector_string;
-	(void)vector_uint;
-	(void)map1;
-	(void)map2;
 
 	switch (t_type)
 	{
@@ -236,18 +227,22 @@ R	magic_cast(T value) throw(MagicCastException)
 	return R();
 }
 
-template <typename A, typename B>
-A&	magic_refcpy(A& a, B& b) throw(MagicCastException)
+template <typename R, typename A, typename B>
+R	magic_assemble(A& a, B& b) throw(MagicCastException)
 {
-	(void)a;
-	(void)b;
-}
+	Node4::ValueType	a_type = Node4Utils::typeToEnum_(A()),
+						b_type = Node4Utils::typeToEnum_(B());
 
-template <typename A, typename B>
-A	magic_cpy(A& a, B& b) throw(MagicCastException)
-{
-	(void)a;
-	(void)b;
+	if (s_type == Node4::TYPE_STRING || a_type == Node4::TYPE_UINT)
+		throw AssembleTooPrimitive();
+
+	A	converted_b = magic_cast<A>(b);
+
+	const std::string	a_id = typeid(A).name();
+	if (a_id.find("map") != std::string::npos)
+	{
+
+	}
 }
 
 // #########################################################

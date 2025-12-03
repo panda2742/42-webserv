@@ -16,5 +16,7 @@ InvalidMapStringException::InvalidMapStringException(void): MagicCastException(I
 
 InvalidMapVectorStringException::InvalidMapVectorStringException(void): MagicCastException(INVALID_MAP_VECTOR_STRING_EXCEPTION) {}
 
+AssembleTooPrimitive::AssembleTooPrimitive(void): MagicCastException(ASSEMBLE_TOO_PRIMITIVE) {}
+
 // #########################################################
 };

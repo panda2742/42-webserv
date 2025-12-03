@@ -9,6 +9,8 @@
 #define INVALID_MAP_STRING_EXCEPTION "a map<unsigned int, string> can only be casted to: string, vector<string>, map<unsigned int, vector<string>>"
 #define INVALID_MAP_VECTOR_STRING_EXCEPTION "a map<unsigned int, vector<string>> can only be casted to: string, vector<string>, map<unsigned int, string>"
 
+#define ASSEMBLE_TOO_PRIMITIVE "your type cannot be merged with another, it musts be a container"
+
 namespace Config
 {
 // #########################################################
@@ -49,6 +51,12 @@ class InvalidMapVectorStringException: public MagicCastException
 	InvalidMapVectorStringException(void);
 };
 
+class AssembleTooPrimitive: public MagicCastException
+{
+	public:
+	AssembleTooPrimitive(void);
+};
+
 /**
  * Convert a type to another. This is pure sorcery. There is the available types:
  * - string
@@ -64,11 +72,8 @@ class InvalidMapVectorStringException: public MagicCastException
 template <typename R, typename T>
 R	magic_cast(T value) throw(MagicCastException);
 
-template <typename A, typename B>
-A&	magic_refcpy(A& a, B& b) throw(MagicCastException);
-
-template <typename A, typename B>
-A	magic_cpy(A& a, B& b) throw(MagicCastException);
+template <typename R, typename A, typename B>
+R	magic_assemble(A& a, B& b) throw (MagicCastException);
 
 // #########################################################
 };
