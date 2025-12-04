@@ -51,6 +51,14 @@ struct FdContext;
 
 /**
  * @class HttpResponse
+ * @brief Create an HTTP response for a request
+ * 
+ * This class have 2 majors parts :
+ * 
+ * - The response creation : creating the headers, oppening the files asked by a get, ...
+ * 
+ * - Sending the response. Each call to `sendResponsePart` will result in a send to the
+ * client fd with a part of the response. 
  */
 class HttpResponse
 {
@@ -99,6 +107,9 @@ private:
 	bool waiting_cgi_;
 	bool res_ready_;
 
+	/**
+	 * Theses function have an enough explicit name
+	 */
 	void setHeader(const std::string &name, const std::string &value);
 	void setStatus(int code, const std::string &message);
 	void setBody(const std::vector<char> &body);
@@ -110,9 +121,18 @@ private:
 	void execChildCGI(const std::string& cgi_prog, const std::string& script_path);
 	void handleResultCGI();
 
+	/**
+	 * calls one of the differents function above
+	 */
 	void createDefault();
 
 	void serializeHeader();
+
+	/**
+	 * This send of data is a bit special because we never have the full file in memory.
+	 * We read a small chunk of the file, send it, read another part, etc, so we never have
+	 * more than 8ko of the file in memory
+	 */
 	bool sendFileDirectPart(int socket_fd);
 
 	const std::string getBodySize() const;
@@ -139,9 +159,6 @@ public:
 	 */
 	ResponseState sendResponsePart(int socket_fd);
 
-	/**
-	 * @brief Release internal resources and reset the object to a clean state.
-	 */
 	void clear();
 
 	/**
@@ -154,15 +171,6 @@ public:
 	 * the response.
 	 */
 	void getContentCGI();
-
-	void create();
-	ResponseState sendResponsePart(int socket_fd);
-
-	void clear();
-
-	void sendBodyCGI();
-	void getContentCGI();
-
 };
 
 
