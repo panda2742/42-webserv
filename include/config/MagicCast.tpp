@@ -230,19 +230,29 @@ R	magic_cast(T value) throw(MagicCastException)
 template <typename R, typename A, typename B>
 R	magic_assemble(A& a, B& b) throw(MagicCastException)
 {
-	Node4::ValueType	a_type = Node4Utils::typeToEnum_(A()),
-						b_type = Node4Utils::typeToEnum_(B());
+	Node4::ValueType	a_type = Node4Utils::typeToEnum_(A());
 
-	if (s_type == Node4::TYPE_STRING || a_type == Node4::TYPE_UINT)
+	if (a_type == Node4::TYPE_STRING || a_type == Node4::TYPE_UINT)
 		throw AssembleTooPrimitive();
 
-	A	converted_b = magic_cast<A>(b);
+	R	converted_a = magic_cast<R>(a),
+		converted_b = magic_cast<R>(b);
 
 	const std::string	a_id = typeid(A).name();
 	if (a_id.find("map") != std::string::npos)
 	{
-
+		typename R::const_iterator	it = converted_b.begin();
+		for (; it != converted_b.end(); ++it)
+			converted_a.insert(*it);
 	}
+	else if (a_id.find("vector") != std::string::npos)
+	{
+		typename R::const_iterator	it = converted_b.begin();
+		for (; it != converted_b.end(); ++it)
+			converted_a.insert(*it);
+	}
+
+	return converted_a;
 }
 
 // #########################################################

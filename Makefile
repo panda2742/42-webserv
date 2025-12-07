@@ -29,7 +29,7 @@ override DEPS		:=	$(patsubst %.o, %.d, $(OBJ))
 override DIRS		:=	$(sort $(dir $(NAME) $(OBJ) $(DEPS)))
 
 MAKEFLAGS	:=	--no-print-directory
-GCC			:=	c++
+GCC			:=	g++
 RM			:=	rm -rf
 VG			:=	valgrind
 VGFLAGS		:=	--leak-check=full --show-leak-kinds=all --track-origins=yes --show-mismatched-frees=yes --track-fds=yes --trace-children=yes

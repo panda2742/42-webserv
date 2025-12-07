@@ -6,10 +6,10 @@
 #include <ostream>
 #include <iostream>
 
-#define INFO_PRFX "["CYAN" INFO  "RESET"]    "
-#define WARN_PRFX "["ORANGE" WARN  "RESET"]    "
-#define DEBUG_PRFX "["BLURPLE" DEBUG "RESET"]    "
-#define ERROR_PRFX "["RED" ERROR "RESET"]    "
+#define INFO_PRFX "[" CYAN " INFO  " RESET "]    "
+#define WARN_PRFX "[" ORANGE " WARN  " RESET "]    "
+#define DEBUG_PRFX "[" BLURPLE " DEBUG " RESET "]    "
+#define ERROR_PRFX "[" RED " ERROR " RESET "]    "
 
 namespace Config
 {

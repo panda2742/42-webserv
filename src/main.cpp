@@ -55,23 +55,23 @@ int	main(int argc, char **argv)
 
 	std::cout << std::endl;
 
-	unsigned int	uint = 42;
-	try { Config::magic_cast<std::string>(uint); }
+	unsigned int	uintv = 42;
+	try { Config::magic_cast<std::string>(uintv); }
 	catch(const std::exception& e) { std::cerr << RED "Conversion went wrong! Reason: " << e.what() << RESET << '\n'; }
 
-	try { Config::magic_cast<unsigned int>(uint); }
+	try { Config::magic_cast<unsigned int>(uintv); }
 	catch(const std::exception& e) { std::cerr << RED "Conversion went wrong! Reason: " << e.what() << RESET << '\n'; }
 
-	try {  Config::magic_cast<std::vector<std::string> >(uint); }
+	try {  Config::magic_cast<std::vector<std::string> >(uintv); }
 	catch(const std::exception& e) { std::cerr << RED "Conversion went wrong! Reason: " << e.what() << RESET << '\n'; }
 
-	try {  Config::magic_cast<std::vector<unsigned int> >(uint); }
+	try {  Config::magic_cast<std::vector<unsigned int> >(uintv); }
 	catch(const std::exception& e) { std::cerr << RED "Conversion went wrong! Reason: " << e.what() << RESET << '\n'; }
 
-	try {  Config::magic_cast<std::map<unsigned int, std::string> >(uint); }
+	try {  Config::magic_cast<std::map<unsigned int, std::string> >(uintv); }
 	catch(const std::exception& e) { std::cerr << RED "Conversion went wrong! Reason: " << e.what() << RESET << '\n'; }
 
-	try {  Config::magic_cast<std::map<unsigned int, std::vector<std::string> > >(uint); }
+	try {  Config::magic_cast<std::map<unsigned int, std::vector<std::string> > >(uintv); }
 	catch(const std::exception& e) { std::cerr << RED "Conversion went wrong! Reason: " << e.what() << RESET << '\n'; }
 
 	std::cout << std::endl;
@@ -99,25 +99,25 @@ int	main(int argc, char **argv)
 
 	std::cout << std::endl;
 
-	std::vector<unsigned int>	vector_uint;
-	vector_uint.push_back(40);
-	vector_uint.push_back(2);
-	try { Config::magic_cast<std::string>(vector_uint); }
+	std::vector<unsigned int>	vector_uintv;
+	vector_uintv.push_back(40);
+	vector_uintv.push_back(2);
+	try { Config::magic_cast<std::string>(vector_uintv); }
 	catch(const std::exception& e) { std::cerr << RED "Conversion went wrong! Reason: " << e.what() << RESET << '\n'; }
 
-	try { Config::magic_cast<unsigned int>(vector_uint); }
+	try { Config::magic_cast<unsigned int>(vector_uintv); }
 	catch(const std::exception& e) { std::cerr << RED "Conversion went wrong! Reason: " << e.what() << RESET << '\n'; }
 
-	try {  Config::magic_cast<std::vector<std::string> >(vector_uint); }
+	try {  Config::magic_cast<std::vector<std::string> >(vector_uintv); }
 	catch(const std::exception& e) { std::cerr << RED "Conversion went wrong! Reason: " << e.what() << RESET << '\n'; }
 
-	try {  Config::magic_cast<std::vector<unsigned int> >(vector_uint); }
+	try {  Config::magic_cast<std::vector<unsigned int> >(vector_uintv); }
 	catch(const std::exception& e) { std::cerr << RED "Conversion went wrong! Reason: " << e.what() << RESET << '\n'; }
 
-	try {  Config::magic_cast<std::map<unsigned int, std::string> >(vector_uint); }
+	try {  Config::magic_cast<std::map<unsigned int, std::string> >(vector_uintv); }
 	catch(const std::exception& e) { std::cerr << RED "Conversion went wrong! Reason: " << e.what() << RESET << '\n'; }
 
-	try {  Config::magic_cast<std::map<unsigned int, std::vector<std::string> > >(vector_uint); }
+	try {  Config::magic_cast<std::map<unsigned int, std::vector<std::string> > >(vector_uintv); }
 	catch(const std::exception& e) { std::cerr << RED "Conversion went wrong! Reason: " << e.what() << RESET << '\n'; }
 
 	std::cout << std::endl;
@@ -173,4 +173,5 @@ int	main(int argc, char **argv)
 		// std::cerr << "Erreur: " << e.what() << std::endl;
 		return 1;
 	}
+	return 0;
 }
