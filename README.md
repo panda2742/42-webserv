@@ -1,6 +1,4 @@
-# 42-webserv — Lecture rapide de l'architecture
-
-Ce README explique la base du serveur (implémentation de type événementiel) présent dans ce dépôt : comment la boucle d'événements (epoll) permet de rendre l'I/O non bloquante, et quel est le rôle du `FdContext` pour suivre l'état des descripteurs de fichier.
+# 42-webserv
 
 ## Objectif
 
