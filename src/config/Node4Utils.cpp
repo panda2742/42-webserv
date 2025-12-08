@@ -2,9 +2,9 @@
 #include "config/ConfigLogger.hpp"
 #include "config/Utils.hpp"
 
-namespace Config
+namespace cfg
 {
-namespace Node4Utils
+namespace n4u
 {
 // #########################################################
 

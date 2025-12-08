@@ -2,7 +2,7 @@
 #include "config/Lexer.hpp"
 #include <sstream>
 
-namespace Config
+namespace cfg
 {
 namespace ContainerImproved
 {

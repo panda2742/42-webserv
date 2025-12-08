@@ -3,9 +3,9 @@
 #include "config/Node4.hpp"
 
 template <typename T>
-Directive<T>::Directive(T value_, Config::Node4 *node_): value(value_), node(node_)
+Directive<T>::Directive(T value_, cfg::Node4 *node_): value(value_), node(node_)
 {
-	if (node || Config::Node4Utils::typeToEnum_(T()) != node->value.type)
+	if (!node || cfg::n4u::typeToEnum_(T()) != node->value.type)
 		throw std::runtime_error("The type is not corresponding.");
 }
 
@@ -19,12 +19,12 @@ template <typename T>
 template <typename R>
 std::vector<Directive<R> >	Directive<T>::find(const std::string& prop_name)
 {
-	std::vector<Config::Node4 *>	nodes = node->access(prop_name);
+	std::vector< cfg::Node4 *>	nodes = node->access(prop_name);
 	std::vector<Directive<R> >		res;
 
-	for (std::vector<Config::Node4 *>::const_iterator it = nodes.begin(); it != nodes.end(); ++it)
+	for (std::vector< cfg::Node4 *>::const_iterator it = nodes.begin(); it != nodes.end(); ++it)
 	{
-		if (Config::Node4Utils::typeToEnum_(R()) != ((*it)->value.type))
+		if (cfg::n4u::typeToEnum_(R()) != ((*it)->value.type))
 			throw std::runtime_error("The type is not corresponding.");
 		res.push_back(Directive<R>(*(*it)->value.getAs<R>(), *it));
 	}
@@ -32,21 +32,16 @@ std::vector<Directive<R> >	Directive<T>::find(const std::string& prop_name)
 	return res;
 }
 
-namespace Config
+namespace cfg
 {
 // #########################################################
 
 template <typename T>
-HttpConfig::GetData<T>::GetData(const std::string& prop_name_, const Node4 *parent_, unsigned int depth_)
-	: depth(depth_), parent(parent_), prop_name(prop_name_)
-{
-	type = Node4Utils::typeToEnum_(T());
-}
+HttpConfig::GetData<T>::GetData(const std::string& prop_name_, const Node4 *parent_)
+	: parent(parent_), prop_name(prop_name_) {}
 
 template <typename T>HttpConfig::GetData<T>::GetData(const GetData& other)
-	: depth(other.depth),
-	  parent(other.parent),
-	  type(other.type),
+	: parent(other.parent),
 	  prop_name(other.prop_name),
 	  local_res(other.local_res) {}
 
@@ -104,7 +99,8 @@ std::vector<Directive<T> >	HttpConfig::get(const std::string& prop_name, const N
 		parent = root_;
 
 	GetData<T>	ddata(prop_name, parent, 0);
-	return get_(ddata);
+	std::vector<Directive<T> >	directives = get_(ddata);
+	return directives;
 }
 
 template <typename T, typename P>

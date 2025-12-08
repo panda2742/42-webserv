@@ -3,7 +3,7 @@
 #include <fstream>
 #include <iostream>
 
-namespace Config
+namespace cfg
 {
 // #########################################################
 
@@ -79,7 +79,7 @@ void	Parser::tokenize_(void) throw(ParsingException)
 			if ((*it) == "{")
 			{
 				type = Lexer::TokenSymbolOpen;
-				for (std::vector<Config::Lexer::TokenNode>::reverse_iterator jt = lexer_nodes_.rbegin(); jt != lexer_nodes_.rend(); ++jt)
+				for (std::vector< cfg::Lexer::TokenNode>::reverse_iterator jt = lexer_nodes_.rbegin(); jt != lexer_nodes_.rend(); ++jt)
 				{
 					if ((*jt).type == Lexer::TokenDirective)
 					{

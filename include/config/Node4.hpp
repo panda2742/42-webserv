@@ -6,7 +6,7 @@
 #include <vector>
 #include <map>
 
-namespace Config
+namespace cfg
 {
 // #########################################################
 
@@ -38,7 +38,7 @@ class Node4
 		T		*getAs(void);
 		template <typename T>
 		void	setAs(T data_);
-		void						deleteData(void);
+		void	deleteData(void);
 	};
 
 	std::string	name;
@@ -56,7 +56,7 @@ class Node4
 	std::vector<Node4 *>	access(const std::string& child_name) const;
 };
 
-namespace Node4Utils
+namespace n4u
 {
 	Node4::ValueType	dataType_(
 		std::vector<Lexer::TokenNode>::const_iterator node,

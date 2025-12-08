@@ -13,4 +13,8 @@
 
 #define PARSING_ERROR_MSG "Parsing error: "
 
+#include <string>
+
+typedef std::string	root;
+
 #endif

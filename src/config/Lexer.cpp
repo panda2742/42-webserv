@@ -1,6 +1,6 @@
 #include "config/Lexer.hpp"
 
-namespace Config
+namespace cfg
 {
 namespace Lexer
 {

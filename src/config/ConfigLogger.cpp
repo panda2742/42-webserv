@@ -1,6 +1,6 @@
 #include "config/ConfigLogger.hpp"
 
-namespace Config
+namespace cfg
 {
 // #########################################################
 

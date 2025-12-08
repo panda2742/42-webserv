@@ -4,7 +4,7 @@
 #include <iostream>
 #include <sstream>
 
-namespace Config
+namespace cfg
 {
 // #########################################################
 
@@ -43,8 +43,8 @@ static A	as(B value)
 template <typename R, typename T>
 R	magic_cast(T value) throw(MagicCastException)
 {
-	Node4::ValueType	r_type = Node4Utils::typeToEnum_(R()),
-						t_type = Node4Utils::typeToEnum_(T());
+	Node4::ValueType	r_type = n4u::typeToEnum_(R()),
+						t_type = n4u::typeToEnum_(T());
 
 	if (r_type == t_type)
 		return as<R>(value);
@@ -221,7 +221,6 @@ R	magic_cast(T value) throw(MagicCastException)
 				return as<R>(map1);
 			}
 			break;
-			break;
 		}
 	}
 	return R();
@@ -230,7 +229,7 @@ R	magic_cast(T value) throw(MagicCastException)
 template <typename R, typename A, typename B>
 R	magic_assemble(A& a, B& b) throw(MagicCastException)
 {
-	Node4::ValueType	a_type = Node4Utils::typeToEnum_(A());
+	Node4::ValueType	a_type = n4u::typeToEnum_(A());
 
 	if (a_type == Node4::TYPE_STRING || a_type == Node4::TYPE_UINT)
 		throw AssembleTooPrimitive();
@@ -239,13 +238,7 @@ R	magic_assemble(A& a, B& b) throw(MagicCastException)
 		converted_b = magic_cast<R>(b);
 
 	const std::string	a_id = typeid(A).name();
-	if (a_id.find("map") != std::string::npos)
-	{
-		typename R::const_iterator	it = converted_b.begin();
-		for (; it != converted_b.end(); ++it)
-			converted_a.insert(*it);
-	}
-	else if (a_id.find("vector") != std::string::npos)
+	if (a_id.find("map") != std::string::npos || a_id.find("vector") != std::string::npos)
 	{
 		typename R::const_iterator	it = converted_b.begin();
 		for (; it != converted_b.end(); ++it)

@@ -6,7 +6,7 @@
 #include "config/Node4.hpp"
 #include "config/Utils.hpp"
 
-namespace Config
+namespace cfg
 {
 // #########################################################
 

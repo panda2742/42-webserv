@@ -8,7 +8,7 @@
 #include "types.hpp"
 #include "Lexer.hpp"
 
-namespace Config
+namespace cfg
 {
 // #########################################################
 
@@ -28,7 +28,6 @@ class Parser
 
 	void	saveRaw_(void) throw(ParsingException);
 	void	tokenize_(void) throw(ParsingException);
-	void	generateStruct_(void) throw(ParsingException);
 
 	public:
 	Parser(const std::string& filename)

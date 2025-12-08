@@ -6,11 +6,11 @@
 #include <sstream>
 #include "config/Node4.hpp"
 
-namespace Config
+namespace cfg
 {
 // #########################################################
 
-HttpConfig::HttpConfig(void): root_(Node4Utils::createStringNode4())
+HttpConfig::HttpConfig(void): root_(n4u::createStringNode4())
 {
 	root_->name = "http";
 }
@@ -32,8 +32,8 @@ void	HttpConfig::generate(const std::vector<Lexer::TokenNode>& nodes) throw(Pars
 	{
 		if (it->type == Lexer::TokenParent || it->type == Lexer::TokenDirective)
 		{
-			Node4::ValueType	type = Node4Utils::dataType_(it, nodes.end());
-			Node4					*node = Node4Utils::createNode4(type);
+			Node4::ValueType	type = n4u::dataType_(it, nodes.end());
+			Node4					*node = n4u::createNode4(type);
 
 			node->name = it->value;
 			node->parent = parent;

@@ -3,7 +3,7 @@
 
 #include "Parser.hpp"
 
-namespace Config
+namespace cfg
 {
 // #########################################################
 
@@ -23,7 +23,5 @@ std::string					mapVecStr(const std::map<unsigned int, std::vector<std::string> 
 
 // #########################################################
 };
-
-// POV Bro a laisse sa session ouverte
 
 #endif

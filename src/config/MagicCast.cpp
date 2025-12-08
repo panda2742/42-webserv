@@ -1,6 +1,6 @@
 #include "config/MagicCast.hpp"
 
-namespace Config
+namespace cfg
 {
 // #########################################################
 
