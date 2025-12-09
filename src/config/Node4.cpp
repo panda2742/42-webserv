@@ -76,7 +76,7 @@ void	Node4::Value::deleteData(void)
 	data = NULL;
 }
 
-std::string	Node4::fastStr(void)
+std::string	Node4::fastStr_(void)
 {
 	std::stringstream	ss;
 
@@ -126,7 +126,7 @@ std::string Node4::toString(void)
 		++tabs;
 	}
     std::stringstream	ss;
-    ss << std::string(tabs, '\t') << fastStr();
+    ss << std::string(tabs, '\t') << fastStr_();
 
 	if (first_child)
 		ss << first_child->toString();
@@ -140,21 +140,6 @@ std::string Node4::toString(void)
 }
 
 std::vector<Node4 *>	Node4::access(const std::string& child_name)
-{
-	std::vector<Node4 *>	res;
-
-	Node4	*c = this->first_child;
-	while (c)
-	{
-		if (c->name == child_name)
-			res.push_back(c);
-		c = c->next_sibling;
-	}
-
-	return res;
-}
-
-std::vector<Node4 *>	Node4::access(const std::string& child_name) const
 {
 	std::vector<Node4 *>	res;
 

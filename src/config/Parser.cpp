@@ -106,5 +106,9 @@ void	Parser::parse(void) throw(ParsingException)
 	// Utils::printTokens_(lexer_nodes_);
 }
 
+const std::vector<Lexer::TokenNode>&	Parser::getNodes(void) const{
+	return lexer_nodes_;
+}
+
 // #########################################################
 };
