@@ -40,6 +40,15 @@ std::vector<std::string>	&cleanVector(std::vector<std::string>& vect);
 bool						isNumber(const std::string& nbstr);
 
 /**
+ * Return a string containing an ANSI escape color code associated with the type of the value.
+ *
+ * @param value The value to colorize.
+ * @return The ANSI escape color code associated with the type.
+ */
+template <typename T>
+std::string	colorize(T& value);
+
+/**
  * Create a string based on each strings of the parameter. Every string is assembled with a space.
  *
  * @param v The vector of string to concatenate.

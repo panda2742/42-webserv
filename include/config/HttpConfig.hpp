@@ -20,7 +20,7 @@ struct Directive
 	/**
 	 * The value of the directive.
 	 */
-	T				value;
+	T			value;
 
 	/**
 	 * The associated Node4 pointer, because Directive is an overlay of Node4. Used for internal methods.
@@ -42,6 +42,45 @@ struct Directive
 	template <typename R>
 	std::vector<Directive<R> >	find(const std::string& prop_name);
 };
+
+template <typename T>
+std::ostream	operator<<(std::ostream &os, const Directive<T>& directive);
+
+/**
+ * An alias type for a better reading and better usage in the middleware steps.
+ * Represent the string Directive.
+ */
+typedef Directive<std::string>											StrDirective;
+
+/**
+ * An alias type for a better reading and better usage in the middleware steps.
+ * Represent the unsigned int Directive.
+ */
+typedef Directive<unsigned int>											UintDirective;
+
+/**
+ * An alias type for a better reading and better usage in the middleware steps.
+ * Represent the vector<unsigned int> Directive.
+ */
+typedef Directive<std::vector<std::string> >							StrVecDirective;
+
+/**
+ * An alias type for a better reading and better usage in the middleware steps.
+ * Represent the vector<unsigned int> Directive.
+ */
+typedef Directive<std::vector<unsigned int> >							UintVecDirective;
+
+/**
+ * An alias type for a better reading and better usage in the middleware steps.
+ * Represent the map<unsigned int, string> Directive.
+ */
+typedef Directive<std::map<unsigned int, std::string> >					MapDirective;
+
+/**
+ * An alias type for a better reading and better usage in the middleware steps.
+ * Represent the map<unsigned int, vector<string>> Directive.
+ */
+typedef Directive<std::map<unsigned int, std::vector<std::string> > >	MapVecDirective;
 
 namespace cfg
 {

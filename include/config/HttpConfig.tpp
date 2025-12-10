@@ -109,5 +109,33 @@ std::vector<Directive<T> >	HttpConfig::get(const std::string& prop_name, const D
 	return get(prop_name, directive.node);
 }
 
+template <typename T>
+std::ostream	operator<<(std::ostream &os, const Directive<T>& directive)
+{
+	static std::vector<std::string>	colors;
+	static std::vector<std::string>	names;
+	if (colors.empty())
+	{
+		colors.push_back(ORANGE);
+		names.push_back("String");
+		colors.push_back(LIGHT_GREEN);
+		names.push_back("Unsigned int");
+		colors.push_back(GREEN);
+		names.push_back("String Vector");
+		colors.push_back(CYAN);
+		names.push_back("Unsigned int Vector");
+		colors.push_back(BLURPLE);
+		names.push_back("Map String");
+		colors.push_back(PINK);
+		names.push_back("Map String Vector");
+	}
+
+	const std::string	color = colors[n4u::typeToEnum_(directive.node->value.type)];
+
+	os << color;
+	os << ""
+	os << RESET;
+}
+
 // #########################################################
 };

@@ -11,7 +11,8 @@ SOURCES					:=	main \
 							HttpConnection \
 							HttpRequest \
 							HttpResponse \
-							$(addprefix config/, ConfigLogger HttpConfig Lexer MagicCast Node4 Node4Utils Parser util)
+							$(addprefix config/, ConfigLogger HttpConfig Lexer MagicCast Node4 Node4Utils Parser util) \
+							$(addprefix tests/, 01_magic_cast_test 02_directive_get_test)
 
 override SOURCE			:=	$(addprefix $(SOURCE_DIR), $(addsuffix .cpp, $(SOURCES)))
 
