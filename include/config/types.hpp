@@ -13,11 +13,4 @@
 
 #define PARSING_ERROR_MSG "Parsing error: "
 
-#include <string>
-
-/**
- * An alias to the type string to improve readability for some case of Directive<T> where T represent a nulled-type.
- */
-typedef std::string	root;
-
 #endif
