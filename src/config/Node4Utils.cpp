@@ -1,6 +1,6 @@
 #include "config/Node4.hpp"
 #include "config/ConfigLogger.hpp"
-#include "config/Utils.hpp"
+#include "config/utl.hpp"
 
 namespace cfg
 {
@@ -102,7 +102,7 @@ Node4::ValueType	dataType_(std::vector<Lexer::TokenNode>::const_iterator node, s
 	while (current != end && current->type == Lexer::TokenArgument)
 	{
 		++nb_arguments;
-		if (Utils::isNumber(current->value) && start == current)
+		if (utl::isNumber(current->value) && start == current)
 			nb_starts = true;
 		else if (start != current)
 			only_nb = false;
