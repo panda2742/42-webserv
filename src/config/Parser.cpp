@@ -1,5 +1,5 @@
 #include "config/Parser.hpp"
-#include "config/utl.hpp"
+#include "config/util.hpp"
 #include <fstream>
 #include <iostream>
 
@@ -59,7 +59,7 @@ void	Parser::tokenize_(void) throw(ParsingException)
 
 		while (j < raw_length)
 		{
-			if (utl::isInCharset(raw[j], " \n\t\r\v"))
+			if (util::isInCharset(raw[j], " \n\t\r\v"))
 			{
 				std::string	value(&raw[i], j - i);
 				if (value.length())
@@ -70,7 +70,7 @@ void	Parser::tokenize_(void) throw(ParsingException)
 		}
 		i = j + 1;
 	}
-	shards = utl::cleanVector(shards);
+	shards = util::cleanVector(shards);
 	for (std::vector<std::string>::const_iterator it = shards.begin(); it != shards.end(); ++it)
 	{
 		Lexer::Token	type = Lexer::TokenDirective;
@@ -103,7 +103,7 @@ void	Parser::parse(void) throw(ParsingException)
 {
 	saveRaw_();
 	tokenize_();
-	// utl::printTokens_(lexer_nodes_);
+	// util::printTokens_(lexer_nodes_);
 }
 
 const std::vector<Lexer::TokenNode>&	Parser::getNodes(void) const{

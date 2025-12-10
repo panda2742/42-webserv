@@ -4,7 +4,7 @@
 #include <map>
 #include "config/types.hpp"
 #include "config/Node4.hpp"
-#include "config/utl.hpp"
+#include "config/util.hpp"
 
 namespace cfg
 {
@@ -93,16 +93,16 @@ std::string	Node4::fastStr_(void)
 			ss << LIGHT_GREEN << "UINT" << RESET << "=" << LIGHT_GREEN << *value.getAs<unsigned int>() << RESET;
 			break;
 		case TYPE_STRING_VECTOR:
-			ss << GREEN << "STRINGVEC" << RESET << "=" << GREEN << utl::vecStr(*value.getAs<std::vector<std::string> >()) << RESET;
+			ss << GREEN << "STRINGVEC" << RESET << "=" << GREEN << util::vecStr(*value.getAs<std::vector<std::string> >()) << RESET;
 			break;
 		case TYPE_UINT_VECTOR:
-			ss << CYAN << "UINTVEC" << RESET << "=" << CYAN << utl::vecUIntStr(*value.getAs<std::vector<unsigned int> >()) << RESET;
+			ss << CYAN << "UINTVEC" << RESET << "=" << CYAN << util::vecUIntStr(*value.getAs<std::vector<unsigned int> >()) << RESET;
 			break;
 		case TYPE_MAP_UINT_STRING:
-			ss << BLURPLE << "UINT_STRING" << RESET << "=" << BLURPLE << utl::mapStr(*value.getAs<std::map<unsigned int, std::string> >()) << RESET;
+			ss << BLURPLE << "UINT_STRING" << RESET << "=" << BLURPLE << util::mapStr(*value.getAs<std::map<unsigned int, std::string> >()) << RESET;
 			break;
 		case TYPE_MAP_UINT_STRING_VECTOR:
-			ss << PINK << "UINT_STRINGVEC" << RESET << "=" << PINK << utl::mapVecStr(*value.getAs<std::map<unsigned int, std::vector<std::string> > >()) << RESET;
+			ss << PINK << "UINT_STRINGVEC" << RESET << "=" << PINK << util::mapVecStr(*value.getAs<std::map<unsigned int, std::vector<std::string> > >()) << RESET;
 			break;
 		default:
 			ss << GREY << " EMPTY" << RESET;

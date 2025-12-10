@@ -7,7 +7,7 @@ namespace cfg
 {
 // #########################################################
 
-namespace utl
+namespace util
 {
 
 /**

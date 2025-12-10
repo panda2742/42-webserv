@@ -1,11 +1,11 @@
-#include "config/utl.hpp"
+#include "config/util.hpp"
 #include <iostream>
 #include "config/Lexer.hpp"
 #include <sstream>
 
 namespace cfg
 {
-namespace utl
+namespace util
 {
 // #########################################################
 
