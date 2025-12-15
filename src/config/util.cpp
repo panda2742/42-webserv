@@ -1,10 +1,11 @@
-#include "config/Utils.hpp"
+#include "config/util.hpp"
 #include <iostream>
 #include "config/Lexer.hpp"
+#include <sstream>
 
-namespace Config
+namespace cfg
 {
-namespace Utils
+namespace util
 {
 // #########################################################
 

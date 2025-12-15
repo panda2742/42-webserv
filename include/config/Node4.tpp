@@ -1,6 +1,6 @@
 #include "Node4.hpp"
 
-namespace Config
+namespace cfg
 {
 // #########################################################
 

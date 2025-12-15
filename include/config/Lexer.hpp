@@ -5,12 +5,15 @@
 #include <ostream>
 #include "types.hpp"
 
-namespace Config
+namespace cfg
 {
 namespace Lexer
 {
 // #########################################################
 
+/**
+ * The different types of token for the lexer.
+ */
 enum Token
 {
 	TokenSymbolOpen,
@@ -21,10 +24,21 @@ enum Token
 	TokenArgument
 };
 
+/**
+ * Represent a node for the lexer.
+ */
 struct TokenNode
 {
+	/**
+	 * The type of the token.
+	 */
 	Token		type;
+
+	/**
+	 * The text value of the token, extracted from the configuration file.
+	 */
 	std::string	value;
+
 	TokenNode(const Token type_, const std::string& value_)
 		: type(type_), value(value_) {}
 };

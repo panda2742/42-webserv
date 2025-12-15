@@ -1,9 +1,9 @@
 #include "config/Parser.hpp"
-#include "config/Utils.hpp"
+#include "config/util.hpp"
 #include <fstream>
 #include <iostream>
 
-namespace Config
+namespace cfg
 {
 // #########################################################
 
@@ -59,7 +59,7 @@ void	Parser::tokenize_(void) throw(ParsingException)
 
 		while (j < raw_length)
 		{
-			if (Utils::isInCharset(raw[j], " \n\t\r\v"))
+			if (util::isInCharset(raw[j], " \n\t\r\v"))
 			{
 				std::string	value(&raw[i], j - i);
 				if (value.length())
@@ -70,7 +70,7 @@ void	Parser::tokenize_(void) throw(ParsingException)
 		}
 		i = j + 1;
 	}
-	shards = Utils::cleanVector(shards);
+	shards = util::cleanVector(shards);
 	for (std::vector<std::string>::const_iterator it = shards.begin(); it != shards.end(); ++it)
 	{
 		Lexer::Token	type = Lexer::TokenDirective;
@@ -79,7 +79,7 @@ void	Parser::tokenize_(void) throw(ParsingException)
 			if ((*it) == "{")
 			{
 				type = Lexer::TokenSymbolOpen;
-				for (std::vector<Config::Lexer::TokenNode>::reverse_iterator jt = lexer_nodes_.rbegin(); jt != lexer_nodes_.rend(); ++jt)
+				for (std::vector< cfg::Lexer::TokenNode>::reverse_iterator jt = lexer_nodes_.rbegin(); jt != lexer_nodes_.rend(); ++jt)
 				{
 					if ((*jt).type == Lexer::TokenDirective)
 					{
@@ -103,7 +103,11 @@ void	Parser::parse(void) throw(ParsingException)
 {
 	saveRaw_();
 	tokenize_();
-	// Utils::printTokens_(lexer_nodes_);
+	// util::printTokens_(lexer_nodes_);
+}
+
+const std::vector<Lexer::TokenNode>&	Parser::getNodes(void) const{
+	return lexer_nodes_;
 }
 
 // #########################################################

@@ -3,6 +3,7 @@ override NAME		:=	webserv
 override INCLUDE_DIR	:=	include/
 override TEMPLATE_DIR	:=	include/
 override SOURCE_DIR		:=	src/
+
 SOURCES					:=	$(CONFIG_SOURCES) main \
 							utils \
 							Logger \
@@ -15,7 +16,8 @@ SOURCES					:=	$(CONFIG_SOURCES) main \
 							http/HttpResponseCreate \
 							http/HttpResponseSend \
 							http/HttpResponseCGI \
-							$(addprefix config/, ConfigLogger ContainerImproved HttpConfig Lexer Node4 Node4Utils Parser Utils)
+							$(addprefix config/, ConfigLogger HttpConfig Lexer MagicCast Node4 Node4Utils Parser util) \
+							$(addprefix tests/, 01_magic_cast_test 02_directive_get_test)
 
 override INCLUDE		:=	$(addprefix $(INCLUDE_DIR), $(addsuffix .hpp, $(INCLUDES)))
 override TEMPLATE		:=	$(addprefix $(TEMPLATE_DIR), $(addsuffix .tpp, $(TEMPLATES)))
@@ -35,7 +37,7 @@ override DEPS		:=	$(patsubst %.o, %.d, $(OBJ))
 override DIRS		:=	$(sort $(dir $(NAME) $(OBJ) $(DEPS)))
 
 MAKEFLAGS	:=	--no-print-directory
-GCC			:=	c++
+GCC			:=	g++
 RM			:=	rm -rf
 VG			:=	valgrind
 VGFLAGS		:=	--leak-check=full --show-leak-kinds=all --track-origins=yes --show-mismatched-frees=yes --track-fds=yes --trace-children=yes

@@ -1,31 +1,119 @@
 #include "HttpConfig.hpp"
 #include <iostream>
-#include "config/Node4.hpp"
+#include "Node4.hpp"
+#include "util.hpp"
 
-namespace Config
+template <typename T>
+Directive<T>::Directive(T value_, cfg::Node4 *node_): value(value_), node(node_)
+{
+	if (!node)
+		throw std::runtime_error("Parent cannot be null.");
+	if (cfg::n4u::typeToEnum_(T()) != node->value.type)
+		throw std::runtime_error("The type is not corresponding.");
+}
+
+template <typename T>
+Directive<T>::Directive(const Directive& other): value(other.value), node(other.node) {}
+
+template <typename T>
+Directive<T>::~Directive(void) {}
+
+template <typename T>
+template <typename R>
+std::vector<Directive<R> >	Directive<T>::find(const std::string& prop_name)
+{
+	std::vector<cfg::Node4 *>	nodes = node->access(prop_name);
+	std::vector<Directive<R> >	res;
+
+	for (std::vector<cfg::Node4 *>::const_iterator it = nodes.begin(); it != nodes.end(); ++it)
+	{
+		if (cfg::n4u::typeToEnum_(R()) != ((*it)->value.type))
+			continue;
+		res.push_back(Directive<R>(*(*it)->value.getAs<R>(), *it));
+	}
+
+	return res;
+}
+
+template <typename T>
+template <typename R>
+R	Directive<T>::get(const std::string& prop_name)
+{
+	std::vector<cfg::Node4 *>	nodes = node->access(prop_name);
+	R							final_value;
+
+	for (std::vector<cfg::Node4 *>::const_iterator it = nodes.begin(); it != nodes.end(); ++it)
+	{
+		switch ((*it)->value.type)
+		{
+			case cfg::Node4::TYPE_STRING:
+			{
+				R	v = cfg::magic_cast<R>(*(*it)->value.getAs<std::string>());
+				final_value = cfg::magic_assemble<R>(final_value, v);
+				break;
+			}
+			case cfg::Node4::TYPE_UINT:
+			{
+				R	v = cfg::magic_cast<R>(*(*it)->value.getAs<unsigned int>());
+				final_value = cfg::magic_assemble<R>(final_value, v);
+				break;
+			}
+			case cfg::Node4::TYPE_STRING_VECTOR:
+			{
+				R	v = cfg::magic_cast<R>(*(*it)->value.getAs<std::vector<std::string> >());
+				final_value = cfg::magic_assemble<R>(final_value, v);
+				break;
+			}
+			case cfg::Node4::TYPE_UINT_VECTOR:
+			{
+				R	v = cfg::magic_cast<R>(*(*it)->value.getAs<std::vector<unsigned int> >());
+				final_value = cfg::magic_assemble<R>(final_value, v);
+				break;
+			}
+			case cfg::Node4::TYPE_MAP_UINT_STRING:
+			{
+				std::cout << (*it)->name << std::endl;
+				std::cout << cfg::util::represent(*(*it)->value.getAs<std::map<unsigned int, std::string> >()) << std::endl;
+				R	v = cfg::magic_cast<R>(*(*it)->value.getAs<std::map<unsigned int, std::string> >());
+				final_value = cfg::magic_assemble<R>(final_value, v);
+				break;
+			}
+			case cfg::Node4::TYPE_MAP_UINT_STRING_VECTOR:
+			{
+				R	v = cfg::magic_cast<R>(*(*it)->value.getAs<std::map<unsigned int, std::vector<std::string> > >());
+				final_value = cfg::magic_assemble<R>(final_value, v);
+				break;
+			}
+		}
+	}
+
+	return final_value;
+}
+
+template <typename T>
+std::ostream&	operator<<(std::ostream &os, const Directive<T>& directive)
+{
+	os << "Directive { " << cfg::util::represent(directive.value) << " }";
+	return os;
+}
+
+namespace cfg
 {
 // #########################################################
 
 template <typename T>
-HttpConfig::Directive<T>::Directive(T value_, Node4 *node_): value(value_), node(node_) {}
-
-template <typename T>
-HttpConfig::Directive<T>::~Directive(void) {}
-
-template <typename T>
-HttpConfig::GetData<T>::GetData(const std::string& prop_name_, const Node4 *parent_, unsigned int depth_)
-	: depth(depth_), parent(parent_), prop_name(prop_name_)
-{
-	type = Node4Utils::typeToEnum_(T());
-}
+HttpConfig::GetData<T>::GetData(const std::string& prop_name_, const Node4 *parent_)
+	: parent(parent_), prop_name(prop_name_) {}
 
 template <typename T>HttpConfig::GetData<T>::GetData(const GetData& other)
-	: depth(other.depth), parent(other.parent), type(other.type), prop_name(other.prop_name), local_res(other.local_res) {}
+	: parent(other.parent),
+	  prop_name(other.prop_name),
+	  local_res(other.local_res) {}
 
 template <typename T>HttpConfig::GetData<T>::~GetData(void) {}
 
 template <typename T>
-std::vector<HttpConfig::Directive<T> >	HttpConfig::get_(GetData<T>& ddata)
+std::vector<Directive<T> >	HttpConfig::get_(GetData<T>& ddata)
 {
 	std::vector<GetData<T> >	results;
 
@@ -70,13 +158,20 @@ std::vector<HttpConfig::Directive<T> >	HttpConfig::get_(GetData<T>& ddata)
 }
 
 template <typename T>
-std::vector<HttpConfig::Directive<T> >	HttpConfig::get(const std::string& prop_name, const Node4 *parent)
+std::vector<Directive<T> >	HttpConfig::get(const std::string& prop_name, const Node4 *parent)
 {
 	if (!parent)
 		parent = root_;
 
 	GetData<T>	ddata(prop_name, parent, 0);
-	return get_(ddata);
+	std::vector<Directive<T> >	directives = get_(ddata);
+	return directives;
+}
+
+template <typename T, typename P>
+std::vector<Directive<T> >	HttpConfig::get(const std::string& prop_name, const Directive<P>& directive)
+{
+	return get(prop_name, directive.node);
 }
 
 // #########################################################
