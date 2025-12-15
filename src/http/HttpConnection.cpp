@@ -1,4 +1,3 @@
-
 #include "HttpConnection.hpp"
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
@@ -6,14 +5,20 @@
 #include <vector>
 #include <sys/socket.h>
 
-HttpConnection::HttpConnection(int socket_fd) : socket_fd_(socket_fd), header_(false), content_size_(0)
+HttpConnection::HttpConnection(int socket_fd, Server& server)
+	: socket_fd_(socket_fd), server_(server), header_(false), content_size_(0)
 {
-
+	context_.type = CLIENT;
+	context_.fd = socket_fd;
 }
 
 HttpConnection::~HttpConnection()
 {
-	
+	// requests_.clear();
+	// std::deque<HttpRequest>().swap(requests_);
+	// responses_.clear();
+	// std::deque<HttpResponse>().swap(responses_);
+	// raw_.clear();
 }
 
 void HttpConnection::clear()
@@ -21,7 +26,6 @@ void HttpConnection::clear()
 	raw_.clear();
 	header_ = false;
 	content_size_ = 0;
-	// res_ready_ = false;
 }
 
 ssize_t HttpConnection::find(const std::string& search, size_t range)
@@ -68,6 +72,15 @@ void HttpConnection::receiveContent(char *content, size_t size)
 
 	if (!header_)
 	{
+		if (raw_.size() > 3)
+		{
+			if (raw_[0] == 0x16 && raw_[1] == 0x03 && (raw_[2] == 0x01 || raw_[2] == 0x02 || raw_[2] == 0x03))
+			{
+				handleRequest();
+				return ;
+			}
+		}
+
 		ssize_t pos = find("\r\n\r\n", raw_.size());
 
 		if (pos == -1) return ;
@@ -106,7 +119,7 @@ bool HttpConnection::handleRequest()
 
 	if (!req.parse()) return false;
 
-	responses_.push_back(HttpResponse(req));
+	responses_.push_back(HttpResponse(req, server_));
 	HttpResponse& res = responses_.back();
 	res.create();
 	clear();

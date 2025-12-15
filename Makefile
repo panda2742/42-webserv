@@ -3,17 +3,24 @@ override NAME		:=	webserv
 override INCLUDE_DIR	:=	include/
 override TEMPLATE_DIR	:=	include/
 override SOURCE_DIR		:=	src/
-SOURCES					:=	main \
+
+SOURCES					:=	$(CONFIG_SOURCES) main \
+							utils \
 							Logger \
 							Server \
 							FileCacheManager \
-							http_utils \
-							HttpConnection \
-							HttpRequest \
-							HttpResponse \
+							http/http_utils \
+							http/HttpConnection \
+							http/HttpRequest \
+							http/HttpResponse \
+							http/HttpResponseCreate \
+							http/HttpResponseSend \
+							http/HttpResponseCGI \
 							$(addprefix config/, ConfigLogger HttpConfig Lexer MagicCast Node4 Node4Utils Parser util) \
 							$(addprefix tests/, 01_magic_cast_test 02_directive_get_test)
 
+override INCLUDE		:=	$(addprefix $(INCLUDE_DIR), $(addsuffix .hpp, $(INCLUDES)))
+override TEMPLATE		:=	$(addprefix $(TEMPLATE_DIR), $(addsuffix .tpp, $(TEMPLATES)))
 override SOURCE			:=	$(addprefix $(SOURCE_DIR), $(addsuffix .cpp, $(SOURCES)))
 
 CPPFLAGS	:=	-Wall -Wextra -Werror -MD -Wshadow -g3 -std=c++98 -pthread

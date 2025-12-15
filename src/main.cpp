@@ -5,30 +5,33 @@
 #include "Logger.hpp"
 #include "Server.hpp"
 #include "tests.hpp"
+#include <signal.h>
 
-int	main(int argc, char **argv)
+void exit_signal(int sig);
+
+int main(int argc, char **argv)
 {
 	if (argc ^ 2)
 	{
 		std::cout << "Provide a unique configuration file." << std::endl;
 		return 1;
 	}
-	 cfg::Parser		parser(argv[1]);
-	 cfg::HttpConfig	conf;
 
-	parser.parse();
-	conf.generate(parser.getNodes());
+	try
+	{
+		struct sigaction	sigint_sa;
+		sigint_sa.sa_flags = 0;
+		sigint_sa.sa_handler = exit_signal;
+		sigemptyset(&sigint_sa.sa_mask);
+		sigaction(SIGINT, &sigint_sa, NULL);
 
-	magic_cast_test();
-	directive_get_test(conf);
-
-	try {
 		Server server;
+		server.init();
 		server.run();
 	}
-	catch (const std::exception& e) {
+	catch (const std::exception& e)
+	{
 		Logger::error(e.what());
-		// std::cerr << "Erreur: " << e.what() << std::endl;
 		return 1;
 	}
 	return 0;
