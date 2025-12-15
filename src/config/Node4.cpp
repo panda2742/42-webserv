@@ -87,25 +87,25 @@ std::string	Node4::fastStr_(void)
 	switch (value.type)
 	{
 		case TYPE_STRING:
-			ss << ORANGE << "STRING" << RESET << "=" << ORANGE << *value.getAs<std::string>() << RESET;
+			ss << "STRING =" << util::represent(*value.getAs<std::string>());
 			break;
 		case TYPE_UINT:
-			ss << LIGHT_GREEN << "UINT" << RESET << "=" << LIGHT_GREEN << *value.getAs<unsigned int>() << RESET;
+			ss << "UINT =" << util::represent(*value.getAs<unsigned int>());
 			break;
 		case TYPE_STRING_VECTOR:
-			ss << GREEN << "STRINGVEC" << RESET << "=" << GREEN << util::vecStr(*value.getAs<std::vector<std::string> >()) << RESET;
+			ss << "STRINGVEC =" << util::represent(*value.getAs<std::vector<std::string> >());
 			break;
 		case TYPE_UINT_VECTOR:
-			ss << CYAN << "UINTVEC" << RESET << "=" << CYAN << util::vecUIntStr(*value.getAs<std::vector<unsigned int> >()) << RESET;
+			ss << "UINTVEC =" << util::represent(*value.getAs<std::vector<unsigned int> >());
 			break;
 		case TYPE_MAP_UINT_STRING:
-			ss << BLURPLE << "UINT_STRING" << RESET << "=" << BLURPLE << util::mapStr(*value.getAs<std::map<unsigned int, std::string> >()) << RESET;
+			ss << "UINT_STRING =" << util::represent(*value.getAs<std::map<unsigned int, std::string> >());
 			break;
 		case TYPE_MAP_UINT_STRING_VECTOR:
-			ss << PINK << "UINT_STRINGVEC" << RESET << "=" << PINK << util::mapVecStr(*value.getAs<std::map<unsigned int, std::vector<std::string> > >()) << RESET;
+			ss << "UINT_STRINGVEC =" << util::represent(*value.getAs<std::map<unsigned int, std::vector<std::string> > >());
 			break;
 		default:
-			ss << GREY << " EMPTY" << RESET;
+			ss << " EMPTY";
 			break;
 	}
 	if (next_sibling)

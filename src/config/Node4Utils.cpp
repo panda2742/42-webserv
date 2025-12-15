@@ -104,7 +104,7 @@ Node4::ValueType	dataType_(std::vector<Lexer::TokenNode>::const_iterator node, s
 		++nb_arguments;
 		if (util::isNumber(current->value) && start == current)
 			nb_starts = true;
-		else if (start != current)
+		else if (start != current && !util::isNumber(current->value))
 			only_nb = false;
 
 		++current;

@@ -41,10 +41,22 @@ struct Directive
 	 */
 	template <typename R>
 	std::vector<Directive<R> >	find(const std::string& prop_name);
+
+	/**
+	 * Iter on each sibling of this first child and build an instance of R. Each Directive is collapsed and merged into
+	 * a unique value whose. The objective is to concatenate every possible value into a single vector/map.
+	 * Please, BE ABSOLUTELY CAREFUL WHILE USING THIS and have a look at the convert table of the magic_cast.
+	 *
+	 * @tparam R The type of the final value.
+	 * @param prop_name The property to look for.
+	 * @return The built value (instance of R).
+	 */
+	template <typename R>
+	R	get(const std::string& prop_name);
 };
 
 template <typename T>
-std::ostream	operator<<(std::ostream &os, const Directive<T>& directive);
+std::ostream&	operator<<(std::ostream &os, const Directive<T>& directive);
 
 /**
  * An alias type for a better reading and better usage in the middleware steps.

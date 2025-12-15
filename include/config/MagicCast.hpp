@@ -1,5 +1,5 @@
-#ifndef PARSE_UTILS_HPP
-#define PARSE_UTILS_HPP
+#ifndef MAGIC_CAST_HPP
+#define MAGIC_CAST_HPP
 
 #include "Parser.hpp"
 

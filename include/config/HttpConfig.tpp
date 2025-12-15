@@ -1,11 +1,14 @@
 #include "HttpConfig.hpp"
 #include <iostream>
-#include "config/Node4.hpp"
+#include "Node4.hpp"
+#include "util.hpp"
 
 template <typename T>
 Directive<T>::Directive(T value_, cfg::Node4 *node_): value(value_), node(node_)
 {
-	if (!node || cfg::n4u::typeToEnum_(T()) != node->value.type)
+	if (!node)
+		throw std::runtime_error("Parent cannot be null.");
+	if (cfg::n4u::typeToEnum_(T()) != node->value.type)
 		throw std::runtime_error("The type is not corresponding.");
 }
 
@@ -19,17 +22,79 @@ template <typename T>
 template <typename R>
 std::vector<Directive<R> >	Directive<T>::find(const std::string& prop_name)
 {
-	std::vector< cfg::Node4 *>	nodes = node->access(prop_name);
-	std::vector<Directive<R> >		res;
+	std::vector<cfg::Node4 *>	nodes = node->access(prop_name);
+	std::vector<Directive<R> >	res;
 
-	for (std::vector< cfg::Node4 *>::const_iterator it = nodes.begin(); it != nodes.end(); ++it)
+	for (std::vector<cfg::Node4 *>::const_iterator it = nodes.begin(); it != nodes.end(); ++it)
 	{
 		if (cfg::n4u::typeToEnum_(R()) != ((*it)->value.type))
-			throw std::runtime_error("The type is not corresponding.");
+			continue;
 		res.push_back(Directive<R>(*(*it)->value.getAs<R>(), *it));
 	}
 
 	return res;
+}
+
+template <typename T>
+template <typename R>
+R	Directive<T>::get(const std::string& prop_name)
+{
+	std::vector<cfg::Node4 *>	nodes = node->access(prop_name);
+	R							final_value;
+
+	for (std::vector<cfg::Node4 *>::const_iterator it = nodes.begin(); it != nodes.end(); ++it)
+	{
+		switch ((*it)->value.type)
+		{
+			case cfg::Node4::TYPE_STRING:
+			{
+				R	v = cfg::magic_cast<R>(*(*it)->value.getAs<std::string>());
+				final_value = cfg::magic_assemble<R>(final_value, v);
+				break;
+			}
+			case cfg::Node4::TYPE_UINT:
+			{
+				R	v = cfg::magic_cast<R>(*(*it)->value.getAs<unsigned int>());
+				final_value = cfg::magic_assemble<R>(final_value, v);
+				break;
+			}
+			case cfg::Node4::TYPE_STRING_VECTOR:
+			{
+				R	v = cfg::magic_cast<R>(*(*it)->value.getAs<std::vector<std::string> >());
+				final_value = cfg::magic_assemble<R>(final_value, v);
+				break;
+			}
+			case cfg::Node4::TYPE_UINT_VECTOR:
+			{
+				R	v = cfg::magic_cast<R>(*(*it)->value.getAs<std::vector<unsigned int> >());
+				final_value = cfg::magic_assemble<R>(final_value, v);
+				break;
+			}
+			case cfg::Node4::TYPE_MAP_UINT_STRING:
+			{
+				std::cout << (*it)->name << std::endl;
+				std::cout << cfg::util::represent(*(*it)->value.getAs<std::map<unsigned int, std::string> >()) << std::endl;
+				R	v = cfg::magic_cast<R>(*(*it)->value.getAs<std::map<unsigned int, std::string> >());
+				final_value = cfg::magic_assemble<R>(final_value, v);
+				break;
+			}
+			case cfg::Node4::TYPE_MAP_UINT_STRING_VECTOR:
+			{
+				R	v = cfg::magic_cast<R>(*(*it)->value.getAs<std::map<unsigned int, std::vector<std::string> > >());
+				final_value = cfg::magic_assemble<R>(final_value, v);
+				break;
+			}
+		}
+	}
+
+	return final_value;
+}
+
+template <typename T>
+std::ostream&	operator<<(std::ostream &os, const Directive<T>& directive)
+{
+	os << "Directive { " << cfg::util::represent(directive.value) << " }";
+	return os;
 }
 
 namespace cfg
@@ -107,34 +172,6 @@ template <typename T, typename P>
 std::vector<Directive<T> >	HttpConfig::get(const std::string& prop_name, const Directive<P>& directive)
 {
 	return get(prop_name, directive.node);
-}
-
-template <typename T>
-std::ostream	operator<<(std::ostream &os, const Directive<T>& directive)
-{
-	static std::vector<std::string>	colors;
-	static std::vector<std::string>	names;
-	if (colors.empty())
-	{
-		colors.push_back(ORANGE);
-		names.push_back("String");
-		colors.push_back(LIGHT_GREEN);
-		names.push_back("Unsigned int");
-		colors.push_back(GREEN);
-		names.push_back("String Vector");
-		colors.push_back(CYAN);
-		names.push_back("Unsigned int Vector");
-		colors.push_back(BLURPLE);
-		names.push_back("Map String");
-		colors.push_back(PINK);
-		names.push_back("Map String Vector");
-	}
-
-	const std::string	color = colors[n4u::typeToEnum_(directive.node->value.type)];
-
-	os << color;
-	os << ""
-	os << RESET;
 }
 
 // #########################################################

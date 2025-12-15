@@ -42,47 +42,28 @@ bool						isNumber(const std::string& nbstr);
 /**
  * Return a string containing an ANSI escape color code associated with the type of the value.
  *
- * @param value The value to colorize.
+ * @tparam T The type of the value to get the color from.
  * @return The ANSI escape color code associated with the type.
  */
 template <typename T>
-std::string	colorize(T& value);
+std::string					colorize(const T&);
 
 /**
- * Create a string based on each strings of the parameter. Every string is assembled with a space.
+ * Take a variable of type T, where T must be a valid node type. It displays correctly the asked value with colors
+ * based on types of each member of the value.
  *
- * @param v The vector of string to concatenate.
- * @return The built string.
+ * @tparam T The type of the value.
+ * @param value The value to represent.
+ * @return The built string representation of the value.
  */
-std::string					vecStr(const std::vector<std::string>& v);
-
-/**
- * Create a string on each unsigned int of the parameter. Every unsinged int is assembled with a space.
- *
- * @param v The vector of unsigned int to concatenate.
- * @return The built string.
- */
-std::string					vecUIntStr(const std::vector<unsigned int>& v);
-
-/**
- * Create a string with the keys of the map and the values of the map. Every key-value is assembled with a space.
- *
- * @param m The map to concatenate.
- * @return The built string.
- */
-std::string					mapStr(const std::map<unsigned int, std::string>& m);
-
-/**
- * Create a string with the keys of the map and the values of the map. Every key-value is assembled with a space.
- *
- * @param m The map to concatenate.
- * @return The built string.
- */
-std::string					mapVecStr(const std::map<unsigned int, std::vector<std::string> >& m);
+template <typename T>
+std::string					represent(const T& value);
 
 };
 
 // #########################################################
 };
+
+#include "util.tpp"
 
 #endif
