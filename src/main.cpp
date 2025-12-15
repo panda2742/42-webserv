@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 	try
 	{
 		// Create a parser
-		cfg::Parser	parser("samples/webserv.conf");
+		cfg::Parser	parser(argv[1]);
 		// Parse the file
 		parser.parse();
 
