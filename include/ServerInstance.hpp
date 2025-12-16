@@ -3,11 +3,17 @@
 
 #include <vector>
 #include <string>
+#include <arpa/inet.h>
+
+struct ListenProp {
+	in_addr_t ip;
+	uint port;
+};
 
 class ServerInstance
 {
 private:
-	std::vector<unsigned int> ports_;
+	std::vector<ListenProp> listen_;
 	std::vector<std::string> server_names_;
 	
 public:

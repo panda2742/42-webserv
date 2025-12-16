@@ -1,5 +1,6 @@
 
 #include "Server.hpp"
+#include "ServerInstance.hpp"
 #include "Logger.hpp"
 #include "utils.hpp"
 #include <sys/socket.h>
@@ -13,7 +14,6 @@
 #include <unistd.h>
 #include <errno.h>
 #include <signal.h>
-#include <arpa/inet.h>
 
 // #define BASEPORT 8080
 #define MAX_EVENTS 64
@@ -166,13 +166,30 @@ void Server::init()
 
 	for (size_t i = 0; i < servers.size(); i++)
 	{
-		std::vector<unsigned int> listens;
+		std::vector<ListenProp> listens;
 		std::vector<std::string> server_names;
 		std::vector<std::string> listen_directives;
 		
 		try {
 			listen_directives = servers[i].get<std::vector<std::string> >("listen");
-			// std::cout << cfg::util::represent(listens) << std::endl;
+
+			for (size_t j = 0; j < listen_directives.size(); j++)
+			{
+				size_t sep = listen_directives[j].find(":");
+
+				if (sep == std::string::npos)
+				{
+					listens.push_back((ListenProp){.ip = INADDR_ANY, .port = std::atoi(listen_directives[j].c_str())});
+				}
+				else
+				{
+					std::string ip = listen_directives[j].substr(0, sep);
+					if (ip == "localhost") ip = "127.0.0.1";
+
+					listens.push_back((ListenProp){.ip = inet_addr(ip.c_str()), .port = std::atoi(listen_directives[j].c_str() + sep)});
+				}
+			}
+			std::cout << cfg::util::represent(listen_directives) << std::endl;
 		} catch (const std::exception& e) {
 			throw std::runtime_error("Invalid listen value for server " + to_string(i) + ". Error: " + e.what());
 		}
