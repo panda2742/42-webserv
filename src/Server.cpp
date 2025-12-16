@@ -13,8 +13,9 @@
 #include <unistd.h>
 #include <errno.h>
 #include <signal.h>
+#include <arpa/inet.h>
 
-#define BASEPORT 8080
+// #define BASEPORT 8080
 #define MAX_EVENTS 64
 
 bool siginted = false;
@@ -149,8 +150,8 @@ int Server::removeCgiFd(int fd)
 	return removeFdEpoll(fd);
 }
 
-Server::Server()
-	: running_(false), is_child_(false)
+Server::Server(cfg::HttpConfig &conf)
+	: running_(false), is_child_(false), conf_(conf)
 {
 	listen_fd_ = -1;
 	epoll_fd_ = -1;
@@ -159,6 +160,31 @@ Server::Server()
 void Server::init()
 {
 	Logger::info("server starting");
+
+	StrDirective http = conf_.http();
+	std::vector<StrDirective> servers = http.find<std::string>("server");
+
+	for (size_t i = 0; i < servers.size(); i++)
+	{
+		std::vector<unsigned int> listens;
+		std::vector<std::string> server_names;
+		std::vector<std::string> listen_directives;
+		
+		try {
+			listen_directives = servers[i].get<std::vector<std::string> >("listen");
+			// std::cout << cfg::util::represent(listens) << std::endl;
+		} catch (const std::exception& e) {
+			throw std::runtime_error("Invalid listen value for server " + to_string(i) + ". Error: " + e.what());
+		}
+		try {
+			server_names = servers[i].get<std::vector<std::string> >("server_name");
+			std::cout << cfg::util::represent(server_names) << std::endl;
+		} catch (const std::exception& e) {
+			throw std::runtime_error("Invalid server_name value for server " + to_string(i) + ". Error: " + e.what());
+		}
+	}
+
+	
 
 	listen_fd_ = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -169,7 +195,7 @@ void Server::init()
 	struct sockaddr_in addr;
 	std::memset(&addr, 0, sizeof(addr));
 	addr.sin_family = AF_INET;
-	addr.sin_port = htons(BASEPORT);
+	addr.sin_port = htons(8080);
 	addr.sin_addr.s_addr = INADDR_ANY;
 
 	if (bind(listen_fd_, (struct sockaddr *)&addr, sizeof(addr)) < 0)

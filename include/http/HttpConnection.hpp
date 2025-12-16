@@ -5,8 +5,8 @@
 #include <iostream>
 #include <deque>
 #include <sys/types.h>
-#include "HttpRequest.hpp"
-#include "HttpResponse.hpp"
+#include "http/HttpRequest.hpp"
+#include "http/HttpResponse.hpp"
 #include "utils_structs.hpp"
 
 class Server;

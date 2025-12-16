@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 #include <vector>
-#include "HttpRequest.hpp"
+#include "http/HttpRequest.hpp"
 #include "Logger.hpp"
 #include "FileCacheManager.hpp"
 #include "utils_structs.hpp"

@@ -5,10 +5,11 @@
 #include <cstdlib>
 #include <map>
 #include <stdint.h>
-#include "HttpConnection.hpp"
-#include "HttpResponse.hpp"
+#include "http/HttpConnection.hpp"
+#include "http/HttpResponse.hpp"
 #include "program.hpp"
 #include "utils_structs.hpp"
+#include "config/HttpConfig.hpp"
 
 class Server
 {
@@ -19,6 +20,8 @@ private:
 	int listen_fd_;
 	FdContext listen_context_;
 	int epoll_fd_;
+
+	cfg::HttpConfig& conf_;
 
 	// std::map<int, FdContext> pipe_context_;
 	std::map<int, HttpConnection> connections_;
@@ -33,7 +36,7 @@ private:
 	void removeClient(int fd, Logger::Level lvl);
 
 public:
-	Server();
+	Server(cfg::HttpConfig &conf);
 	~Server();
 
 	void init();

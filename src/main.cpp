@@ -18,15 +18,16 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
+	// Create the configuration class
+	cfg::HttpConfig	conf;
+	
 	try
 	{
 		// Create a parser
 		cfg::Parser	parser(argv[1]);
 		// Parse the file
 		parser.parse();
-
-		// Create the configuration class
-		cfg::HttpConfig	conf;
+		
 		// Load the configuration by passing parser lexer nodes
 		conf.generate(parser.getNodes());
 
@@ -46,7 +47,7 @@ int main(int argc, char **argv)
 		sigemptyset(&sigint_sa.sa_mask);
 		sigaction(SIGINT, &sigint_sa, NULL);
 
-		Server server;
+		Server server(conf);
 		server.init();
 		server.run();
 	}

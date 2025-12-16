@@ -1,6 +1,6 @@
-#include "HttpConnection.hpp"
-#include "HttpRequest.hpp"
-#include "HttpResponse.hpp"
+#include "http/HttpConnection.hpp"
+#include "http/HttpRequest.hpp"
+#include "http/HttpResponse.hpp"
 #include <algorithm>
 #include <vector>
 #include <sys/socket.h>

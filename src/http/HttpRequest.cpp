@@ -1,6 +1,6 @@
 
 #include "FileCacheManager.hpp"
-#include "HttpRequest.hpp"
+#include "http/HttpRequest.hpp"
 #include "utils.hpp"
 #include "Logger.hpp"
 #include <algorithm>
@@ -191,6 +191,7 @@ bool HttpRequest::parse()
 			create_error_ = BAD_REQUEST;
 			return true;
 		}
+		// std::cout << "Host: " << it->second << std::endl;
 
 		// for (std::map<std::string, std::string>::const_iterator it = infos_.begin();
 		// 	it != infos_.end();
