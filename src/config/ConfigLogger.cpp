@@ -4,7 +4,7 @@ namespace cfg
 {
 // #########################################################
 
-void	ConfigLogger::printMsg_(const std::string& msg, std::ostream& os)
+void	ConfigLogger::printMsg_(const str_t& msg, std::ostream& os)
 {
 	os << "CONFIG *    " << msg << std::endl;
 	std::flush(os);
@@ -13,44 +13,44 @@ void	ConfigLogger::printMsg_(const std::string& msg, std::ostream& os)
 ConfigLogger::ConfigLogger(void) {}
 ConfigLogger::~ConfigLogger(void) {}
 
-void	ConfigLogger::info(const std::string& msg)
+void	ConfigLogger::info(const str_t& msg)
 {
-	printMsg_(std::string(INFO_PRFX) + msg, std::cout);
+	printMsg_(str_t(INFO_PRFX) + msg, std::cout);
 }
 
-void	ConfigLogger::warn(const std::string& msg)
+void	ConfigLogger::warn(const str_t& msg)
 {
-	printMsg_(std::string(WARN_PRFX) + msg, std::cout);
+	printMsg_(str_t(WARN_PRFX) + msg, std::cout);
 }
 
-void	ConfigLogger::debug(const std::string& msg)
+void	ConfigLogger::debug(const str_t& msg)
 {
-	printMsg_(std::string(DEBUG_PRFX) + msg, std::cout);
+	printMsg_(str_t(DEBUG_PRFX) + msg, std::cout);
 }
 
-void	ConfigLogger::error(const std::string& msg)
+void	ConfigLogger::error(const str_t& msg)
 {
-	printMsg_(std::string(ERROR_PRFX) + msg, std::cerr);
+	printMsg_(str_t(ERROR_PRFX) + msg, std::cerr);
 }
 
 void	ConfigLogger::info(const char *cstr)
 {
-	info(std::string(cstr));
+	info(str_t(cstr));
 }
 
 void	ConfigLogger::warn(const char *cstr)
 {
-	warn(std::string(cstr));
+	warn(str_t(cstr));
 }
 
 void	ConfigLogger::debug(const char *cstr)
 {
-	debug(std::string(cstr));
+	debug(str_t(cstr));
 }
 
 void	ConfigLogger::error(const char *cstr)
 {
-	error(std::string(cstr));
+	error(str_t(cstr));
 }
 
 ConfigLogger	log;

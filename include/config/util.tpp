@@ -2,6 +2,7 @@
 #include "MagicCast.hpp"
 #include <typeinfo>
 #include <sstream>
+#include "global.hpp"
 
 namespace cfg
 {
@@ -11,115 +12,115 @@ namespace util
 {
 
 template <typename T>
-inline std::string	colorize(const T&)
+inline str_t	colorize(const T&)
 {
 	return RESET;
 }
 
 template <>
-inline std::string	colorize<std::string>(const std::string&)
+inline str_t	colorize<str_t>(const str_t&)
 {
 	return ORANGE;
 }
 
 template <>
-inline std::string	colorize<unsigned int>(const unsigned int&)
+inline str_t	colorize<uint_t>(const uint_t&)
 {
 	return LIGHT_GREEN;
 }
 
 template <>
-inline std::string	colorize<std::vector<std::string> >(const std::vector<std::string>&)
+inline str_t	colorize<vecstr_t >(const vecstr_t&)
 {
 	return GREEN;
 }
 
 template <>
-inline std::string	colorize<std::vector<unsigned int> >(const std::vector<unsigned int>&)
+inline str_t	colorize<vecuint_t >(const vecuint_t&)
 {
 	return CYAN;
 }
 
 template <>
-inline std::string	colorize<std::map<unsigned int, std::string> >(const std::map<unsigned int, std::string>&)
+inline str_t	colorize<mapstr_t >(const mapstr_t&)
 {
 	return BLURPLE;
 }
 
 template <>
-inline std::string	colorize<std::map<unsigned int, std::vector<std::string> > >(const std::map<unsigned int, std::vector<std::string> > &)
+inline str_t	colorize<mapvec_t>(const mapvec_t &)
 {
 	return PINK;
 }
 
 template <typename T>
-std::string	represent(const T& value)
+str_t	represent(const T& value)
 {
 	const std::type_info&	value_type = typeid(value);
-	const std::string		main_color = colorize(value);
+	const str_t		main_color = colorize(value);
 	std::stringstream		s;
 
-	if (value_type == typeid(std::string))
+	if (value_type == typeid(str_t))
 	{
-		const std::string	v = magic_cast<std::string>(value);
+		const str_t	v = magic_cast<str_t>(value);
 		s << main_color << v << RESET;
 	}
-	else if (value_type == typeid(unsigned int))
+	else if (value_type == typeid(uint_t))
 	{
-		const unsigned int	v = magic_cast<unsigned int>(value);
+		const uint_t	v = magic_cast<uint_t>(value);
 		s << main_color << v << RESET;
 	}
-	else if (value_type == typeid(std::vector<std::string>))
+	else if (value_type == typeid(vecstr_t))
 	{
-		const std::vector<std::string>	v = magic_cast<std::vector<std::string> >(value);
+		const vecstr_t	v = magic_cast<vecstr_t >(value);
 		s << main_color << "[";
-		for (std::vector<std::string>::const_iterator it = v.begin(); it != v.end(); ++it)
+		for (vecstr_t::const_iterator it = v.begin(); it != v.end(); ++it)
 		{
 			if (it != v.begin())
 				s << ", ";
-			const std::string	color = colorize(*it);
+			const str_t	color = colorize(*it);
 			s << color << (*it);
 		}
 		s << main_color << "]" << RESET;
 	}
-	else if (value_type == typeid(std::vector<unsigned int>))
+	else if (value_type == typeid(vecuint_t))
 	{
-		const std::vector<unsigned int>	v = magic_cast<std::vector<unsigned int> >(value);
+		const vecuint_t	v = magic_cast<vecuint_t >(value);
 		s << main_color << "[";
-		for (std::vector<unsigned int>::const_iterator it = v.begin(); it != v.end(); ++it)
+		for (vecuint_t::const_iterator it = v.begin(); it != v.end(); ++it)
 		{
 			if (it != v.begin())
 				s << ", ";
-			const std::string	color = colorize(*it);
+			const str_t	color = colorize(*it);
 			s << color << (*it);
 		}
 		s << main_color << "]" << RESET;
 	}
-	else if (value_type == typeid(std::map<unsigned int, std::string>))
+	else if (value_type == typeid(mapstr_t))
 	{
-		const std::map<unsigned int, std::string>	v = magic_cast<std::map<unsigned int, std::string> >(value);
+		const mapstr_t	v = magic_cast<mapstr_t >(value);
 		s << main_color << "{";
-		for (std::map<unsigned int, std::string>::const_iterator it = v.begin(); it != v.end(); ++it)
+		for (mapstr_t::const_iterator it = v.begin(); it != v.end(); ++it)
 		{
 			if (it != v.begin())
 				s << ", ";
-			const unsigned int	it_k = (*it).first;
-			const std::string	it_v = (*it).second;
+			const uint_t	it_k = (*it).first;
+			const str_t	it_v = (*it).second;
 			s << colorize(it_k) << it_k << main_color << ": " << colorize(it_v) << it_v;
 		}
 		s << main_color << "}";
 	}
-	else if (value_type == typeid(std::map<unsigned int, std::vector<std::string> >))
+	else if (value_type == typeid(mapvec_t))
 	{
-		const std::map<unsigned int, std::vector<std::string> >	v =
-			magic_cast<std::map<unsigned int, std::vector<std::string> > >(value);
+		const mapvec_t	v =
+			magic_cast<mapvec_t>(value);
 		s << main_color << "{";
-		for (std::map<unsigned int, std::vector<std::string> >::const_iterator it = v.begin(); it != v.end(); ++it)
+		for (mapvec_t::const_iterator it = v.begin(); it != v.end(); ++it)
 		{
 			if (it != v.begin())
 				s << ", ";
-			const unsigned int				it_k = (*it).first;
-			const std::vector<std::string>	it_v = (*it).second;
+			const uint_t				it_k = (*it).first;
+			const vecstr_t	it_v = (*it).second;
 			s << colorize(it_k) << it_k << main_color << ": " << represent(it_v);
 		}
 		s << main_color << "}";

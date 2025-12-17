@@ -4,7 +4,7 @@ namespace cfg
 {
 // #########################################################
 
-MagicCastException::MagicCastException(const std::string& err_msg): std::runtime_error(err_msg) {}
+MagicCastException::MagicCastException(const str_t& err_msg): std::runtime_error(err_msg) {}
 
 InvalidStringException::InvalidStringException(void): MagicCastException(INVALID_STRING_EXCEPTION) {}
 

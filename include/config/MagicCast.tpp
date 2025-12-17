@@ -13,7 +13,7 @@ namespace cfg
 r_type: 0
 r_type typeid: NSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
 
-====== UNSIGNED INT =====================
+====== uint_t =====================
 r_type: 1
 r_type typeid: j
 
@@ -21,15 +21,15 @@ r_type typeid: j
 r_type: 2
 r_type typeid: St6vectorINSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEESaIS5_EE
 
-====== VECTOR UNSIGNED INT ==============
+====== VECTOR uint_t ==============
 r_type: 3
 r_type typeid: St6vectorIjSaIjEE
 
-====== MAP UNSIGNED INT STRING ==========
+====== MAP uint_t STRING ==========
 r_type: 4
 r_type typeid: St3mapIjNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEESt4lessIjESaISt4pairIKjS5_EEE
 
-====== MAP UNSIGNED INT VECTOR STRING ===
+====== MAP uint_t VECTOR STRING ===
 r_type: 5
 r_type typeid: St3mapIjSt6vectorINSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEESaIS6_EESt4lessIjESaISt4pairIKjS8_EEE
  */
@@ -50,18 +50,18 @@ R	magic_cast(T value) throw(MagicCastException)
 		return as<R>(value);
 
 	std::stringstream									string;
-	unsigned int										uint;
-	std::vector<std::string>							vector_string;
-	std::vector<unsigned int>							vector_uint;
-	std::map<unsigned int, std::string>					map1;
-	std::map<unsigned int, std::vector<std::string> >	map2;
+	uint_t										uint;
+	vecstr_t							vector_string;
+	vecuint_t							vector_uint;
+	mapstr_t					map1;
+	mapvec_t	map2;
 
 	switch (t_type)
 	{
 		case Node4::TYPE_STRING:
 			if (r_type != Node4::TYPE_STRING_VECTOR)
 				throw InvalidStringException();
-			vector_string.push_back(as<std::string>(value));
+			vector_string.push_back(as<str_t>(value));
 			return as<R>(vector_string);
 			break;
 
@@ -69,28 +69,28 @@ R	magic_cast(T value) throw(MagicCastException)
 		{
 			if (r_type == Node4::TYPE_STRING)
 			{
-				string << as<unsigned int>(value);
+				string << as<uint_t>(value);
 				return as<R>(string.str());
 			}
 			else if (r_type == Node4::TYPE_STRING_VECTOR)
 			{
-				string << as<unsigned int>(value);
+				string << as<uint_t>(value);
 				vector_string.push_back(string.str());
 				return as<R>(vector_string);
 			}
 			else if (r_type == Node4::TYPE_UINT_VECTOR)
 			{
-				vector_uint.push_back(as<unsigned int>(value));
+				vector_uint.push_back(as<uint_t>(value));
 				return as<R>(vector_uint);
 			}
 			else if (r_type == Node4::TYPE_MAP_UINT_STRING)
 			{
-				map1.insert(std::make_pair(as<unsigned int>(value), ""));
+				map1.insert(std::make_pair(as<uint_t>(value), ""));
 				return as<R>(map1);
 			}
 			else if (r_type == Node4::TYPE_MAP_UINT_STRING_VECTOR)
 			{
-				map2.insert(std::make_pair(as<unsigned int>(value), std::vector<std::string>()));
+				map2.insert(std::make_pair(as<uint_t>(value), vecstr_t()));
 				return as<R>(map2);
 			}
 			break;
@@ -100,8 +100,8 @@ R	magic_cast(T value) throw(MagicCastException)
 		{
 			if (r_type != Node4::TYPE_STRING)
 				throw InvalidVectorStringException();
-			std::vector<std::string>	value_vec = as<std::vector<std::string> >(value);
-			for (std::vector<std::string>::const_iterator it = value_vec.begin(); it != value_vec.end(); ++it)
+			vecstr_t	value_vec = as<vecstr_t >(value);
+			for (vecstr_t::const_iterator it = value_vec.begin(); it != value_vec.end(); ++it)
 				string << (*it) + " ";
 			return as<R>(string.str());
 			break;
@@ -111,16 +111,16 @@ R	magic_cast(T value) throw(MagicCastException)
 		{
 			if (r_type == Node4::TYPE_UINT)
 				throw InvalidVectorUintException();
-			std::vector<unsigned int>	value_vec = as<std::vector<unsigned int> >(value);
+			vecuint_t	value_vec = as<vecuint_t >(value);
 			if (r_type == Node4::TYPE_STRING)
 			{
-				for (std::vector<unsigned int>::const_iterator it = value_vec.begin(); it != value_vec.end(); ++it)
+				for (vecuint_t::const_iterator it = value_vec.begin(); it != value_vec.end(); ++it)
 					string << (*it) << " ";
 				return	as<R>(string.str());
 			}
 			else if (r_type == Node4::TYPE_STRING_VECTOR)
 			{
-				for (std::vector<unsigned int>::const_iterator it = value_vec.begin(); it != value_vec.end(); ++it)
+				for (vecuint_t::const_iterator it = value_vec.begin(); it != value_vec.end(); ++it)
 				{
 					string.clear();
 					string << (*it);
@@ -130,7 +130,7 @@ R	magic_cast(T value) throw(MagicCastException)
 			}
 			else if (r_type == Node4::TYPE_MAP_UINT_STRING)
 			{
-				std::vector<unsigned int>::const_iterator	it = value_vec.begin();
+				vecuint_t::const_iterator	it = value_vec.begin();
 				uint = (*it);
 				++it;
 				for (; it != value_vec.end(); ++it)
@@ -140,7 +140,7 @@ R	magic_cast(T value) throw(MagicCastException)
 			}
 			else if (r_type == Node4::TYPE_MAP_UINT_STRING_VECTOR)
 			{
-				std::vector<unsigned int>::const_iterator	it = value_vec.begin();
+				vecuint_t::const_iterator	it = value_vec.begin();
 				uint = (*it);
 				++it;
 				for (; it != value_vec.end(); ++it)
@@ -159,7 +159,7 @@ R	magic_cast(T value) throw(MagicCastException)
 		{
 			if (r_type != Node4::TYPE_STRING && r_type != Node4::TYPE_STRING_VECTOR && r_type != Node4::TYPE_MAP_UINT_STRING_VECTOR)
 				throw InvalidMapStringException();
-			std::map<unsigned int, std::string>	value_map = as<std::map<unsigned int, std::string> >(value);
+			mapstr_t	value_map = as<mapstr_t >(value);
 			if (r_type == Node4::TYPE_STRING)
 			{
 				if (value_map.size() == 0)
@@ -191,13 +191,13 @@ R	magic_cast(T value) throw(MagicCastException)
 		{
 			if (r_type != Node4::TYPE_STRING && r_type != Node4::TYPE_STRING_VECTOR && r_type != Node4::TYPE_MAP_UINT_STRING)
 				throw InvalidMapVectorStringException();
-			std::map<unsigned int, std::vector<std::string> >	value_map = as<std::map<unsigned int, std::vector<std::string> > >(value);
+			mapvec_t	value_map = as<mapvec_t>(value);
 			if (r_type == Node4::TYPE_STRING)
 			{
 				if (value_map.size() == 0)
 					return as<R>(string.str());
 				string << value_map.begin()->first << " ";
-				for (std::vector<std::string>::const_iterator it = value_map.begin()->second.begin(); it != value_map.begin()->second.end(); ++it)
+				for (vecstr_t::const_iterator it = value_map.begin()->second.begin(); it != value_map.begin()->second.end(); ++it)
 					string << (*it) << " ";
 				return as<R>(string.str());
 			}
@@ -207,7 +207,7 @@ R	magic_cast(T value) throw(MagicCastException)
 					return as<R>(vector_string);
 				string << value_map.begin()->first;
 				vector_string.push_back(string.str());
-				for (std::vector<std::string>::const_iterator it = value_map.begin()->second.begin(); it != value_map.begin()->second.end(); ++it)
+				for (vecstr_t::const_iterator it = value_map.begin()->second.begin(); it != value_map.begin()->second.end(); ++it)
 					vector_string.push_back(*it);
 				return as<R>(vector_string);
 			}
@@ -215,7 +215,7 @@ R	magic_cast(T value) throw(MagicCastException)
 			{
 				if (value_map.size() == 0)
 					return as<R>(map1);
-				for (std::vector<std::string>::const_iterator it = value_map.begin()->second.begin(); it != value_map.begin()->second.end(); ++it)
+				for (vecstr_t::const_iterator it = value_map.begin()->second.begin(); it != value_map.begin()->second.end(); ++it)
 					string << (*it) << " ";
 				map1.insert(std::make_pair(value_map.begin()->first, string.str()));
 				return as<R>(map1);
@@ -237,14 +237,14 @@ R	magic_assemble(A& a, B& b) throw(MagicCastException)
 	R	converted_a = magic_cast<R>(a),
 		converted_b = magic_cast<R>(b);
 
-	const std::string	a_id = typeid(A).name();
-	if (a_id.find("vector") != std::string::npos)
+	const str_t	a_id = typeid(A).name();
+	if (a_id.find("vector") != str_t::npos)
 	{
 		typename R::const_iterator	it = converted_b.begin();
 		for (; it != converted_b.end(); ++it)
 			converted_a.push_back(*it);
 	}
-	if (a_id.find("map") != std::string::npos)
+	if (a_id.find("map") != str_t::npos)
 	{
 		typename R::const_iterator	it = converted_b.begin();
 		for (; it != converted_b.end(); ++it)

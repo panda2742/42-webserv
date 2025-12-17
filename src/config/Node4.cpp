@@ -53,22 +53,22 @@ void	Node4::Value::deleteData(void)
 	switch (type)
 	{
 		case TYPE_STRING:
-			delete getAs<std::string>();
+			delete getAs<str_t>();
 			break;
 		case TYPE_UINT:
-			delete getAs<unsigned int>();
+			delete getAs<uint_t>();
 			break;
 		case TYPE_STRING_VECTOR:
-			delete getAs<std::vector<std::string> >();
+			delete getAs<vecstr_t >();
 			break;
 		case TYPE_UINT_VECTOR:
-			delete getAs<std::vector<unsigned int> >();
+			delete getAs<vecuint_t >();
 			break;
 		case TYPE_MAP_UINT_STRING:
-			delete getAs<std::map<unsigned int, std::string> >();
+			delete getAs<mapstr_t >();
 			break;
 		case TYPE_MAP_UINT_STRING_VECTOR:
-			delete getAs<std::map<unsigned int, std::vector<std::string> > >();
+			delete getAs<mapvec_t>();
 			break;
 		default:
 			break;
@@ -76,7 +76,7 @@ void	Node4::Value::deleteData(void)
 	data = NULL;
 }
 
-std::string	Node4::fastStr_(void)
+str_t	Node4::fastStr_(void)
 {
 	std::stringstream	ss;
 
@@ -87,22 +87,22 @@ std::string	Node4::fastStr_(void)
 	switch (value.type)
 	{
 		case TYPE_STRING:
-			ss << "STRING =" << util::represent(*value.getAs<std::string>());
+			ss << "STRING =" << util::represent(*value.getAs<str_t>());
 			break;
 		case TYPE_UINT:
-			ss << "UINT =" << util::represent(*value.getAs<unsigned int>());
+			ss << "UINT =" << util::represent(*value.getAs<uint_t>());
 			break;
 		case TYPE_STRING_VECTOR:
-			ss << "STRINGVEC =" << util::represent(*value.getAs<std::vector<std::string> >());
+			ss << "STRINGVEC =" << util::represent(*value.getAs<vecstr_t >());
 			break;
 		case TYPE_UINT_VECTOR:
-			ss << "UINTVEC =" << util::represent(*value.getAs<std::vector<unsigned int> >());
+			ss << "UINTVEC =" << util::represent(*value.getAs<vecuint_t >());
 			break;
 		case TYPE_MAP_UINT_STRING:
-			ss << "UINT_STRING =" << util::represent(*value.getAs<std::map<unsigned int, std::string> >());
+			ss << "UINT_STRING =" << util::represent(*value.getAs<mapstr_t >());
 			break;
 		case TYPE_MAP_UINT_STRING_VECTOR:
-			ss << "UINT_STRINGVEC =" << util::represent(*value.getAs<std::map<unsigned int, std::vector<std::string> > >());
+			ss << "UINT_STRINGVEC =" << util::represent(*value.getAs<mapvec_t>());
 			break;
 		default:
 			ss << " EMPTY";
@@ -116,9 +116,9 @@ std::string	Node4::fastStr_(void)
 	return ss.str();
 }
 
-std::string Node4::toString(void)
+str_t Node4::toString(void)
 {
-	unsigned int	tabs = 0;
+	uint_t	tabs = 0;
 	Node4	*p = parent;
 	while (p)
 	{
@@ -126,7 +126,7 @@ std::string Node4::toString(void)
 		++tabs;
 	}
     std::stringstream	ss;
-    ss << std::string(tabs, '\t') << fastStr_();
+    ss << str_t(tabs, '\t') << fastStr_();
 
 	if (first_child)
 		ss << first_child->toString();
@@ -139,7 +139,7 @@ std::string Node4::toString(void)
     return ss.str();
 }
 
-std::vector<Node4 *>	Node4::access(const std::string& child_name)
+std::vector<Node4 *>	Node4::access(const str_t& child_name)
 {
 	std::vector<Node4 *>	res;
 
