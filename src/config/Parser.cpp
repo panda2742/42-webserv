@@ -11,7 +11,7 @@ void	Parser::saveRaw_(void) throw(ParsingException)
 {
 	std::ifstream	file(filename_.c_str(), std::ios::in | std::ios::binary);
 	if (!file)
-		throw ParsingException("file is not openable.");
+		throw ParsingException("file is not openable");
 
 	file.seekg(0, std::ios::end);
 	std::ifstream::pos_type size = file.tellg();
@@ -43,6 +43,9 @@ void	Parser::saveRaw_(void) throw(ParsingException)
                 result += raw_config_[i];
         }
     }
+
+	if (result.length() > 80000)
+		throw ParsingException("file is too large (comments excluded)");
 
 	raw_config_ = result;
 }
@@ -103,7 +106,6 @@ void	Parser::parse(void) throw(ParsingException)
 {
 	saveRaw_();
 	tokenize_();
-	// util::printTokens_(lexer_nodes_);
 }
 
 const std::vector<Lexer::TokenNode>&	Parser::getNodes(void) const{
