@@ -20,8 +20,9 @@ class Middleware
 	~Middleware(void);
 
 	/**
-	 * 
+	 * Check the format and ensures there is the correct amount of brackets, and other formating stuff.
 	 */
+	bool	checkFormat(const std::string);
 
 	private:
 	/**
