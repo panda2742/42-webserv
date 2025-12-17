@@ -6,19 +6,38 @@
 #include <arpa/inet.h>
 
 struct ListenProp {
-	in_addr_t ip;
-	uint port;
+	union {
+		struct {
+			in_addr_t ip;
+			uint port;
+		};
+		uint64_t salade_tomate_oignons;
+	};
 };
+
+inline bool operator<(const ListenProp &a, const ListenProp &b)
+{
+	if (a.port != b.port) return a.port < b.port;
+	return a.ip < b.ip;
+}
+
+inline bool operator==(const ListenProp &a, const ListenProp &b)
+{
+	return a.salade_tomate_oignons == b.salade_tomate_oignons;
+}
 
 class ServerInstance
 {
 private:
-	std::vector<ListenProp> listen_;
+	std::vector<ListenProp> listens_;
 	std::vector<std::string> server_names_;
 	
 public:
-	ServerInstance();
+	ServerInstance(std::vector<ListenProp>& listen, std::vector<std::string>& server_names);
 	~ServerInstance();
+
+	const std::vector<ListenProp> &getListens(void) const { return listens_; }
+	const std::vector<std::string> &getServerNames(void) const { return server_names_; }
 };
 
 

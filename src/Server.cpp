@@ -1,19 +1,22 @@
 
-#include "Server.hpp"
+#include <algorithm>
+#include <stdexcept>
+#include <iostream>
+#include <cstring>
+#include <string>
+
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/epoll.h>
+#include <unistd.h>
+#include <signal.h>
+#include <fcntl.h>
+#include <errno.h>
+
 #include "ServerInstance.hpp"
+#include "Server.hpp"
 #include "Logger.hpp"
 #include "utils.hpp"
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <cstring>
-#include <stdexcept>
-#include <string>
-#include <fcntl.h>
-#include <sys/epoll.h>
-#include <iostream>
-#include <unistd.h>
-#include <errno.h>
-#include <signal.h>
 
 // #define BASEPORT 8080
 #define MAX_EVENTS 64
@@ -153,8 +156,19 @@ int Server::removeCgiFd(int fd)
 Server::Server(cfg::HttpConfig &conf)
 	: running_(false), is_child_(false), conf_(conf)
 {
-	listen_fd_ = -1;
+	// listen_fd_ = -1;
 	epoll_fd_ = -1;
+}
+
+in_addr_t inet_addr_secure(const std::string& ip)
+{
+	in_addr addr;
+
+	int ret = inet_pton(AF_INET, ip.c_str(), &addr);
+	if (ret != 1)
+		throw std::invalid_argument("invalid IPv4 address: " + ip);
+
+	return addr.s_addr;
 }
 
 void Server::init()
@@ -179,14 +193,26 @@ void Server::init()
 
 				if (sep == std::string::npos)
 				{
-					listens.push_back((ListenProp){.ip = INADDR_ANY, .port = std::atoi(listen_directives[j].c_str())});
+					ListenProp prop;
+					prop.ip = INADDR_ANY;
+					prop.port = (uint)std::atoi(listen_directives[j].c_str());
+
+					if (prop.port == 0) throw std::runtime_error("Unauthorized port 0 in configuration");
+
+					listens.push_back(prop);
 				}
 				else
 				{
 					std::string ip = listen_directives[j].substr(0, sep);
 					if (ip == "localhost") ip = "127.0.0.1";
 
-					listens.push_back((ListenProp){.ip = inet_addr(ip.c_str()), .port = std::atoi(listen_directives[j].c_str() + sep)});
+					ListenProp prop;
+					prop.ip = inet_addr_secure(ip);
+					prop.port = (uint)std::atoi(listen_directives[j].c_str() + sep + 1);
+
+					if (prop.port == 0) throw std::runtime_error("Unauthorized port 0 in configuration");
+
+					listens.push_back(prop);
 				}
 			}
 			std::cout << cfg::util::represent(listen_directives) << std::endl;
@@ -199,39 +225,60 @@ void Server::init()
 		} catch (const std::exception& e) {
 			throw std::runtime_error("Invalid server_name value for server " + to_string(i) + ". Error: " + e.what());
 		}
+
+		instances_.push_back(ServerInstance(listens, server_names));
 	}
 
+	std::map<ListenProp, std::vector<ServerInstance*> > server_instance_map;
 	
+	for (size_t i = 0; i < instances_.size(); i++) {
+		ServerInstance &instance = instances_[i];
+		const std::vector<ListenProp> &instance_listen_props = instance.getListens();
+		for (size_t j = 0; j < instance_listen_props.size(); j++) {
+			const std::vector<ServerInstance*> &server_instances = server_instance_map[instance_listen_props[j]];
+			if (std::find(server_instances.begin(), server_instances.end(), &instance) == server_instances.end()) {
+				server_instance_map[instance_listen_props[j]].push_back(&instance);
+			}
+		}
+	}
 
-	listen_fd_ = socket(AF_INET, SOCK_STREAM, 0);
+	for (
+		std::map<ListenProp, std::vector<ServerInstance*> >::const_iterator it = server_instance_map.begin();
+		it != server_instance_map.end();
+		++it
+	) {
+		std::cout << it->first.ip << ":" << it->first.port << " -> " << it->second.size() << std::endl;
+	}
+	
+	// listen_fd_ = socket(AF_INET, SOCK_STREAM, 0);
 
-	// Socket options pour ne pas bloquer le port apres un kill
-	int opt = 1;
-	setsockopt(listen_fd_, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+	// // Socket options pour ne pas bloquer le port apres un kill
+	// int opt = 1;
+	// setsockopt(listen_fd_, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
-	struct sockaddr_in addr;
-	std::memset(&addr, 0, sizeof(addr));
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(8080);
-	addr.sin_addr.s_addr = INADDR_ANY;
+	// struct sockaddr_in addr;
+	// std::memset(&addr, 0, sizeof(addr));
+	// addr.sin_family = AF_INET;
+	// addr.sin_port = htons(8080);
+	// addr.sin_addr.s_addr = INADDR_ANY;
 
-	if (bind(listen_fd_, (struct sockaddr *)&addr, sizeof(addr)) < 0)
-		throw std::runtime_error("Socket binding: " + std::string(strerror(errno)));
+	// if (bind(listen_fd_, (struct sockaddr *)&addr, sizeof(addr)) < 0)
+	// 	throw std::runtime_error("Socket binding: " + std::string(strerror(errno)));
 
-	if (listen(listen_fd_, SOMAXCONN) < 0)
-		throw std::runtime_error("listen failed");
+	// if (listen(listen_fd_, SOMAXCONN) < 0)
+	// 	throw std::runtime_error("listen failed");
 
-	fcntl(listen_fd_, F_SETFL, O_NONBLOCK);
+	// fcntl(listen_fd_, F_SETFL, O_NONBLOCK);
 
-	epoll_fd_ = epoll_create(1);
-	if (epoll_fd_ < 0)
-		throw std::runtime_error("epoll_create failed");
+	// epoll_fd_ = epoll_create(1);
+	// if (epoll_fd_ < 0)
+	// 	throw std::runtime_error("epoll_create failed");
 
-	listen_context_.type = LISTEN;
-	listen_context_.fd = listen_fd_;
+	// listen_context_.type = LISTEN;
+	// listen_context_.fd = listen_fd_;
 
-	if (addFdEpoll(listen_fd_, EPOLLIN, &listen_context_) < 0)
-		throw std::runtime_error("epoll to listen fd link failed");
+	// if (addFdEpoll(listen_fd_, EPOLLIN, &listen_context_) < 0)
+	// 	throw std::runtime_error("epoll to listen fd link failed");
 }
 
 void Server::run()
@@ -252,7 +299,7 @@ void Server::run()
 
 			if (context->type == LISTEN)
 			{
-				int client_fd = accept(listen_fd_, NULL, NULL);
+				int client_fd = accept(listen_fd_[0], NULL, NULL);
 				fcntl(client_fd, F_SETFL, O_NONBLOCK);
 
 				connections_.insert(std::make_pair(client_fd, HttpConnection(client_fd, *this)));
@@ -304,8 +351,8 @@ void Server::clean()
 	{
 		if (it->first >= 0) close(it->first);
 	}
-	if (listen_fd_ >= 0) close(listen_fd_);
-	listen_fd_ = -1;
+	// if (listen_fd_ >= 0) close(listen_fd_);
+	// listen_fd_ = -1; // TODO
 	if (epoll_fd_ >= 0) close(epoll_fd_);
 	epoll_fd_ = -1;
 }
