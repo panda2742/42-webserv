@@ -30,6 +30,8 @@ int main(int argc, char **argv)
 		// Load the configuration by passing parser lexer nodes
 		conf.generate(parser.getNodes());
 
+		std::cout << "Parsed! Nodes: " << parser.getNodes().size() << std::endl;
+
 		// Call a new middleware on the config
 		mdw::Middleware	middleware(conf);
 	}

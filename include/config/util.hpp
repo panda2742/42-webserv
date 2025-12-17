@@ -2,6 +2,7 @@
 #define PARSE_UTILS_HPP
 
 #include "Parser.hpp"
+#include "global.hpp"
 
 namespace cfg
 {
@@ -29,7 +30,7 @@ void						printTokens_(const std::vector<Lexer::TokenNode>& nodes);
 /**
  *
  */
-std::vector<std::string>	&cleanVector(std::vector<std::string>& vect);
+vecstr_t	&cleanVector(vecstr_t& vect);
 
 /**
  * Test if a string is a number.
@@ -37,7 +38,7 @@ std::vector<std::string>	&cleanVector(std::vector<std::string>& vect);
  * @param nbstr The string to test.
  * @return The result of the test as a boolean.
  */
-bool						isNumber(const std::string& nbstr);
+bool						isNumber(const str_t& nbstr);
 
 /**
  * Return a string containing an ANSI escape color code associated with the type of the value.
@@ -46,7 +47,7 @@ bool						isNumber(const std::string& nbstr);
  * @return The ANSI escape color code associated with the type.
  */
 template <typename T>
-std::string					colorize(const T&);
+str_t					colorize(const T&);
 
 /**
  * Take a variable of type T, where T must be a valid node type. It displays correctly the asked value with colors
@@ -57,7 +58,7 @@ std::string					colorize(const T&);
  * @return The built string representation of the value.
  */
 template <typename T>
-std::string					represent(const T& value);
+str_t					represent(const T& value);
 
 };
 

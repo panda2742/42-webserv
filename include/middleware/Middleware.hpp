@@ -19,6 +19,10 @@ class Middleware
 	Middleware(cfg::HttpConfig& conf);
 	~Middleware(void);
 
+	/**
+	 * 
+	 */
+
 	private:
 	/**
 	 * The instance of the HttpConfig class to do the test onto.

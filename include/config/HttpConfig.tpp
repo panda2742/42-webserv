@@ -20,7 +20,7 @@ Directive<T>::~Directive(void) {}
 
 template <typename T>
 template <typename R>
-std::vector<Directive<R> >	Directive<T>::find(const std::string& prop_name)
+std::vector<Directive<R> >	Directive<T>::find(const str_t& prop_name)
 {
 	std::vector<cfg::Node4 *>	nodes = node->access(prop_name);
 	std::vector<Directive<R> >	res;
@@ -37,7 +37,7 @@ std::vector<Directive<R> >	Directive<T>::find(const std::string& prop_name)
 
 template <typename T>
 template <typename R>
-R	Directive<T>::get(const std::string& prop_name)
+R	Directive<T>::get(const str_t& prop_name)
 {
 	std::vector<cfg::Node4 *>	nodes = node->access(prop_name);
 	R							final_value;
@@ -48,39 +48,39 @@ R	Directive<T>::get(const std::string& prop_name)
 		{
 			case cfg::Node4::TYPE_STRING:
 			{
-				R	v = cfg::magic_cast<R>(*(*it)->value.getAs<std::string>());
+				R	v = cfg::magic_cast<R>(*(*it)->value.getAs<str_t>());
 				final_value = cfg::magic_assemble<R>(final_value, v);
 				break;
 			}
 			case cfg::Node4::TYPE_UINT:
 			{
-				R	v = cfg::magic_cast<R>(*(*it)->value.getAs<unsigned int>());
+				R	v = cfg::magic_cast<R>(*(*it)->value.getAs<uint_t>());
 				final_value = cfg::magic_assemble<R>(final_value, v);
 				break;
 			}
 			case cfg::Node4::TYPE_STRING_VECTOR:
 			{
-				R	v = cfg::magic_cast<R>(*(*it)->value.getAs<std::vector<std::string> >());
+				R	v = cfg::magic_cast<R>(*(*it)->value.getAs<vecstr_t >());
 				final_value = cfg::magic_assemble<R>(final_value, v);
 				break;
 			}
 			case cfg::Node4::TYPE_UINT_VECTOR:
 			{
-				R	v = cfg::magic_cast<R>(*(*it)->value.getAs<std::vector<unsigned int> >());
+				R	v = cfg::magic_cast<R>(*(*it)->value.getAs<vecuint_t >());
 				final_value = cfg::magic_assemble<R>(final_value, v);
 				break;
 			}
 			case cfg::Node4::TYPE_MAP_UINT_STRING:
 			{
 				std::cout << (*it)->name << std::endl;
-				std::cout << cfg::util::represent(*(*it)->value.getAs<std::map<unsigned int, std::string> >()) << std::endl;
-				R	v = cfg::magic_cast<R>(*(*it)->value.getAs<std::map<unsigned int, std::string> >());
+				std::cout << cfg::util::represent(*(*it)->value.getAs<mapstr_t >()) << std::endl;
+				R	v = cfg::magic_cast<R>(*(*it)->value.getAs<mapstr_t >());
 				final_value = cfg::magic_assemble<R>(final_value, v);
 				break;
 			}
 			case cfg::Node4::TYPE_MAP_UINT_STRING_VECTOR:
 			{
-				R	v = cfg::magic_cast<R>(*(*it)->value.getAs<std::map<unsigned int, std::vector<std::string> > >());
+				R	v = cfg::magic_cast<R>(*(*it)->value.getAs<mapvec_t>());
 				final_value = cfg::magic_assemble<R>(final_value, v);
 				break;
 			}
@@ -102,7 +102,7 @@ namespace cfg
 // #########################################################
 
 template <typename T>
-HttpConfig::GetData<T>::GetData(const std::string& prop_name_, const Node4 *parent_)
+HttpConfig::GetData<T>::GetData(const str_t& prop_name_, const Node4 *parent_)
 	: parent(parent_), prop_name(prop_name_) {}
 
 template <typename T>HttpConfig::GetData<T>::GetData(const GetData& other)
@@ -158,7 +158,7 @@ std::vector<Directive<T> >	HttpConfig::get_(GetData<T>& ddata)
 }
 
 template <typename T>
-std::vector<Directive<T> >	HttpConfig::get(const std::string& prop_name, const Node4 *parent)
+std::vector<Directive<T> >	HttpConfig::get(const str_t& prop_name, const Node4 *parent)
 {
 	if (!parent)
 		parent = root_;
@@ -169,7 +169,7 @@ std::vector<Directive<T> >	HttpConfig::get(const std::string& prop_name, const N
 }
 
 template <typename T, typename P>
-std::vector<Directive<T> >	HttpConfig::get(const std::string& prop_name, const Directive<P>& directive)
+std::vector<Directive<T> >	HttpConfig::get(const str_t& prop_name, const Directive<P>& directive)
 {
 	return get(prop_name, directive.node);
 }
