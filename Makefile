@@ -74,11 +74,11 @@ re: fclean
 .PHONY: run
 run: all
 	@clear
-	./$(NAME) samples/hatsune_miku.conf
+	./$(NAME) samples/webserv.conf
 
 .PHONY: vg
 vg: all
 	@clear
-	$(VG) $(VGFLAGS) ./$(NAME) samples/hatsune_miku.conf
+	$(VG) $(VGFLAGS) ./$(NAME) samples/webserv.conf
 
 -include $(DEPS)
