@@ -5,8 +5,8 @@
 #include <vector>
 #include <sys/socket.h>
 
-HttpConnection::HttpConnection(int socket_fd, Server& server)
-	: socket_fd_(socket_fd), server_(server), header_(false), content_size_(0)
+HttpConnection::HttpConnection(int socket_fd, FdContext *socket_context, Server& server)
+	: socket_fd_(socket_fd), socket_context_(socket_context), server_(server), header_(false), content_size_(0)
 {
 	context_.type = CLIENT;
 	context_.fd = socket_fd;

@@ -5,6 +5,8 @@
 #include <string>
 #include <arpa/inet.h>
 
+#include "config/HttpConfig.hpp"
+
 struct ListenProp {
 	union {
 		struct {
@@ -29,12 +31,17 @@ inline bool operator==(const ListenProp &a, const ListenProp &b)
 class ServerInstance
 {
 private:
+	StrDirective server_;
+	uint32_t server_index_;
+
 	std::vector<ListenProp> listens_;
 	std::vector<std::string> server_names_;
 	
 public:
-	ServerInstance(std::vector<ListenProp>& listen, std::vector<std::string>& server_names);
+	ServerInstance(StrDirective& server, uint32_t server_index);
 	~ServerInstance();
+
+	void init();
 
 	const std::vector<ListenProp> &getListens(void) const { return listens_; }
 	const std::vector<std::string> &getServerNames(void) const { return server_names_; }

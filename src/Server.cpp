@@ -160,77 +160,17 @@ Server::Server(cfg::HttpConfig &conf)
 	epoll_fd_ = -1;
 }
 
-in_addr_t inet_addr_secure(const std::string& ip)
-{
-	in_addr addr;
-
-	int ret = inet_pton(AF_INET, ip.c_str(), &addr);
-	if (ret != 1)
-		throw std::invalid_argument("invalid IPv4 address: " + ip);
-
-	return addr.s_addr;
-}
-
-
-void Server::initServerInstances()
+void Server::initInstances()
 {
 	StrDirective http = conf_.http();
 	std::vector<StrDirective> servers = http.find<std::string>("server");
 
 	for (size_t i = 0; i < servers.size(); i++)
 	{
-		std::vector<ListenProp> listens;
-		std::vector<std::string> server_names;
-		std::vector<std::string> listen_directives;
-		
-		try {
-			listen_directives = servers[i].get<std::vector<std::string> >("listen");
-
-			for (size_t j = 0; j < listen_directives.size(); j++)
-			{
-				size_t sep = listen_directives[j].find(":");
-
-				if (sep == std::string::npos)
-				{
-					ListenProp prop;
-					prop.ip = INADDR_ANY;
-					prop.port = (uint)std::atoi(listen_directives[j].c_str());
-
-					if (prop.port == 0) throw std::runtime_error("Unauthorized port 0 in configuration");
-
-					listens.push_back(prop);
-				}
-				else
-				{
-					std::string ip = listen_directives[j].substr(0, sep);
-					if (ip == "localhost") ip = "127.0.0.1";
-
-					ListenProp prop;
-					prop.ip = inet_addr_secure(ip);
-					prop.port = (uint)std::atoi(listen_directives[j].c_str() + sep + 1);
-
-					if (prop.port == 0) throw std::runtime_error("Unauthorized port 0 in configuration");
-
-					listens.push_back(prop);
-				}
-			}
-			// std::cout << cfg::util::represent(listen_directives) << std::endl;
-		} catch (const std::exception& e) {
-			throw std::runtime_error("Invalid listen value for server " + to_string(i) + ". Error: " + e.what());
-		}
-		try {
-			server_names = servers[i].get<std::vector<std::string> >("server_name");
-			// std::cout << cfg::util::represent(server_names) << std::endl;
-		} catch (const std::exception& e) {
-			throw std::runtime_error("Invalid server_name value for server " + to_string(i) + ". Error: " + e.what());
-		}
-
-		instances_.push_back(ServerInstance(listens, server_names));
+		instances_.push_back(ServerInstance(servers[i], i));
+		instances_.back().init();
 	}
-}
 
-void Server::initSockets()
-{
 	for (size_t i = 0; i < instances_.size(); i++)
 	{
 		ServerInstance &instance = instances_[i];
@@ -245,7 +185,10 @@ void Server::initSockets()
 			}
 		}
 	}
+}
 
+void Server::initSockets()
+{
 	epoll_fd_ = epoll_create(1);
 	if (epoll_fd_ < 0)
 		throw std::runtime_error("epoll_create failed");
@@ -289,6 +232,7 @@ void Server::initSockets()
 		listen_context.type = LISTEN;
 		listen_context.fd_index = static_cast<uint32_t>(listen_context_.size());
 		listen_context.server_instances = &it->second;
+		listen_context.port = it->first.port;
 
 		listen_fd_.push_back(listen_fd);
 		listen_context_.push_back(listen_context);
@@ -313,7 +257,7 @@ void Server::init()
 {
 	Logger::info("server starting");
 
-	initServerInstances();
+	initInstances();
 	initSockets();
 }
 
@@ -338,7 +282,7 @@ void Server::run()
 				int client_fd = accept(listen_fd_[context->fd_index], NULL, NULL);
 				fcntl(client_fd, F_SETFL, O_NONBLOCK);
 
-				connections_.insert(std::make_pair(client_fd, HttpConnection(client_fd, *this)));
+				connections_.insert(std::make_pair(client_fd, HttpConnection(client_fd, context, *this)));
 
 				std::map<int, HttpConnection>::iterator it = connections_.find(client_fd);
 				if (it == connections_.end())

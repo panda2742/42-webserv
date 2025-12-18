@@ -22,6 +22,7 @@ struct FdContext
 		struct {
 			const std::vector<ServerInstance*> *server_instances;
 			uint32_t fd_index;
+			uint32_t port;
 		};
 	};
 };

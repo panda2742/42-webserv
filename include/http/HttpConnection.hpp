@@ -30,6 +30,7 @@ class HttpConnection
 private:
 	int socket_fd_;
 	FdContext context_;
+	FdContext *socket_context_;
 	
 	Server& server_;
 
@@ -51,7 +52,7 @@ private:
 	bool handleRequest();
 	
 public:
-	HttpConnection(int socket_fd, Server& server);
+	HttpConnection(int socket_fd, FdContext *socket_context, Server& server);
 	~HttpConnection();
 
 	/**

@@ -45,7 +45,7 @@ public:
 	~Server();
 
 	void init();
-	void initServerInstances();
+	void initInstances();
 	void initSockets();
 	void run();
 	void clean();
