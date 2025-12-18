@@ -250,6 +250,10 @@ void Server::initSockets()
 	if (epoll_fd_ < 0)
 		throw std::runtime_error("epoll_create failed");
 
+	size_t total_listens = server_instance_map_.size();
+	listen_context_.reserve(total_listens);
+	listen_fd_.reserve(total_listens);
+
 	for (
 		std::map<ListenProp, std::vector<ServerInstance*> >::const_iterator it = server_instance_map_.begin();
 		it != server_instance_map_.end();
@@ -286,9 +290,10 @@ void Server::initSockets()
 		listen_context.fd_index = static_cast<uint32_t>(listen_context_.size());
 		listen_context.server_instances = &it->second;
 
+		listen_fd_.push_back(listen_fd);
 		listen_context_.push_back(listen_context);
 
-		if (addFdEpoll(listen_fd, EPOLLIN, &listen_context_.back()) < 0)
+		if (addFdEpoll(listen_fd, EPOLLIN, &listen_context_[listen_context_.size() - 1]) < 0)
 		{
 			close(listen_fd);
 			throw std::runtime_error("epoll to listen fd link failed");
@@ -330,7 +335,7 @@ void Server::run()
 
 			if (context->type == LISTEN)
 			{
-				int client_fd = accept(listen_fd_[0], NULL, NULL);
+				int client_fd = accept(listen_fd_[context->fd_index], NULL, NULL);
 				fcntl(client_fd, F_SETFL, O_NONBLOCK);
 
 				connections_.insert(std::make_pair(client_fd, HttpConnection(client_fd, *this)));
