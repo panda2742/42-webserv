@@ -16,9 +16,14 @@ enum FdType
 struct FdContext
 {
 	FdType type;
-	HttpResponse* cgi_owner_response;
-	int fd;
-	std::vector<ServerInstance> server_instances;
+	union {
+		HttpResponse *cgi_owner_response;
+		int fd;
+		struct {
+			const std::vector<ServerInstance*> *server_instances;
+			uint32_t fd_index;
+		};
+	};
 };
 
 #endif

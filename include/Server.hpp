@@ -26,6 +26,7 @@ private:
 
 	cfg::HttpConfig& conf_;
 	std::vector<ServerInstance> instances_;
+	std::map<ListenProp, std::vector<ServerInstance*> > server_instance_map_;
 
 	// std::map<int, FdContext> pipe_context_;
 	std::map<int, HttpConnection> connections_;
@@ -44,6 +45,8 @@ public:
 	~Server();
 
 	void init();
+	void initServerInstances();
+	void initSockets();
 	void run();
 	void clean();
 	
