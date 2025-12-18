@@ -32,6 +32,9 @@ int main(int argc, char **argv)
 
 		// Call a new middleware on the config
 		mdw::Middleware	middleware(conf);
+
+		// Check if the configuration is valid.
+		middleware.checkFormat(parser.getNodes());
 	}
 	catch (const std::exception& e)
 	{

@@ -6,6 +6,16 @@
 namespace mdw
 {
 // #########################################################
+
+/**
+ * Represent an exception during the middleware process.
+ */
+class MiddlewareException : public std::runtime_error
+{
+	public:
+	MiddlewareException(const std::string& msg);
+};
+
 /**
  * Represent the class that does all the tests for the middleware operations between the configuration parsing and
  * the use in the server part of the project.
@@ -22,7 +32,7 @@ class Middleware
 	/**
 	 * Check the format and ensures there is the correct amount of brackets, and other formating stuff.
 	 */
-	bool	checkFormat(const std::string);
+	bool	checkFormat(const std::vector<cfg::Lexer::TokenNode>& nodes) const throw(MiddlewareException);
 
 	private:
 	/**
