@@ -6,6 +6,9 @@
 #include <sys/types.h>
 #include <map>
 
+#include "utils_structs.hpp"
+#include "ServerInstance.hpp"
+
 /**
  * @enum Method
  * 
@@ -52,6 +55,8 @@ class HttpRequest
 {
 
 private:
+	FdContext *socket_context_;
+	ServerInstance *instance_;
 
 	std::vector<char> raw_;
 	size_t header_size_;
@@ -69,6 +74,7 @@ private:
 
 	bool checkHttpVersion();
 	bool parseTarget();
+	bool linkInstance();
 
 public:
 	HttpRequest();
@@ -79,11 +85,12 @@ public:
 	 * @param raw Buffer containing the full message (headers + body).
 	 * @param header_size Size in bytes of the header portion within `raw`.
 	 * @param content_size Size in bytes of the expected body.
+	 * @param socket_context The socket context of the connection
 	 *
 	 * After `init` is called, invoke `parse()` to analyze the request line,
 	 * headers and extract query parameters if present.
 	 */
-	void init(std::vector<char>& raw, size_t header_size, size_t content_size);
+	void init(std::vector<char>& raw, size_t header_size, size_t content_size, FdContext *socket_context);
 
 	/**
 	 * @brief Parse the request stored in `raw_`.

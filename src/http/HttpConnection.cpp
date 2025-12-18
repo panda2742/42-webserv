@@ -115,7 +115,7 @@ bool HttpConnection::handleRequest()
 	requests_.push_back(HttpRequest());
 	HttpRequest& req = requests_.back();
 
-	req.init(raw_, header_size_, content_size_);
+	req.init(raw_, header_size_, content_size_, socket_context_);
 
 	if (!req.parse()) return false;
 

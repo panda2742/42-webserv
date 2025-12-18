@@ -65,7 +65,17 @@ void ServerInstance::init()
 		throw std::runtime_error("Invalid listen value for server " + to_string(server_index_) + ". Error: " + e.what());
 	}
 	try {
+		is_default_ = false;
 		server_names_ = server_.get<std::vector<std::string> >("server_name");
+
+		for (size_t i = 0; i < server_names_.size(); i++)
+		{
+			if (server_names_[i] == "default")
+			{
+				is_default_ = true;
+				break ;
+			}
+		}
 		// std::cout << cfg::util::represent(server_names_) << std::endl;
 	} catch (const std::exception& e) {
 		throw std::runtime_error("Invalid server_name value for server " + to_string(server_index_) + ". Error: " + e.what());

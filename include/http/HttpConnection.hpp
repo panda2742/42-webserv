@@ -63,6 +63,12 @@ public:
 	FdContext* getContext() { return &context_; }
 
 	/**
+	 * Get the fd context of the socket of the connection. It's type is always LISTEN and contain the
+	 * instances informations
+	 */
+	FdContext* getSocketContext() { return socket_context_; }
+
+	/**
 	 * This function is called when epoll mark the fd of the connection as ready to read.
 	 * This function just take as a parameter the result of recv.
 	 * 
