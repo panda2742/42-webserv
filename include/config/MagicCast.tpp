@@ -237,19 +237,7 @@ R	magic_assemble(A& a, B& b) throw(MagicCastException)
 	R	converted_a = magic_cast<R>(a),
 		converted_b = magic_cast<R>(b);
 
-	const std::string	a_id = typeid(A).name();
-	if (a_id.find("vector") != std::string::npos)
-	{
-		typename R::const_iterator	it = converted_b.begin();
-		for (; it != converted_b.end(); ++it)
-			converted_a.push_back(*it);
-	}
-	if (a_id.find("map") != std::string::npos)
-	{
-		typename R::const_iterator	it = converted_b.begin();
-		for (; it != converted_b.end(); ++it)
-			converted_a.push_back(*it);
-	}
+	converted_a = magic_assemble_sub_(converted_a, converted_b);
 
 	return converted_a;
 }

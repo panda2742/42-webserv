@@ -97,7 +97,7 @@ void ServerInstance::init()
 	}
 
 	try {
-		// error_pages_ = server_.get<std::map<unsigned int, std::string> >("error_page");
+		error_pages_ = server_.get<std::map<unsigned int, std::string> >("error_page");
 	} catch (const std::exception& e) {
 		throw std::invalid_argument("Invalid error_page value for server " + to_string(server_index_) + ". Error: " + e.what());
 	}

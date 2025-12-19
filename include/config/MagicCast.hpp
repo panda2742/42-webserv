@@ -99,6 +99,11 @@ R	magic_cast(T value) throw(MagicCastException);
 template <typename R, typename A, typename B>
 R	magic_assemble(A& a, B& b) throw (MagicCastException);
 
+std::vector<std::string>							magic_assemble_sub_(std::vector<std::string>& a, std::vector<std::string>& b) throw (MagicCastException);
+std::vector<unsigned int>							magic_assemble_sub_(std::vector<unsigned int>& a, std::vector<unsigned int>& b) throw (MagicCastException);
+std::map<unsigned int, std::string>					magic_assemble_sub_(std::map<unsigned int, std::string>& a, std::map<unsigned int, std::string>& b) throw (MagicCastException);
+std::map<unsigned int, std::vector<std::string> >	magic_assemble_sub_(std::map<unsigned int, std::vector<std::string> >& a, std::map<unsigned int, std::vector<std::string> >& b) throw (MagicCastException);
+
 // #########################################################
 };
 

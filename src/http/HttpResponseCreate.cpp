@@ -8,6 +8,7 @@
 
 void HttpResponse::setStatus(int code, const std::string &message)
 {
+	if (!status_mutable_) return ;
 	status_code_ = code;
 	status_message_ = message;
 }
@@ -43,18 +44,32 @@ void HttpResponse::setError(int code)
 {
 	setStatus(code, getHttpErrorMessage(code));
 
-	// const std::map<unsigned int, std::string>& error_pages = req_.getServerInstance()->getErrorPages();
-	// std::map<unsigned int, std::string>::const_iterator error = error_pages.find(static_cast<unsigned int>(code));
-	// if (error != error_pages.end()) 
-	// {
-	// 	CachedFile *file_error = NULL;
-	// 	struct stat file_error_info = {};
-	// 	std::string final_file_path;
-	// 	// TODO modif pour pas prendre le root mais passer par les locations
-	// 	FileStatus err_file_status = FileCacheManager::getFile(req_.getServerInstance()->getRoot(), error->second, file_error, file_error_info, final_file_path);
-		
-	// 	if (err_file_status)
-	// }
+	const std::map<unsigned int, std::string>& error_pages = req_.getServerInstance()->getErrorPages();
+	std::map<unsigned int, std::string>::const_iterator error_it = error_pages.find(static_cast<unsigned int>(code));
+
+	std::cout << cfg::util::represent(error_pages) << std::endl;
+
+	if (error_it != error_pages.end()) 
+	{
+		CachedFile *file_error = NULL;
+		struct stat file_error_info = {};
+		std::string final_file_path;
+		// TODO modif pour pas prendre le root mais passer par les locations
+		FileStatus err_file_status = FileCacheManager::getFile(req_.getServerInstance()->getRoot(), error_it->second, file_error, file_error_info, final_file_path);
+
+		std::cout << err_file_status << std::endl;
+
+		if (err_file_status == FILE_OK || err_file_status == FILE_STREAM_DIRECT)
+		{
+			file_path_ = final_file_path;
+			file_info_ = file_error_info;
+			file_status_ = err_file_status;
+			file_ = file_error;
+			status_mutable_ = false;
+			createDefault();
+			return ;
+		}
+	}
 	
 	// try load configurated error page
 	// + set file status a FILE_OK si y'a bien un fichier / FILE_STREAM_DIRECT si trop lourd
