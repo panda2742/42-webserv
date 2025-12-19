@@ -72,12 +72,12 @@ bool readFileToVector(const std::string& path, std::vector<char>& out)
 	return true;
 }
 
-FileStatus FileCacheManager::getFile(std::string path, CachedFile*& file, struct stat &fileInfo, std::string &full_path)
+FileStatus FileCacheManager::getFile(const std::string& root, const std::string& path, CachedFile*& file, struct stat &fileInfo, std::string &full_path)
 {
 	file = NULL;
-	std::string basepath = path[0] == '/' ? "./www" : "./www/";
-	full_path = basepath + path;
+	full_path = root + path;
 
+	if (path.find('\0') != std::string::npos) return PATH_FORBIDDEN;
 	if (path.find("..") != std::string::npos) return PATH_FORBIDDEN;
 
 	if (stat(full_path.c_str(), &fileInfo) != 0)
@@ -98,16 +98,16 @@ FileStatus FileCacheManager::getFile(std::string path, CachedFile*& file, struct
 	
 	// debug_log_file(fileInfo);
 
-	std::map<std::string, CachedFile>::iterator it = cache_.find(path);
+	std::map<std::string, CachedFile>::iterator it = cache_.find(full_path);
 	if (it == cache_.end() || it->second.mtime < fileInfo.st_mtime)
 	{
 		if (it != cache_.end() && it->second.mtime < fileInfo.st_mtime) cache_.erase(it);
 
 		freeMinimumSize(fileInfo.st_size);
 
-		cache_.insert(std::make_pair(path, CachedFile()));
+		cache_.insert(std::make_pair(full_path, CachedFile()));
 
-		it = cache_.find(path);
+		it = cache_.find(full_path);
 
 		CachedFile& file_tmp = it->second;
 
@@ -123,12 +123,12 @@ FileStatus FileCacheManager::getFile(std::string path, CachedFile*& file, struct
 		file_tmp.size = file_tmp.data.size();
 		cache_size_ += file_tmp.size;
 
-		Logger::info("file " + path + " cached");
+		Logger::info("file " + full_path + " cached");
 	}
 
 	file = &it->second;
 
-	touch(path);
+	touch(full_path);
 
 	return FILE_OK;
 }

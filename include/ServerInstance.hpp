@@ -37,6 +37,8 @@ private:
 	std::vector<ListenProp> listens_;
 	std::vector<std::string> server_names_;
 	bool is_default_;
+	std::string root_;
+	std::map<unsigned int, std::string> error_pages_;
 	
 public:
 	ServerInstance(StrDirective& server, uint32_t server_index);
@@ -44,9 +46,12 @@ public:
 
 	void init();
 
-	const std::vector<ListenProp> &getListens() const { return listens_; }
-	const std::vector<std::string> &getServerNames() const { return server_names_; }
+	const std::vector<ListenProp>& getListens() const { return listens_; }
+	const std::vector<std::string>& getServerNames() const { return server_names_; }
 	bool hasDefaultName() const { return is_default_; }
+	const std::string& getRoot() const { return root_; }
+	const std::map<unsigned int, std::string>& getErrorPages() const { return error_pages_; }
+	
 };
 
 

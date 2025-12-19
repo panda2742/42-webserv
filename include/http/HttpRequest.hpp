@@ -108,6 +108,7 @@ public:
 	const std::string* getHeaderInfo(const std::string& key) const;
 	const std::map<std::string, std::string>& getHeaders() const { return infos_; }
 	const std::map<std::string, std::string>& getQueries() const { return queries_; }
+	const ServerInstance *getServerInstance() const { return instance_; }
 
 	void clear();
 

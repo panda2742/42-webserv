@@ -42,7 +42,7 @@ void ServerInstance::init()
 				prop.ip = INADDR_ANY;
 				prop.port = (uint)std::atoi(listen_directives[j].c_str());
 
-				if (prop.port == 0) throw std::runtime_error("Unauthorized port 0 in configuration");
+				if (prop.port == 0) throw std::invalid_argument("Unauthorized port 0 in configuration");
 
 				listens_.push_back(prop);
 			}
@@ -55,14 +55,15 @@ void ServerInstance::init()
 				prop.ip = inet_addr_secure(ip);
 				prop.port = (uint)std::atoi(listen_directives[j].c_str() + sep + 1);
 
-				if (prop.port == 0) throw std::runtime_error("Unauthorized port 0 in configuration");
+				if (listen_directives[j].size() - sep > 7 || prop.port != static_cast<unsigned short>(prop.port)) throw std::invalid_argument("Invalid port: " + std::string(listen_directives[j].c_str() + sep + 1) + " " + to_string(prop.port));
+				if (prop.port == 0) throw std::invalid_argument("Unauthorized port 0 in configuration");
 
 				listens_.push_back(prop);
 			}
 		}
 		// std::cout << cfg::util::represent(listen_directives) << std::endl;
 	} catch (const std::exception& e) {
-		throw std::runtime_error("Invalid listen value for server " + to_string(server_index_) + ". Error: " + e.what());
+		throw std::invalid_argument("Invalid listen value for server " + to_string(server_index_) + ". Error: " + e.what());
 	}
 	try {
 		is_default_ = false;
@@ -76,8 +77,28 @@ void ServerInstance::init()
 				break ;
 			}
 		}
+
+		if (server_names_.size() == 0) is_default_ = true;
+
 		// std::cout << cfg::util::represent(server_names_) << std::endl;
 	} catch (const std::exception& e) {
-		throw std::runtime_error("Invalid server_name value for server " + to_string(server_index_) + ". Error: " + e.what());
+		throw std::invalid_argument("Invalid server_name value for server " + to_string(server_index_) + ". Error: " + e.what());
+	}
+
+	try {
+		root_ = server_.find<std::string>("root").at(0).value;
+
+		if (root_.empty()) throw std::invalid_argument("root is required");
+
+		if (root_.size() - 1 == '/') root_.erase(root_.end() - 1);
+
+	} catch (const std::exception& e) {
+		throw std::invalid_argument("Invalid root value for server " + to_string(server_index_) + ". Error: " + e.what());
+	}
+
+	try {
+		// error_pages_ = server_.get<std::map<unsigned int, std::string> >("error_page");
+	} catch (const std::exception& e) {
+		throw std::invalid_argument("Invalid error_page value for server " + to_string(server_index_) + ". Error: " + e.what());
 	}
 }

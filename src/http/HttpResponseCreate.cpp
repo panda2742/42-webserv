@@ -43,6 +43,19 @@ void HttpResponse::setError(int code)
 {
 	setStatus(code, getHttpErrorMessage(code));
 
+	// const std::map<unsigned int, std::string>& error_pages = req_.getServerInstance()->getErrorPages();
+	// std::map<unsigned int, std::string>::const_iterator error = error_pages.find(static_cast<unsigned int>(code));
+	// if (error != error_pages.end()) 
+	// {
+	// 	CachedFile *file_error = NULL;
+	// 	struct stat file_error_info = {};
+	// 	std::string final_file_path;
+	// 	// TODO modif pour pas prendre le root mais passer par les locations
+	// 	FileStatus err_file_status = FileCacheManager::getFile(req_.getServerInstance()->getRoot(), error->second, file_error, file_error_info, final_file_path);
+		
+	// 	if (err_file_status)
+	// }
+	
 	// try load configurated error page
 	// + set file status a FILE_OK si y'a bien un fichier / FILE_STREAM_DIRECT si trop lourd
 
@@ -60,7 +73,7 @@ void HttpResponse::setDirectory()
 	std::string full_path_tmp;
 	std::string index_path = req_.getTarget()[req_.getTarget().size() - 1] == '/' ? req_.getTarget() + "index.html" : req_.getTarget() + "/index.html";
 
-	FileStatus index_status = FileCacheManager::getFile(index_path, file_, tmp_file_info, full_path_tmp);
+	FileStatus index_status = FileCacheManager::getFile(req_.getServerInstance()->getRoot(), index_path, file_, tmp_file_info, full_path_tmp);
 
 
 	if (index_status == FILE_OK || index_status == FILE_STREAM_DIRECT)
@@ -119,7 +132,7 @@ void HttpResponse::createDefault()
 	// } // Redirection example
 	if (req_.getMethod() == GET)
 	{
-		if (file_status_ == NONE) file_status_ = FileCacheManager::getFile(req_.getTarget(), file_, file_info_, file_path_);
+		if (file_status_ == NONE) file_status_ = FileCacheManager::getFile(req_.getServerInstance()->getRoot(), req_.getTarget(), file_, file_info_, file_path_);
 
 		if (file_status_ == FILE_OK)
 		{

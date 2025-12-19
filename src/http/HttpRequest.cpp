@@ -173,7 +173,7 @@ bool HttpRequest::linkInstance()
 	}
 	if (!instance_) instance_ = first_default ? first_default : instances[0];
 
-	std::cout << cfg::util::represent(instance_->getServerNames()) << std::endl;
+	std::cout << cfg::util::represent(instance_->getRoot()) << std::endl;
 
 	// std::cout << "Host: " << host_it->second << std::endl;
 	return false;
@@ -218,7 +218,6 @@ bool HttpRequest::parse()
 		if (!parseTarget()) return true;
 
 		version_ = getNextPart(lines[0], " ");
-		if (!checkHttpVersion()) return true;
 
 		lines.erase(lines.begin());
 
@@ -236,6 +235,9 @@ bool HttpRequest::parse()
 		}
 
 		if (linkInstance()) return true;
+
+		if (!checkHttpVersion()) return true;
+
 
 		// for (std::map<std::string, std::string>::const_iterator it = infos_.begin();
 		// 	it != infos_.end();
