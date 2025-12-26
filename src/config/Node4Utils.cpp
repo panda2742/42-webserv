@@ -39,7 +39,7 @@ Node4	*createNode4(Node4::ValueType type)
 	}
 	catch (const std::bad_alloc& e)
 	{
-		log.error("Memory allocation failed in createNode4: " + std::string(e.what()));
+		log.error("Memory allocation failed in createNode4: " + str_t(e.what()));
 		return NULL;
 	}
 	return NULL;
@@ -48,42 +48,42 @@ Node4	*createNode4(Node4::ValueType type)
 Node4	*createStringNode4()
 {
 	Node4	*node = new Node4(Node4::TYPE_STRING);
-	node->value.data = new std::string();
+	node->value.data = new str_t();
 	return node;
 }
 
 Node4	*createUintNode4()
 {
 	Node4	*node = new Node4(Node4::TYPE_UINT);
-	node->value.data = new unsigned int();
+	node->value.data = new uint_t();
 	return node;
 }
 
 Node4	*createStringVectorNode4(void)
 {
 	Node4	*node = new Node4(Node4::TYPE_STRING_VECTOR);
-	node->value.data = new std::vector<std::string>();
+	node->value.data = new vecstr_t();
 	return node;
 }
 
 Node4	*createUintVectorNode4(void)
 {
 	Node4	*node = new Node4(Node4::TYPE_UINT_VECTOR);
-	node->value.data = new std::vector<unsigned int>();
+	node->value.data = new vecuint_t();
 	return node;
 }
 
 Node4	*createMapUintStringNode4(void)
 {
 	Node4	*node = new Node4(Node4::TYPE_MAP_UINT_STRING);
-	node->value.data = new std::map<unsigned int, std::string>();
+	node->value.data = new mapstr_t();
 	return node;
 }
 
 Node4	*createMapUintStringVectorNode4(void)
 {
 	Node4	*node = new Node4(Node4::TYPE_MAP_UINT_STRING_VECTOR);
-	node->value.data = new std::map<unsigned int, std::vector<std::string> >();
+	node->value.data = new mapvec_t();
 	return node;
 }
 
@@ -96,7 +96,7 @@ Node4::ValueType	dataType_(std::vector<Lexer::TokenNode>::const_iterator node, s
 	}
 	bool					nb_starts = false;
 	bool					only_nb = true;
-	unsigned int			nb_arguments = 0;
+	uint_t			nb_arguments = 0;
 	const std::vector<Lexer::TokenNode>::const_iterator	start = ++node;
 	std::vector<Lexer::TokenNode>::const_iterator		current = start;
 	while (current != end && current->type == Lexer::TokenArgument)
@@ -133,32 +133,32 @@ Node4::ValueType	dataType_(std::vector<Lexer::TokenNode>::const_iterator node, s
 	return Node4::TYPE_STRING;
 }
 
-Node4::ValueType	typeToEnum_(std::string)
+Node4::ValueType	typeToEnum_(str_t)
 {
 	return Node4::TYPE_STRING;
 }
 
-Node4::ValueType	typeToEnum_(unsigned int)
+Node4::ValueType	typeToEnum_(uint_t)
 {
 	return Node4::TYPE_UINT;
 }
 
-Node4::ValueType	typeToEnum_(std::vector<std::string>)
+Node4::ValueType	typeToEnum_(vecstr_t)
 {
 	return Node4::TYPE_STRING_VECTOR;
 }
 
-Node4::ValueType	typeToEnum_(std::vector<unsigned int>)
+Node4::ValueType	typeToEnum_(vecuint_t)
 {
 	return Node4::TYPE_UINT_VECTOR;
 }
 
-Node4::ValueType	typeToEnum_(std::map<unsigned int, std::string>)
+Node4::ValueType	typeToEnum_(mapstr_t)
 {
 	return Node4::TYPE_MAP_UINT_STRING;
 }
 
-Node4::ValueType	typeToEnum_(std::map<unsigned int, std::vector<std::string> >)
+Node4::ValueType	typeToEnum_(mapvec_t)
 {
 	return Node4::TYPE_MAP_UINT_STRING_VECTOR;
 }

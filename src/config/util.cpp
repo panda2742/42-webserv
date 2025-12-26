@@ -32,14 +32,14 @@ void	printTokens_(const std::vector<Lexer::TokenNode>& nodes)
 	}
 }
 
-std::vector<std::string>&	cleanVector(std::vector<std::string>& vect)
+vecstr_t&	cleanVector(vecstr_t& vect)
 {
-	std::vector<std::string>	res;
+	vecstr_t	res;
 
-	for (std::vector<std::string>::iterator it = vect.begin(); it != vect.end(); ++it)
+	for (vecstr_t::iterator it = vect.begin(); it != vect.end(); ++it)
 	{
-		const std::string&	str = (*it);
-		std::string			current;
+		const str_t&	str = (*it);
+		str_t			current;
 
 		for (size_t i = 0; i < str.length(); ++i)
 		{
@@ -51,7 +51,7 @@ std::vector<std::string>&	cleanVector(std::vector<std::string>& vect)
 					res.push_back(current);
 					current.clear();
 				}
-				res.push_back(std::string(1, c));
+				res.push_back(str_t(1, c));
 			}
 			else
 				current += c;
@@ -65,9 +65,9 @@ std::vector<std::string>&	cleanVector(std::vector<std::string>& vect)
 	return vect;
 }
 
-bool	isNumber(const std::string& nbstr)
+bool	isNumber(const str_t& nbstr)
 {
-	for (std::string::const_iterator it = nbstr.begin(); it != nbstr.end(); ++it)
+	for (str_t::const_iterator it = nbstr.begin(); it != nbstr.end(); ++it)
 	{
 		if (!isInCharset(*it, "1234567890"))
 			return false;

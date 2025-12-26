@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include "types.hpp"
 #include "Lexer.hpp"
+#include "global.hpp"
 
 namespace cfg
 {
@@ -18,7 +19,7 @@ namespace cfg
 class ParsingException: public std::runtime_error
 {
 	public:
-	ParsingException(const std::string& msg)
+	ParsingException(const str_t& msg)
 		: std::runtime_error(PARSING_ERROR_MSG + msg) {}
 };
 
@@ -31,12 +32,12 @@ class Parser
 	/**
 	 * The name of the configuration file.
 	 */
-	std::string						filename_;
+	str_t						filename_;
 
 	/**
 	 * The raw content of the configuration file. Everything is stored there.
 	 */
-	std::string						raw_config_;
+	str_t						raw_config_;
 
 	/**
 	 * The list of nodes, in the same order they appear in the configuration file.
@@ -59,7 +60,7 @@ class Parser
 	/**
 	 * @param filename The name of the configuration file.
 	 */
-	Parser(const std::string& filename)
+	Parser(const str_t& filename)
 		: filename_(filename) {}
 	~Parser(void) {}
 

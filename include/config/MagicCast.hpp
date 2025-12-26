@@ -2,12 +2,13 @@
 #define MAGIC_CAST_HPP
 
 #include "Parser.hpp"
+#include "global.hpp"
 
 #define INVALID_STRING_EXCEPTION "a string can only be casted to: vector<string>"
 #define INVALID_VECTOR_STRING_EXCEPTION "a vector<string> can only be casted to: string"
-#define INVALID_VECTOR_UINT_EXCEPTION "a vector<unsigned int> can only be casted to: string, vector<string>, map<unsigned int, string>, map<unsigned int, vector<string>>"
-#define INVALID_MAP_STRING_EXCEPTION "a map<unsigned int, string> can only be casted to: string, vector<string>, map<unsigned int, vector<string>>"
-#define INVALID_MAP_VECTOR_STRING_EXCEPTION "a map<unsigned int, vector<string>> can only be casted to: string, vector<string>, map<unsigned int, string>"
+#define INVALID_VECTOR_UINT_EXCEPTION "a vector<uint_t> can only be casted to: string, vector<string>, map<uint_t, string>, map<uint_t, vector<string>>"
+#define INVALID_MAP_STRING_EXCEPTION "a map<uint_t, string> can only be casted to: string, vector<string>, map<uint_t, vector<string>>"
+#define INVALID_MAP_VECTOR_STRING_EXCEPTION "a map<uint_t, vector<string>> can only be casted to: string, vector<string>, map<uint_t, string>"
 
 #define ASSEMBLE_TOO_PRIMITIVE "your type cannot be merged with another, it musts be a container"
 
@@ -18,7 +19,7 @@ namespace cfg
 class MagicCastException: public std::runtime_error
 {
 	public:
-	MagicCastException(const std::string& err_msg);
+	MagicCastException(const str_t& err_msg);
 };
 
 class InvalidStringException: public MagicCastException
@@ -68,15 +69,15 @@ class AssembleTooPrimitive: public MagicCastException
  *
  * ##### `string` -> `vector<string>`
  *
- * ##### `unsigned int`  -> `string`, `vector<string>`, `vector<unsigned int>`, `map<unsigned int, string>`, `map<unsigned int, vector<string>>`
+ * ##### `uint_t`  -> `string`, `vector<string>`, `vector<uint_t>`, `map<uint_t, string>`, `map<uint_t, vector<string>>`
  *
  * ##### `vector<string>` -> `string`
  *
- * ##### `vector<unsigned int>`  -> `string`, `vector<string>`, `map<unsigned int, string>`, `map<unsigned int, vector<string>>`
+ * ##### `vector<uint_t>`  -> `string`, `vector<string>`, `map<uint_t, string>`, `map<uint_t, vector<string>>`
  *
- * ##### `map<unsigned int, string>` -> `string`, `vector<string>`, `map<unsigned int, vector<string>>`
+ * ##### `map<uint_t, string>` -> `string`, `vector<string>`, `map<uint_t, vector<string>>`
  *
- * ##### `map<unsigned int, vector<string>>` -> `string`, `vector<string>`, `map<unsigned int, string>`
+ * ##### `map<uint_t, vector<string>>` -> `string`, `vector<string>`, `map<uint_t, string>`
  *
  * @tparam R The type to convert the value in.
  * @tparam T The current type (auto deduced) of the value to convert.

@@ -5,6 +5,7 @@
 #include <string>
 #include <ostream>
 #include <iostream>
+#include "global.hpp"
 
 #define INFO_PRFX "[" CYAN " INFO  " RESET "]    "
 #define WARN_PRFX "[" ORANGE " WARN  " RESET "]    "
@@ -24,7 +25,7 @@ class ConfigLogger
 	 * @param msg The message to print.
 	 * @param os The output stream.
 	 */
-	void	printMsg_(const std::string& msg, std::ostream& os);
+	void	printMsg_(const str_t& msg, std::ostream& os);
 
 	public:
 	ConfigLogger(void);
@@ -35,28 +36,28 @@ class ConfigLogger
 	 *
 	 * @param msg The message to print.
 	 */
-	void	info(const std::string& msg);
+	void	info(const str_t& msg);
 
 	/**
 	 * Orange colored message to the output stream.
 	 *
 	 * @param msg The message to print.
 	 */
-	void	warn(const std::string& msg);
+	void	warn(const str_t& msg);
 
 	/**
 	 * Blurple colored message to the output stream.
 	 *
 	 * @param msg The message to print.
 	 */
-	void	debug(const std::string& msg);
+	void	debug(const str_t& msg);
 
 	/**
 	 * Red colored message to the error stream.
 	 *
 	 * @param msg The message to print.
 	 */
-	void	error(const std::string& msg);
+	void	error(const str_t& msg);
 
 	/**
 	 * Cyan colored message to the output stream.

@@ -5,6 +5,7 @@
 #include "config/Lexer.hpp"
 #include <vector>
 #include <map>
+#include "global.hpp"
 
 namespace cfg
 {
@@ -18,7 +19,7 @@ class Node4
 	 *
 	 * @return A string representation of the node.
 	 */
-	std::string	fastStr_(void);
+	str_t	fastStr_(void);
 
 	public:
 	/**
@@ -27,27 +28,27 @@ class Node4
 	enum ValueType
 	{
 		/**
-		 * #### `std::string`
+		 * #### `str_t`
 		 */
 		TYPE_STRING,
 		/**
-		 * #### `unsigned int`
+		 * #### `uint_t`
 		 */
 		TYPE_UINT,
 		/**
-		 * #### `std::vector<std::string>`
+		 * #### `vecstr_t`
 		 */
 		TYPE_STRING_VECTOR,
 		/**
-		 * #### `std::vector<unsigned int>`
+		 * #### `vecuint_t`
 		 */
 		TYPE_UINT_VECTOR,
 		/**
-		 * #### `std::map<unsigned int, std::string>`
+		 * #### `mapstr_t`
 		 */
 		TYPE_MAP_UINT_STRING,
 		/**
-		 * #### `std::map<unsigned int, std::vector<std::string> >`
+		 * #### `mapvec_t`
 		 */
 		TYPE_MAP_UINT_STRING_VECTOR,
 	};
@@ -100,7 +101,7 @@ class Node4
 	 * The name of the node4/directive. For example, if "listen 80;" is present into the config file, the node4 name
 	 * will be "listen".
 	 */
-	std::string	name;
+	str_t	name;
 
 	/**
 	 * The value of the node4, an instance of the Value class.
@@ -136,7 +137,7 @@ class Node4
 	 *
 	 * @return A string containing the representation of the node and its links.
 	 */
-	std::string				toString(void);
+	str_t				toString(void);
 
 	/**
 	 * Iter on each child and its siblings and return a sequence of all the nodes whose name match with the child_name
@@ -145,14 +146,14 @@ class Node4
 	 * @param child_name The name of the children to look for. Can be unique or not.
 	 * @return A sequence with node pointers.
 	 */
-	std::vector<Node4 *>	access(const std::string& child_name);
+	std::vector<Node4 *>	access(const str_t& child_name);
 };
 
 namespace n4u
 {
 	/**
 	 * Takes two lexer token-node iterators and guess the delimited directive value type. For example, if it has some
-	 * unsigned ints, the return value will be TYPE_UINT_VECTOR.
+	 * uint_ts, the return value will be TYPE_UINT_VECTOR.
 	 *
 	 * @param node The current token-node for the directive start.
 	 * @param node The end token-node for the directive end; can be a delimiter, an end of file delimiter, or another
@@ -180,7 +181,7 @@ namespace n4u
 	Node4				*createStringNode4(void);
 
 	/**
-	 * Create a node with an unsigned int typed value.
+	 * Create a node with an uint_t typed value.
 	 *
 	 * @return A pointer to the newly allocated node.
 	 */
@@ -219,42 +220,42 @@ namespace n4u
 	 *
 	 * @return The type associated with the parameter.
 	 */
-	Node4::ValueType	typeToEnum_(std::string);
+	Node4::ValueType	typeToEnum_(str_t);
 
 	/**
 	 * Take one of the sixth possible typed value, and return the corresponding enum value with a dispatcher.
 	 *
 	 * @return The type associated with the parameter.
 	 */
-	Node4::ValueType	typeToEnum_(unsigned int);
+	Node4::ValueType	typeToEnum_(uint_t);
 
 	/**
 	 * Take one of the sixth possible typed value, and return the corresponding enum value with a dispatcher.
 	 *
 	 * @return The type associated with the parameter.
 	 */
-	Node4::ValueType	typeToEnum_(std::vector<std::string>);
+	Node4::ValueType	typeToEnum_(vecstr_t);
 
 	/**
 	 * Take one of the sixth possible typed value, and return the corresponding enum value with a dispatcher.
 	 *
 	 * @return The type associated with the parameter.
 	 */
-	Node4::ValueType	typeToEnum_(std::vector<unsigned int>);
+	Node4::ValueType	typeToEnum_(vecuint_t);
 
 	/**
 	 * Take one of the sixth possible typed value, and return the corresponding enum value with a dispatcher.
 	 *
 	 * @return The type associated with the parameter.
 	 */
-	Node4::ValueType	typeToEnum_(std::map<unsigned int, std::string>);
+	Node4::ValueType	typeToEnum_(mapstr_t);
 
 	/**
 	 * Take one of the sixth possible typed value, and return the corresponding enum value with a dispatcher.
 	 *
 	 * @return The type associated with the parameter.
 	 */
-	Node4::ValueType	typeToEnum_(std::map<unsigned int, std::vector<std::string> >);
+	Node4::ValueType	typeToEnum_(mapvec_t);
 };
 
 // #########################################################

@@ -20,9 +20,9 @@ HttpConfig::~HttpConfig(void)
 	delete root_;
 }
 
-Directive<std::string>	HttpConfig::http(void)
+Directive<str_t>	HttpConfig::http(void)
 {
-	return Directive<std::string>(*root_->value.getAs<std::string>(), root_);
+	return Directive<str_t>(*root_->value.getAs<str_t>(), root_);
 }
 
 void	HttpConfig::generate(const std::vector<Lexer::TokenNode>& nodes) throw(ParsingException)
@@ -83,47 +83,47 @@ void	HttpConfig::generate(const std::vector<Lexer::TokenNode>& nodes) throw(Pars
 					switch (type)
 					{
 						case Node4::TYPE_STRING:
-							node->value.setAs<std::string>(current->value);
+							node->value.setAs<str_t>(current->value);
 							break;
 						case Node4::TYPE_UINT:
-							node->value.setAs<unsigned int>(std::atoi(current->value.c_str()));
+							node->value.setAs<uint_t>(std::atoi(current->value.c_str()));
 							break;
 						case Node4::TYPE_STRING_VECTOR:
 							if (i)
-								node->value.getAs<std::vector<std::string> >()->push_back(current->value);
+								node->value.getAs<vecstr_t >()->push_back(current->value);
 							else
-								node->value.setAs<std::vector<std::string> >(std::vector<std::string>(1, current->value));
+								node->value.setAs<vecstr_t >(vecstr_t(1, current->value));
 							break;
 						case Node4::TYPE_UINT_VECTOR:
 							if (i)
-								node->value.getAs<std::vector<unsigned int> >()->push_back(std::atol(current->value.c_str()));
+								node->value.getAs<vecuint_t >()->push_back(std::atol(current->value.c_str()));
 							else
-								node->value.setAs<std::vector<unsigned int> >(std::vector<unsigned int>(1, std::atoi(current->value.c_str())));
+								node->value.setAs<vecuint_t >(vecuint_t(1, std::atoi(current->value.c_str())));
 							break;
 						case Node4::TYPE_MAP_UINT_STRING:
 							if (i)
 							{
-								std::map<unsigned int, std::string>    *m = node->value.getAs<std::map<unsigned int, std::string> >();
+								mapstr_t    *m = node->value.getAs<mapstr_t >();
 								m->begin()->second = current->value;
 							}
 							else
 							{
-								std::map<unsigned int, std::string>    m;
+								mapstr_t    m;
 								m.insert(std::make_pair(std::atoi(current->value.c_str()), ""));
-								node->value.setAs<std::map<unsigned int, std::string> >(m);
+								node->value.setAs<mapstr_t >(m);
 							}
 							break;
 						case Node4::TYPE_MAP_UINT_STRING_VECTOR:
 							if (i)
 							{
-								std::map<unsigned int, std::vector<std::string> >    *m = node->value.getAs<std::map<unsigned int, std::vector<std::string> > >();
+								mapvec_t    *m = node->value.getAs<mapvec_t>();
 								m->begin()->second.push_back(current->value);
 							}
 							else
 							{
-								std::map<unsigned int, std::vector<std::string> >    m;
-								m.insert(std::make_pair(std::atoi(current->value.c_str()), std::vector<std::string>()));
-								node->value.setAs<std::map<unsigned int, std::vector<std::string> > >(m);
+								mapvec_t   m;
+								m.insert(std::make_pair(std::atoi(current->value.c_str()), vecstr_t()));
+								node->value.setAs<mapvec_t>(m);
 							}
 							break;
 						default:

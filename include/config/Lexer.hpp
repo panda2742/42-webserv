@@ -4,6 +4,7 @@
 #include <string>
 #include <ostream>
 #include "types.hpp"
+#include "global.hpp"
 
 namespace cfg
 {
@@ -32,14 +33,14 @@ struct TokenNode
 	/**
 	 * The type of the token.
 	 */
-	Token		type;
+	Token	type;
 
 	/**
 	 * The text value of the token, extracted from the configuration file.
 	 */
-	std::string	value;
+	str_t	value;
 
-	TokenNode(const Token type_, const std::string& value_)
+	TokenNode(const Token type_, const str_t& value_)
 		: type(type_), value(value_) {}
 };
 

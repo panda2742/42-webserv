@@ -11,13 +11,13 @@ void	Parser::saveRaw_(void) throw(ParsingException)
 {
 	std::ifstream	file(filename_.c_str(), std::ios::in | std::ios::binary);
 	if (!file)
-		throw ParsingException("file is not openable.");
+		throw ParsingException("file is not openable");
 
 	file.seekg(0, std::ios::end);
 	std::ifstream::pos_type size = file.tellg();
 	file.seekg(0, std::ios::beg);
 
-	raw_config_.resize(static_cast<std::string::size_type>(size));
+	raw_config_.resize(static_cast<str_t::size_type>(size));
 
 	if (size > 0)
 		file.read(&raw_config_[0], size);
@@ -25,8 +25,8 @@ void	Parser::saveRaw_(void) throw(ParsingException)
 	raw_config_ += "\n";
 
 	bool		in_comment = false;
-	std::string	result;
-    for (std::string::size_type i = 0; i < raw_config_.length(); ++i) {
+	str_t	result;
+    for (str_t::size_type i = 0; i < raw_config_.length(); ++i) {
         if (in_comment)
 		{
             if (raw_config_[i] == '\n')
@@ -44,6 +44,9 @@ void	Parser::saveRaw_(void) throw(ParsingException)
         }
     }
 
+	if (result.length() > 80000)
+		throw ParsingException("file is too large (comments excluded)");
+
 	raw_config_ = result;
 }
 
@@ -52,7 +55,7 @@ void	Parser::tokenize_(void) throw(ParsingException)
 	const char	*raw = raw_config_.c_str();
 	size_t	i = 0,
 			raw_length = raw_config_.length();
-	std::vector<std::string>	shards;
+	vecstr_t	shards;
 	while (i < raw_length)
 	{
 		size_t	j = i;
@@ -61,7 +64,7 @@ void	Parser::tokenize_(void) throw(ParsingException)
 		{
 			if (util::isInCharset(raw[j], " \n\t\r\v"))
 			{
-				std::string	value(&raw[i], j - i);
+				str_t	value(&raw[i], j - i);
 				if (value.length())
 					shards.push_back(value);
 				break;
@@ -71,7 +74,7 @@ void	Parser::tokenize_(void) throw(ParsingException)
 		i = j + 1;
 	}
 	shards = util::cleanVector(shards);
-	for (std::vector<std::string>::const_iterator it = shards.begin(); it != shards.end(); ++it)
+	for (vecstr_t::const_iterator it = shards.begin(); it != shards.end(); ++it)
 	{
 		Lexer::Token	type = Lexer::TokenDirective;
 		if (!lexer_nodes_.empty())
@@ -103,7 +106,6 @@ void	Parser::parse(void) throw(ParsingException)
 {
 	saveRaw_();
 	tokenize_();
-	// util::printTokens_(lexer_nodes_);
 }
 
 const std::vector<Lexer::TokenNode>&	Parser::getNodes(void) const{

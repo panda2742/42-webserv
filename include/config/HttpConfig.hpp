@@ -8,6 +8,7 @@
 #include "Parser.hpp"
 #include "Node4.hpp"
 #include "types.hpp"
+#include "global.hpp"
 
 /**
  * Represent a config directive with its associated value. This struct is an overlay to the Node4 struct, too
@@ -40,7 +41,7 @@ struct Directive
 	 * @return The sequence of each Directive.
 	 */
 	template <typename R>
-	std::vector<Directive<R> >	find(const std::string& prop_name);
+	std::vector<Directive<R> >	find(const str_t& prop_name);
 
 	/**
 	 * Iter on each sibling of this first child and build an instance of R. Each Directive is collapsed and merged into
@@ -52,7 +53,7 @@ struct Directive
 	 * @return The built value (instance of R).
 	 */
 	template <typename R>
-	R	get(const std::string& prop_name);
+	R	get(const str_t& prop_name);
 };
 
 template <typename T>
@@ -62,37 +63,37 @@ std::ostream&	operator<<(std::ostream &os, const Directive<T>& directive);
  * An alias type for a better reading and better usage in the middleware steps.
  * Represent the string Directive.
  */
-typedef Directive<std::string>											StrDirective;
+typedef Directive<str_t>		StrDirective;
 
 /**
  * An alias type for a better reading and better usage in the middleware steps.
- * Represent the unsigned int Directive.
+ * Represent the uint_t Directive.
  */
-typedef Directive<unsigned int>											UintDirective;
+typedef Directive<uint_t>		UintDirective;
 
 /**
  * An alias type for a better reading and better usage in the middleware steps.
- * Represent the vector<unsigned int> Directive.
+ * Represent the vector<uint_t> Directive.
  */
-typedef Directive<std::vector<std::string> >							StrVecDirective;
+typedef Directive<vecstr_t >	StrVecDirective;
 
 /**
  * An alias type for a better reading and better usage in the middleware steps.
- * Represent the vector<unsigned int> Directive.
+ * Represent the vector<uint_t> Directive.
  */
-typedef Directive<std::vector<unsigned int> >							UintVecDirective;
+typedef Directive<vecuint_t >	UintVecDirective;
 
 /**
  * An alias type for a better reading and better usage in the middleware steps.
- * Represent the map<unsigned int, string> Directive.
+ * Represent the map<uint_t, string> Directive.
  */
-typedef Directive<std::map<unsigned int, std::string> >					MapDirective;
+typedef Directive<mapstr_t >	MapDirective;
 
 /**
  * An alias type for a better reading and better usage in the middleware steps.
- * Represent the map<unsigned int, vector<string>> Directive.
+ * Represent the map<uint_t, vector<string>> Directive.
  */
-typedef Directive<std::map<unsigned int, std::vector<std::string> > >	MapVecDirective;
+typedef Directive<mapvec_t>		MapVecDirective;
 
 namespace cfg
 {
@@ -121,7 +122,7 @@ class HttpConfig
 	 * @return The sequence of each directive.
 	 */
 	template <typename T>
-	std::vector<Directive<T> >	get(const std::string& prop_name, const Node4 *parent = NULL);
+	std::vector<Directive<T> >	get(const str_t& prop_name, const Node4 *parent = NULL);
 
 	/**
 	 * The get method takes a reference node as parent, and will return the most logical value based on nesting.
@@ -138,7 +139,7 @@ class HttpConfig
 	 * @return The sequence of each directive.
 	 */
 	template <typename T, typename P>
-	std::vector<Directive<T> >	get(const std::string& prop_name, const Directive<P>& directive);
+	std::vector<Directive<T> >	get(const str_t& prop_name, const Directive<P>& directive);
 
 	/**
 	 * Takes the sequence of TokenNodes from the lexer and build the nested linked list.
@@ -152,7 +153,7 @@ class HttpConfig
 	 *
 	 * @return The directive instance.
 	 */
-	Directive<std::string>		http(void);
+	Directive<str_t>			http(void);
 
 	private:
 	/**
@@ -166,17 +167,17 @@ class HttpConfig
 		/**
 		 * The parent and current node to look for.
 		 */
-		const Node4						*parent;
+		const Node4					*parent;
 		/**
 		 * The property name to look for.
 		 */
-		const std::string&				prop_name;
+		const str_t&				prop_name;
 		/**
 		 * The result of the search for the current reference.
 		 */
-		std::vector<Directive<T> >		local_res;
+		std::vector<Directive<T> >	local_res;
 
-		GetData(const std::string& prop_name_, const Node4 *parent_);
+		GetData(const str_t& prop_name_, const Node4 *parent_);
 		GetData(const GetData& other);
 		~GetData(void);
 	};
