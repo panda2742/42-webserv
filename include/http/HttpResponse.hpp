@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 #include <vector>
-#include "HttpRequest.hpp"
+#include "http/HttpRequest.hpp"
 #include "Logger.hpp"
 #include "FileCacheManager.hpp"
 #include "utils_structs.hpp"
@@ -80,6 +80,7 @@ private:
 
 	int status_code_;
 	std::string status_message_;
+	bool status_mutable_;
 
 	std::map<std::string, std::string> headers_;
 	std::vector<ResCookie> cookies_;

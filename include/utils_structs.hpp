@@ -1,6 +1,8 @@
 #ifndef __UTILS_STRUCTS_HPP__
 # define __UTILS_STRUCTS_HPP__
 
+#include "ServerInstance.hpp"
+
 class HttpResponse;
 
 enum FdType
@@ -15,8 +17,13 @@ struct FdContext
 {
 	FdType type;
 	union {
-		HttpResponse* cgi_owner_response;
+		HttpResponse *cgi_owner_response;
 		int fd;
+		struct {
+			const std::vector<ServerInstance*> *server_instances;
+			uint32_t fd_index;
+			uint32_t port;
+		};
 	};
 };
 

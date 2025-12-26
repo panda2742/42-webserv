@@ -1,12 +1,12 @@
-#include "HttpConnection.hpp"
-#include "HttpRequest.hpp"
-#include "HttpResponse.hpp"
+#include "http/HttpConnection.hpp"
+#include "http/HttpRequest.hpp"
+#include "http/HttpResponse.hpp"
 #include <algorithm>
 #include <vector>
 #include <sys/socket.h>
 
-HttpConnection::HttpConnection(int socket_fd, Server& server)
-	: socket_fd_(socket_fd), server_(server), header_(false), content_size_(0)
+HttpConnection::HttpConnection(int socket_fd, FdContext *socket_context, Server& server)
+	: socket_fd_(socket_fd), socket_context_(socket_context), server_(server), header_(false), content_size_(0)
 {
 	context_.type = CLIENT;
 	context_.fd = socket_fd;
@@ -115,7 +115,7 @@ bool HttpConnection::handleRequest()
 	requests_.push_back(HttpRequest());
 	HttpRequest& req = requests_.back();
 
-	req.init(raw_, header_size_, content_size_);
+	req.init(raw_, header_size_, content_size_, socket_context_);
 
 	if (!req.parse()) return false;
 

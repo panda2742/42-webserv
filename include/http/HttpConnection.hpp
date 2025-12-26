@@ -5,8 +5,8 @@
 #include <iostream>
 #include <deque>
 #include <sys/types.h>
-#include "HttpRequest.hpp"
-#include "HttpResponse.hpp"
+#include "http/HttpRequest.hpp"
+#include "http/HttpResponse.hpp"
 #include "utils_structs.hpp"
 
 class Server;
@@ -30,6 +30,7 @@ class HttpConnection
 private:
 	int socket_fd_;
 	FdContext context_;
+	FdContext *socket_context_;
 	
 	Server& server_;
 
@@ -51,7 +52,7 @@ private:
 	bool handleRequest();
 	
 public:
-	HttpConnection(int socket_fd, Server& server);
+	HttpConnection(int socket_fd, FdContext *socket_context, Server& server);
 	~HttpConnection();
 
 	/**
@@ -60,6 +61,12 @@ public:
 	 * fd : client, cgi pipe, etc.
 	 */
 	FdContext* getContext() { return &context_; }
+
+	/**
+	 * Get the fd context of the socket of the connection. It's type is always LISTEN and contain the
+	 * instances informations
+	 */
+	FdContext* getSocketContext() { return socket_context_; }
 
 	/**
 	 * This function is called when epoll mark the fd of the connection as ready to read.

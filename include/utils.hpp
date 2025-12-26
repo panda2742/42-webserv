@@ -1,6 +1,6 @@
 #include <sstream>
 #include <string>
-#include "HttpResponse.hpp"
+#include "http/HttpResponse.hpp"
 
 template<typename T>
 std::string to_string(const T& value)

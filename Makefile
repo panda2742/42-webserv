@@ -8,6 +8,7 @@ SOURCES					:=	$(CONFIG_SOURCES) main \
 							utils \
 							Logger \
 							Server \
+							ServerInstance \
 							FileCacheManager \
 							http/http_utils \
 							http/HttpConnection \

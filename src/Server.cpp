@@ -1,20 +1,24 @@
 
+#include <algorithm>
+#include <stdexcept>
+#include <iostream>
+#include <cstring>
+#include <string>
+
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/epoll.h>
+#include <unistd.h>
+#include <signal.h>
+#include <fcntl.h>
+#include <errno.h>
+
+#include "ServerInstance.hpp"
 #include "Server.hpp"
 #include "Logger.hpp"
 #include "utils.hpp"
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <cstring>
-#include <stdexcept>
-#include <string>
-#include <fcntl.h>
-#include <sys/epoll.h>
-#include <iostream>
-#include <unistd.h>
-#include <errno.h>
-#include <signal.h>
 
-#define BASEPORT 8080
+// #define BASEPORT 8080
 #define MAX_EVENTS 64
 
 bool siginted = false;
@@ -149,46 +153,112 @@ int Server::removeCgiFd(int fd)
 	return removeFdEpoll(fd);
 }
 
-Server::Server()
-	: running_(false), is_child_(false)
+Server::Server(cfg::HttpConfig &conf)
+	: running_(false), is_child_(false), conf_(conf)
 {
-	listen_fd_ = -1;
+	// listen_fd_ = -1;
 	epoll_fd_ = -1;
+}
+
+void Server::initInstances()
+{
+	StrDirective http = conf_.http();
+	std::vector<StrDirective> servers = http.find<std::string>("server");
+
+	for (size_t i = 0; i < servers.size(); i++)
+	{
+		instances_.push_back(ServerInstance(servers[i], i));
+		instances_.back().init();
+	}
+
+	for (size_t i = 0; i < instances_.size(); i++)
+	{
+		ServerInstance &instance = instances_[i];
+		const std::vector<ListenProp> &instance_listen_props = instance.getListens();
+
+		for (size_t j = 0; j < instance_listen_props.size(); j++)
+		{
+			const std::vector<ServerInstance*> &server_instances = server_instance_map_[instance_listen_props[j]];
+			if (std::find(server_instances.begin(), server_instances.end(), &instance) == server_instances.end())
+			{
+				server_instance_map_[instance_listen_props[j]].push_back(&instance);
+			}
+		}
+	}
+}
+
+void Server::initSockets()
+{
+	epoll_fd_ = epoll_create(1);
+	if (epoll_fd_ < 0)
+		throw std::runtime_error("epoll_create failed");
+
+	size_t total_listens = server_instance_map_.size();
+	listen_context_.reserve(total_listens);
+	listen_fd_.reserve(total_listens);
+
+	for (
+		std::map<ListenProp, std::vector<ServerInstance*> >::const_iterator it = server_instance_map_.begin();
+		it != server_instance_map_.end();
+		++it
+	) {
+		int listen_fd = socket(AF_INET, SOCK_STREAM, 0);
+
+		int opt = 1;
+		setsockopt(listen_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+
+		struct sockaddr_in addr;
+		std::memset(&addr, 0, sizeof(addr));
+		addr.sin_family = AF_INET;
+		addr.sin_port = htons(it->first.port);
+		addr.sin_addr.s_addr = it->first.ip;
+
+		if (bind(listen_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0)
+		{
+			close(listen_fd);
+			throw std::runtime_error("Socket binding (" + to_string(it->first.port) + "): " + std::string(strerror(errno)));
+		}
+
+		if (listen(listen_fd, SOMAXCONN) < 0)
+		{
+			close(listen_fd);
+			throw std::runtime_error("listen failed");
+		}
+
+		fcntl(listen_fd, F_SETFL, O_NONBLOCK);
+
+		FdContext listen_context;
+		
+		listen_context.type = LISTEN;
+		listen_context.fd_index = static_cast<uint32_t>(listen_context_.size());
+		listen_context.server_instances = &it->second;
+		listen_context.port = it->first.port;
+
+		listen_fd_.push_back(listen_fd);
+		listen_context_.push_back(listen_context);
+
+		if (addFdEpoll(listen_fd, EPOLLIN, &listen_context_[listen_context_.size() - 1]) < 0)
+		{
+			close(listen_fd);
+			throw std::runtime_error("epoll to listen fd link failed");
+		}
+
+		in_addr addr_log;
+		addr_log.s_addr = it->first.ip;
+
+		char buf[INET_ADDRSTRLEN];
+		inet_ntop(AF_INET, &addr_log, buf, INET_ADDRSTRLEN);
+
+		Logger::info("Successfully opened socket for " + std::string(buf) + ":" + to_string(it->first.port));
+	}
 }
 
 void Server::init()
 {
 	Logger::info("server starting");
 
-	listen_fd_ = socket(AF_INET, SOCK_STREAM, 0);
-
-	// Socket options pour ne pas bloquer le port apres un kill
-	int opt = 1;
-	setsockopt(listen_fd_, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
-
-	struct sockaddr_in addr;
-	std::memset(&addr, 0, sizeof(addr));
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(BASEPORT);
-	addr.sin_addr.s_addr = INADDR_ANY;
-
-	if (bind(listen_fd_, (struct sockaddr *)&addr, sizeof(addr)) < 0)
-		throw std::runtime_error("Socket binding: " + std::string(strerror(errno)));
-
-	if (listen(listen_fd_, SOMAXCONN) < 0)
-		throw std::runtime_error("listen failed");
-
-	fcntl(listen_fd_, F_SETFL, O_NONBLOCK);
-
-	epoll_fd_ = epoll_create(1);
-	if (epoll_fd_ < 0)
-		throw std::runtime_error("epoll_create failed");
-
-	listen_context_.type = LISTEN;
-	listen_context_.fd = listen_fd_;
-
-	if (addFdEpoll(listen_fd_, EPOLLIN, &listen_context_) < 0)
-		throw std::runtime_error("epoll to listen fd link failed");
+	initInstances();
+	initSockets();
 }
 
 void Server::run()
@@ -209,10 +279,10 @@ void Server::run()
 
 			if (context->type == LISTEN)
 			{
-				int client_fd = accept(listen_fd_, NULL, NULL);
+				int client_fd = accept(listen_fd_[context->fd_index], NULL, NULL);
 				fcntl(client_fd, F_SETFL, O_NONBLOCK);
 
-				connections_.insert(std::make_pair(client_fd, HttpConnection(client_fd, *this)));
+				connections_.insert(std::make_pair(client_fd, HttpConnection(client_fd, context, *this)));
 
 				std::map<int, HttpConnection>::iterator it = connections_.find(client_fd);
 				if (it == connections_.end())
@@ -261,8 +331,8 @@ void Server::clean()
 	{
 		if (it->first >= 0) close(it->first);
 	}
-	if (listen_fd_ >= 0) close(listen_fd_);
-	listen_fd_ = -1;
+	// if (listen_fd_ >= 0) close(listen_fd_);
+	// listen_fd_ = -1; // TODO
 	if (epoll_fd_ >= 0) close(epoll_fd_);
 	epoll_fd_ = -1;
 }

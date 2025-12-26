@@ -1,6 +1,6 @@
 
 #include "FileCacheManager.hpp"
-#include "HttpRequest.hpp"
+#include "http/HttpRequest.hpp"
 #include "utils.hpp"
 #include "Logger.hpp"
 #include <algorithm>
@@ -11,11 +11,12 @@ HttpRequest::HttpRequest()
 	infos_["Content-Type"] = "";
 }
 
-void HttpRequest::init(std::vector<char>& raw, size_t header_size, size_t content_size)
+void HttpRequest::init(std::vector<char>& raw, size_t header_size, size_t content_size, FdContext *socket_context)
 {
 	raw_ = raw;
 	header_size_ = header_size;
 	content_size_ = content_size;
+	socket_context_ = socket_context;
 }
 
 const std::string* HttpRequest::getHeaderInfo(const std::string& key) const
@@ -129,6 +130,55 @@ bool HttpRequest::parseTarget()
 	return true;
 }
 
+bool HttpRequest::linkInstance()
+{
+	std::map<std::string, std::string>::iterator host_it = infos_.find("Host");
+	if (host_it == infos_.end())
+	{
+		create_error_ = BAD_REQUEST;
+		return true;
+	}
+
+	size_t pos = host_it->second.find(":");
+	std::string req_host;
+	if (pos == std::string::npos) req_host = host_it->second;
+	else req_host = host_it->second.substr(0, pos);
+
+	const std::vector<ServerInstance*>& instances = *socket_context_->server_instances;
+	ServerInstance *first_default = NULL;
+	instance_ = NULL;
+
+	for (
+		std::vector<ServerInstance*>::const_iterator it = instances.begin();
+		it != instances.end();
+		++it
+	) {
+		const std::vector<std::string>& serv_names = (*it)->getServerNames();
+
+		if (!first_default && (*it)->hasDefaultName()) first_default = *it;
+
+		for (
+			std::vector<std::string>::const_iterator host_name = serv_names.begin();
+			host_name != serv_names.end();
+			++host_name
+		) {
+			if (*host_name == req_host)
+			{
+				instance_ = *it;
+				break ;
+			}
+		}
+
+		if (instance_) break ;
+	}
+	if (!instance_) instance_ = first_default ? first_default : instances[0];
+
+	std::cout << cfg::util::represent(instance_->getRoot()) << std::endl;
+
+	// std::cout << "Host: " << host_it->second << std::endl;
+	return false;
+}
+
 bool HttpRequest::parse()
 {
 	try
@@ -168,7 +218,6 @@ bool HttpRequest::parse()
 		if (!parseTarget()) return true;
 
 		version_ = getNextPart(lines[0], " ");
-		if (!checkHttpVersion()) return true;
 
 		lines.erase(lines.begin());
 
@@ -185,12 +234,10 @@ bool HttpRequest::parse()
 			infos_.insert(std::make_pair(key, lines[i]));
 		}
 
-		std::map<std::string, std::string>::iterator it = infos_.find("Host");
-		if (it == infos_.end())
-		{
-			create_error_ = BAD_REQUEST;
-			return true;
-		}
+		if (linkInstance()) return true;
+
+		if (!checkHttpVersion()) return true;
+
 
 		// for (std::map<std::string, std::string>::const_iterator it = infos_.begin();
 		// 	it != infos_.end();
