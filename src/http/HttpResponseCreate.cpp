@@ -76,7 +76,7 @@ void HttpResponse::setError(int code)
 
 	setHeader("Content-Type", "text/html");
 	std::string error = to_string(code) + " " + status_message_;
-	std::string body = "<html><head><title>"+error+"</title></head><body><center><h1>"+error+"</h1></center><hr><center>webserv/"+std::string(VERSION)+"</center></body></html>";
+	std::string body = "<html><head><title>"+error+"</title></head><body><center><h1>"+error+"</h1></center><hr><center>webserv/" VERSION "</center></body></html>";
 	std::vector<char> body_vec(body.begin(), body.end());
 	setBody(body_vec);
 }

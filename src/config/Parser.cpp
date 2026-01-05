@@ -108,7 +108,8 @@ void	Parser::parse(void) throw(ParsingException)
 	tokenize_();
 }
 
-const std::vector<Lexer::TokenNode>&	Parser::getNodes(void) const{
+const std::vector<Lexer::TokenNode>&	Parser::getNodes(void) const
+{
 	return lexer_nodes_;
 }
 
