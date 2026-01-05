@@ -10,6 +10,7 @@ SOURCES					:=	$(CONFIG_SOURCES) main \
 							Server \
 							ServerInstance \
 							FileCacheManager \
+							Location \
 							http/http_utils \
 							http/HttpConnection \
 							http/HttpRequest \

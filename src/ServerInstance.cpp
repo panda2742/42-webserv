@@ -101,4 +101,18 @@ void ServerInstance::init()
 	} catch (const std::exception& e) {
 		throw std::invalid_argument("Invalid error_page value for server " + to_string(server_index_) + ". Error: " + e.what());
 	}
+
+	try {
+		std::vector<StrDirective> locations = server_.find<std::string>("location");
+
+		for (std::vector<StrDirective>::iterator it = locations.begin(); it != locations.end(); ++it)
+		{
+			locations_.push_back(Location(*it, NULL));
+			Location& loc = locations_.back();
+			loc.init();
+		}
+		
+	} catch (const std::exception& e) {
+		throw std::invalid_argument("Invalid locations value for server " + to_string(server_index_) + (server_.value.length() > 0 ? " " + server_.value : "") + ". Error: " + e.what());
+	}
 }

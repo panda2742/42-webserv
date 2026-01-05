@@ -6,6 +6,7 @@
 #include <arpa/inet.h>
 
 #include "config/HttpConfig.hpp"
+#include "Location.hpp"
 
 struct ListenProp {
 	union {
@@ -39,6 +40,7 @@ private:
 	bool is_default_;
 	std::string root_;
 	std::map<unsigned int, std::string> error_pages_;
+	std::vector<Location> locations_;
 	
 public:
 	ServerInstance(StrDirective& server, uint32_t server_index);

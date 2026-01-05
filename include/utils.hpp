@@ -13,6 +13,7 @@ std::string to_string(const T& value)
 std::string toUpper(const std::string& str);
 std::string getNextPart(std::string& input, const std::string& sep);
 std::string trim(const std::string &s);
+std::vector<std::string> split(const std::string& str, char sep);
 
 const std::string getHttpErrorMessage(int code);
 const std::string getMimeType(const std::string& ext);

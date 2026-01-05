@@ -66,7 +66,7 @@ void Server::handleClientIN(int fd)
 
 	size_t size = 0;
 
-	while ((r = recv(fd, buf, sizeof(buf), 0)) > 0)
+	while ((r = recv(fd, buf, sizeof(buf), 0)) > 0) // TODO remove cette boucle et passer en un recv par call de handleClient
 	{
 		request_buffer.insert(request_buffer.end(), buf, buf + r);
 		size += r;

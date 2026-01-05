@@ -134,6 +134,14 @@ void HttpResponse::createDefault()
 {
 	headers_["Content-Length"] = "0";
 
+
+	// VERIFY LOCATION
+
+	std::vector<std::string> res = split(req_.getTarget(), '/');
+
+	std::cout << cfg::util::represent(res) << std::endl;
+
+
 	// addCookie("test", "kakoukakou");
 	// addCookie("test2", "kakoukakou2", true, true, 3600, "/", "Lax");
 
