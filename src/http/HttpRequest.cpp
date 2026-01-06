@@ -173,7 +173,7 @@ bool HttpRequest::linkInstance()
 	}
 	if (!instance_) instance_ = first_default ? first_default : instances[0];
 
-	std::cout << cfg::util::represent(instance_->getRoot()) << std::endl;
+	// std::cout << cfg::util::represent(instance_->getRoot()) << std::endl;
 
 	// std::cout << "Host: " << host_it->second << std::endl;
 	return false;

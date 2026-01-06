@@ -26,6 +26,8 @@ public:
 	~Location();
 
 	void init();
+
+	void print(int indent = 0);
 };
 
 #endif

@@ -25,6 +25,17 @@ void Location::init()
 
 }
 
+void Location::print(int indent)
+{
+	if (parent_ == NULL) std::cout << "Default location" << std::endl;
+	else std::cout << std::string(indent, ' ') << cfg::util::represent(route_) << std::endl;
+
+	for (std::vector<Location>::iterator it = childs_.begin(); it != childs_.end(); ++it)
+	{
+		it->print(indent + 2);
+	}
+}
+
 Location::~Location()
 {
 

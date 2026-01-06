@@ -47,7 +47,7 @@ void HttpResponse::setError(int code)
 	const std::map<unsigned int, std::string>& error_pages = req_.getServerInstance()->getErrorPages();
 	std::map<unsigned int, std::string>::const_iterator error_it = error_pages.find(static_cast<unsigned int>(code));
 
-	std::cout << cfg::util::represent(error_pages) << std::endl;
+	// std::cout << cfg::util::represent(error_pages) << std::endl;
 
 	if (error_it != error_pages.end()) 
 	{
