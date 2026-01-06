@@ -21,11 +21,16 @@ private:
 	LocationType type_;
 	std::vector<std::string> route_;
 
+	std::string root_;
+	std::map<unsigned int, std::string> error_pages_;
+
 public:
 	Location(StrDirective& directive, Location *parent);
 	~Location();
 
 	void init();
+	
+	const std::string *getErrorPage(int code) const; 
 
 	void print(int indent = 0);
 };

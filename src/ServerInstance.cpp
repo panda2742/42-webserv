@@ -85,6 +85,9 @@ void ServerInstance::init()
 		throw std::invalid_argument("Invalid server_name value for server " + to_string(server_index_) + ". Error: " + e.what());
 	}
 
+
+
+	
 	try {
 		root_ = server_.find<std::string>("root").at(0).value;
 
@@ -94,12 +97,6 @@ void ServerInstance::init()
 
 	} catch (const std::exception& e) {
 		throw std::invalid_argument("Invalid root value for server " + to_string(server_index_) + ". Error: " + e.what());
-	}
-
-	try {
-		error_pages_ = server_.get<std::map<unsigned int, std::string> >("error_page");
-	} catch (const std::exception& e) {
-		throw std::invalid_argument("Invalid error_page value for server " + to_string(server_index_) + ". Error: " + e.what());
 	}
 
 	try {
