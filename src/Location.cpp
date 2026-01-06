@@ -3,7 +3,7 @@
 
 Location::Location(StrDirective& directive, Location *location) : directive_(directive), parent_(location), type_(LOCATION_DEFAULT)
 {
-	
+
 }
 
 void Location::init()
@@ -34,6 +34,18 @@ void Location::print(int indent)
 	{
 		it->print(indent + 2);
 	}
+}
+
+const Location&	Location::matches(const vecstr_t& fragments) const
+{
+	if (!fragments.size() || vecCmp_(route_, fragments)) return *this;
+
+	for (std::vector<Location>::const_iterator it = childs_.begin(); it != childs_.end(); ++it)
+	{
+		
+	}
+
+	return *this;
 }
 
 Location::~Location()
