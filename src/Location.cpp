@@ -7,7 +7,8 @@ Location::Location(StrDirective& directive, Location *location) : directive_(dir
 
 void Location::init()
 {
-	route_ = split(directive_.value, '/');
+	if (parent_ != NULL &&  parent_ != ServerInstance::getGlobalLocation())
+		route_ = split(directive_.value, '/');
 
 	try {
 		std::vector<std::string> root_vec = directive_.get<std::vector<std::string> >("root");
@@ -33,15 +34,17 @@ void Location::init()
 		throw std::invalid_argument("Invalid error_page value in location. Error: " + std::string(e.what()));
 	}
 
-	try {
-		error_pages_ = directive_.get<std::map<unsigned int, std::string> >("error_page");
-	} catch (const std::exception& e) {
-		throw std::invalid_argument("Invalid error_page value in location. Error: " + std::string(e.what()));
-	}
+	// try {
+	// 	error_pages_ = directive_.get<std::map<unsigned int, std::string> >("error_page");
+	// } catch (const std::exception& e) {
+	// 	throw std::invalid_argument("Invalid error_page value in location. Error: " + std::string(e.what()));
+	// }
 
 	// ----------------------------------------------- //
 
 	std::vector<StrDirective> childs = directive_.find<std::string>("location");
+
+	childs_.reserve(childs.size());
 
 	for (std::vector<StrDirective>::iterator it = childs.begin(); it != childs.end(); ++it)
 	{
@@ -52,11 +55,15 @@ void Location::init()
 
 }
 
-const std::string *Location::getErrorPage(int code) const {
+const std::string *Location::getErrorPage(int code) const
+{
 	if (!parent_) return NULL;
+
 	const std::map<unsigned int, std::string>::const_iterator found_error_page = error_pages_.find(code);
+
 	if (found_error_page != error_pages_.end())
 		return &found_error_page->second;
+
 	return parent_->getErrorPage(code);
 }
 

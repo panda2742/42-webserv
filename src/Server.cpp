@@ -165,6 +165,9 @@ void Server::initInstances()
 	StrDirective http = conf_.http();
 	std::vector<StrDirective> servers = http.find<std::string>("server");
 
+	Location *glob_loc = new Location(http, NULL);
+	ServerInstance::setGlobalLocation(glob_loc);
+
 	for (size_t i = 0; i < servers.size(); i++)
 	{
 		instances_.push_back(ServerInstance(servers[i], i));
@@ -335,4 +338,6 @@ void Server::clean()
 	// listen_fd_ = -1; // TODO
 	if (epoll_fd_ >= 0) close(epoll_fd_);
 	epoll_fd_ = -1;
+
+	ServerInstance::freeGlobalLocation();
 }

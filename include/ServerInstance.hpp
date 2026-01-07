@@ -41,6 +41,8 @@ private:
 	std::string root_;
 	std::map<unsigned int, std::string> error_pages_;
 	Location locations_;
+
+	static Location *global_loc_;
 	
 public:
 	ServerInstance(StrDirective& server, uint32_t server_index);
@@ -53,6 +55,10 @@ public:
 	bool hasDefaultName() const { return is_default_; }
 	const std::string& getRoot() const { return root_; }
 	const std::map<unsigned int, std::string>& getErrorPages() const { return error_pages_; }
+
+	static void setGlobalLocation(Location *loc) { global_loc_ = loc; }
+	static const Location *getGlobalLocation() { return global_loc_; }
+	static void freeGlobalLocation() { delete global_loc_; }
 	
 };
 
