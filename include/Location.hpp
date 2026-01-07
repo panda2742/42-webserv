@@ -26,6 +26,16 @@ typedef struct {
 	std::string route;
 } redirect_t;
 
+typedef struct {
+	bool enabled;
+	std::string path;
+} upload_t;
+
+typedef struct {
+	bool enabled;
+	std::map<std::string, std::string> map;
+} cgi_t;
+
 class Location
 {
 private:
@@ -43,6 +53,9 @@ private:
 	allow_methods_t allow_methods_;
 	redirect_t redirection_;
 	bool autoindex_;
+	std::vector<std::string> index_;
+	upload_t upload_;
+	cgi_t cgi_;
 
 public:
 	Location(StrDirective& directive, Location *parent);

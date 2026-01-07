@@ -152,8 +152,50 @@ void Location::init()
 		else throw std::invalid_argument("Invalid autoindex value: " + el);
 	}
 	
+	// --------------- INDEX --------------- //
+	std::vector<std::string> index;
+	try {
+		index = directive_.get<std::vector<std::string> >("index");
+	} catch (const std::exception& e) {
+		throw std::invalid_argument("Invalid index value in location. Error: " + std::string(e.what()));
+	}
 
+	if (index.size()) index_ = index;
+	else if (parent_) index_ = parent_->index_;
 
+	// ------------ UPLOAD_PATH ------------ //
+	std::vector<std::string> upload_path;
+	try {
+		upload_path = directive_.get<std::vector<std::string> >("upload_path");
+	} catch (const std::exception& e) {
+		throw std::invalid_argument("Invalid upload_path value in location. Error: " + std::string(e.what()));
+	}
+
+	if (upload_path.size())
+	{
+		upload_.enabled = true;
+		upload_.path = upload_path.at(0);
+	}
+	else upload_.enabled = false;
+
+	// -------------- CGI_EXT -------------- //
+	std::vector<StrVecDirective> cgi_handler;
+	try {
+		cgi_handler = directive_.find<std::vector<std::string> >("cgi_handler");
+	} catch (const std::exception& e) {
+		throw std::invalid_argument("Invalid upload_path value in location. Error: " + std::string(e.what()));
+	}
+
+	if (cgi_handler.size())
+	{
+		cgi_.enabled = true;
+		for (std::vector<StrVecDirective>::iterator it = cgi_handler.begin(); it != cgi_handler.end(); it++)
+		{
+			if (it->value.size() != 2) throw std::invalid_argument("Invalid cgi_handler value (2 arguments required)");
+			cgi_.map[it->value.at(0)] = it->value.at(1);
+		}
+	}
+	else cgi_.enabled = false;
 
 	// ----------------------------------------------- //
 
@@ -209,7 +251,15 @@ void Location::print(int indent)
 	std::cout << std::string(indent, ' ') << " - root: " + root_ << std::endl;
 	std::cout << std::string(indent, ' ') << " - client_max_body_size: " << client_max_body_size_ << std::endl;
 	std::cout << std::string(indent, ' ') << " - autoindex: " << autoindex_ << std::endl;
+	std::cout << std::string(indent, ' ') << " - index: " << cfg::util::represent(index_) << std::endl;
 	if (redirection_.enabled) std::cout << std::string(indent, ' ') << " - redirection: " << redirection_.code << " " << redirection_.route << std::endl;
+	if (upload_.enabled) std::cout << std::string(indent, ' ') << " - upload: " << upload_.path << std::endl;
+	if (cgi_.enabled)
+	{
+		std::cout << std::string(indent, ' ') << " - cgi:" << std::endl;
+		for (std::map<std::string, std::string>::iterator it = cgi_.map.begin(); it != cgi_.map.end(); it++)
+			std::cout << std::string(indent, ' ') << "   • " << it->first << " -> " << it->second << std::endl;
+	}
 
 	for (std::vector<Location>::iterator it = childs_.begin(); it != childs_.end(); ++it)
 	{
