@@ -3,6 +3,8 @@
 
 #include "config/HttpConfig.hpp"
 
+#include <stdint.h>
+
 #define DEFAULT_CLIENT_MAX_BODY_SIZE 20971520
 
 enum LocationType {
@@ -11,6 +13,18 @@ enum LocationType {
 	LOCATION_CGI,
 	LOCATION_UPLOAD
 };
+
+typedef uint8_t allow_methods_t;
+
+#define METHOD_GET		(1 << 0)
+#define METHOD_POST		(1 << 1)
+#define METHOD_DELETE	(1 << 2)
+
+typedef struct {
+	bool enabled;
+	int code;
+	std::string route;
+} redirect_t;
 
 class Location
 {
@@ -26,6 +40,9 @@ private:
 	std::string root_;
 	std::map<unsigned int, std::string> error_pages_;
 	unsigned long client_max_body_size_;
+	allow_methods_t allow_methods_;
+	redirect_t redirection_;
+	bool autoindex_;
 
 public:
 	Location(StrDirective& directive, Location *parent);
