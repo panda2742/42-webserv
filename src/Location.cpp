@@ -25,27 +25,45 @@ void Location::init()
 
 }
 
-void Location::print(int indent)
+void Location::print(int indent) const
 {
 	if (parent_ == NULL) std::cout << "Default location" << std::endl;
-	else std::cout << std::string(indent, ' ') << cfg::util::represent(route_) << std::endl;
+	else std::cout << std::string(indent, ' ') << cfg::util::represent(route_)  << " ";
+	std::cout << this << std::endl;
 
-	for (std::vector<Location>::iterator it = childs_.begin(); it != childs_.end(); ++it)
+	for (std::vector<Location>::const_iterator it = childs_.begin(); it != childs_.end(); ++it)
 	{
 		it->print(indent + 2);
 	}
 }
 
-const Location&	Location::matches(const vecstr_t& fragments) const
+Location* Location::matchProcess_(vecstr_t& fragments, Location& location)
 {
-	if (!fragments.size() || vecCmp_(route_, fragments)) return *this;
-
-	for (std::vector<Location>::const_iterator it = childs_.begin(); it != childs_.end(); ++it)
+	for (std::vector<Location>::iterator it = location.childs_.begin(); it != location.childs_.end(); ++it)
 	{
-		
+		Location* loc_child = matchProcess_(fragments, *it);
+		if (loc_child)
+			return loc_child;
 	}
 
-	return *this;
+	vecstr_t	remaining = vecConsume_(fragments, location.route_);
+
+	if (remaining.size() < fragments.size()) return &location;
+
+	return NULL;
+}
+
+Location* Location::matches(vecstr_t fragments)
+{
+	for (std::vector<Location>::iterator it = childs_.begin();
+		it != childs_.end(); ++it)
+	{
+		Location* match = matchProcess_(fragments, *it);
+		if (match)
+			return match;
+	}
+
+	return NULL;  // Ou this si vous voulez un fallback
 }
 
 Location::~Location()

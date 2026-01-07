@@ -49,12 +49,12 @@ R	magic_cast(T value) throw(MagicCastException)
 	if (r_type == t_type)
 		return as<R>(value);
 
-	std::stringstream									string;
-	uint_t										uint;
-	vecstr_t							vector_string;
-	vecuint_t							vector_uint;
+	std::stringstream			string;
+	uint_t						uint;
+	vecstr_t					vector_string;
+	vecuint_t					vector_uint;
 	mapstr_t					map1;
-	mapvec_t	map2;
+	mapvec_t					map2;
 
 	switch (t_type)
 	{
@@ -238,7 +238,6 @@ R	magic_assemble(A& a, B& b) throw(MagicCastException)
 		converted_b = magic_cast<R>(b);
 
 	converted_a = magic_assemble_sub_(converted_a, converted_b);
-
 
 	return converted_a;
 }

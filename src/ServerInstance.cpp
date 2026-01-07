@@ -11,7 +11,7 @@ ServerInstance::ServerInstance(StrDirective& server, uint32_t server_index)
 
 ServerInstance::~ServerInstance()
 {
-	
+
 }
 
 in_addr_t inet_addr_secure(const std::string& ip)
@@ -28,7 +28,7 @@ in_addr_t inet_addr_secure(const std::string& ip)
 void ServerInstance::init()
 {
 	std::vector<std::string> listen_directives;
-	
+
 	try {
 		listen_directives = server_.get<std::vector<std::string> >("listen");
 
@@ -113,7 +113,6 @@ void ServerInstance::init()
 		// 	loc.init();
 		// }
 		locations_.print();
-		
 	} catch (const std::exception& e) {
 		throw std::invalid_argument("Invalid locations value for server " + to_string(server_index_) + (server_.value.length() > 0 ? " " + server_.value : "") + ". Error: " + e.what());
 	}

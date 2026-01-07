@@ -41,7 +41,7 @@ private:
 	std::string root_;
 	std::map<unsigned int, std::string> error_pages_;
 	Location locations_;
-	
+
 public:
 	ServerInstance(StrDirective& server, uint32_t server_index);
 	~ServerInstance();
@@ -53,7 +53,9 @@ public:
 	bool hasDefaultName() const { return is_default_; }
 	const std::string& getRoot() const { return root_; }
 	const std::map<unsigned int, std::string>& getErrorPages() const { return error_pages_; }
-	
+
+	const Location&	getLocations(void) const { return locations_; }
+
 };
 
 
