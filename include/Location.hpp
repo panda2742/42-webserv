@@ -3,6 +3,8 @@
 
 #include "config/HttpConfig.hpp"
 
+#define DEFAULT_CLIENT_MAX_BODY_SIZE 20971520
+
 enum LocationType {
 	LOCATION_DEFAULT,
 	LOCATION_REdIRECT,
@@ -23,6 +25,7 @@ private:
 
 	std::string root_;
 	std::map<unsigned int, std::string> error_pages_;
+	unsigned long client_max_body_size_;
 
 public:
 	Location(StrDirective& directive, Location *parent);

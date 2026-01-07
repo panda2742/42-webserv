@@ -166,7 +166,10 @@ void Server::initInstances()
 	std::vector<StrDirective> servers = http.find<std::string>("server");
 
 	Location *glob_loc = new Location(http, NULL);
+	glob_loc->init();
 	ServerInstance::setGlobalLocation(glob_loc);
+
+	glob_loc->print();
 
 	for (size_t i = 0; i < servers.size(); i++)
 	{
