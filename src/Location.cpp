@@ -6,6 +6,7 @@
 
 Location::Location(StrDirective& directive, Location *location) : directive_(directive), parent_(location), type_(LOCATION_DEFAULT)
 {
+
 }
 
 void Location::init()
@@ -243,7 +244,7 @@ const char *allow_methods_to_string(allow_methods_t m)
 	return buf;
 }
 
-void Location::print(int indent)
+void Location::print(int indent) const
 {
 	if (parent_ == NULL) std::cout << PINK "Default location" RESET << std::endl;
 	else std::cout << std::string(indent, ' ') << cfg::util::represent(route_) << std::endl;
@@ -265,6 +266,35 @@ void Location::print(int indent)
 	{
 		it->print(indent + 2);
 	}
+}
+
+Location* Location::matchProcess_(vecstr_t& fragments, Location& location)
+{
+	for (std::vector<Location>::iterator it = location.childs_.begin(); it != location.childs_.end(); ++it)
+	{
+		Location* loc_child = matchProcess_(fragments, *it);
+		if (loc_child)
+			return loc_child;
+	}
+
+	vecstr_t	remaining = vecConsume_(fragments, location.route_);
+
+	if (remaining.size() < fragments.size()) return &location;
+
+	return NULL;
+}
+
+Location* Location::matches(vecstr_t fragments)
+{
+	for (std::vector<Location>::iterator it = childs_.begin();
+		it != childs_.end(); ++it)
+	{
+		Location* match = matchProcess_(fragments, *it);
+		if (match)
+			return match;
+	}
+
+	return NULL;  // Ou this si vous voulez un fallback
 }
 
 Location::~Location()

@@ -47,7 +47,7 @@ private:
 	LocationType type_;
 	std::vector<std::string> route_;
 
-	std::string root_;
+  std::string root_;
 	std::map<unsigned int, std::string> error_pages_;
 	unsigned long client_max_body_size_;
 	allow_methods_t allow_methods_;
@@ -56,6 +56,29 @@ private:
 	std::vector<std::string> index_;
 	upload_t upload_;
 	cgi_t cgi_;
+  
+	/**
+	 * An utility function that returns true if two vectors are identical in their content.
+	 *
+	 * @tparam T The type of the vector elements. T MUST have implemented the equal operator.
+	 * @param vec1 The first vector.
+	 * @param vec2 The second vector.
+	 * @return The result of the test which is a boolean.
+	 */
+	template <typename T>
+	static bool	vecCmp_(std::vector<T>& vec1, std::vector<T>& vec2);
+
+	template <typename T>
+	static std::vector<T> vecConsume_(const std::vector<T>& vec1, const std::vector<T>& vec2);
+
+	/**
+	 * Process the matches function but private because what do you mean CIA can spy me?
+	 *
+	 * @param fragments The sequence of fragments.
+	 * @param location The location to process.
+	 * @return A pointer to the location if it matches or NULL if it does not.
+	 */
+	Location	*matchProcess_(vecstr_t& fragments, Location& location);
 
 public:
 	Location(StrDirective& directive, Location *parent);
@@ -65,7 +88,11 @@ public:
 	
 	const std::string *getErrorPage(int code) const; 
 
-	void print(int indent = 0);
+	void print(int indent = 0) const;
+
+	Location* matches(vecstr_t fragments);
 };
+
+#include "Location.tpp"
 
 #endif

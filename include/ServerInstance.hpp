@@ -56,6 +56,8 @@ public:
 	const std::string& getRoot() const { return root_; }
 	const std::map<unsigned int, std::string>& getErrorPages() const { return error_pages_; }
 
+	const Location&	getLocations(void) const { return locations_; }
+
 	static void setGlobalLocation(Location *loc) { global_loc_ = loc; }
 	static const Location *getGlobalLocation() { return global_loc_; }
 	static void freeGlobalLocation() { delete global_loc_; }

@@ -49,7 +49,7 @@ void HttpResponse::setError(int code)
 
 	// std::cout << cfg::util::represent(error_pages) << std::endl;
 
-	if (error_it != error_pages.end()) 
+	if (error_it != error_pages.end())
 	{
 		CachedFile *file_error = NULL;
 		struct stat file_error_info = {};
@@ -70,7 +70,7 @@ void HttpResponse::setError(int code)
 			return ;
 		}
 	}
-	
+
 	// try load configurated error page
 	// + set file status a FILE_OK si y'a bien un fichier / FILE_STREAM_DIRECT si trop lourd
 
@@ -141,6 +141,12 @@ void HttpResponse::createDefault()
 
 	std::cout << cfg::util::represent(res) << std::endl;
 
+	const ServerInstance&	servi = *req_.getServerInstance();
+	const Location&			serv_loc = servi.getLocations();
+
+	std::cout << "==== START TEST MATCH ====" << std::endl;
+	const_cast<Location&>(serv_loc).matches(res)->print();
+	std::cout << "==== END TEST MATCH ====" << std::endl;
 
 	// addCookie("test", "kakoukakou");
 	// addCookie("test2", "kakoukakou2", true, true, 3600, "/", "Lax");

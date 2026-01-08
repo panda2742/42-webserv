@@ -13,7 +13,7 @@ ServerInstance::ServerInstance(StrDirective& server, uint32_t server_index)
 
 ServerInstance::~ServerInstance()
 {
-	
+
 }
 
 in_addr_t inet_addr_secure(const std::string& ip)
@@ -30,7 +30,7 @@ in_addr_t inet_addr_secure(const std::string& ip)
 void ServerInstance::init()
 {
 	std::vector<std::string> listen_directives;
-	
+
 	try {
 		listen_directives = server_.get<std::vector<std::string> >("listen");
 
