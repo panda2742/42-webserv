@@ -145,7 +145,7 @@ void HttpResponse::createDefault()
 	const Location&			serv_loc = servi.getLocations();
 
 	std::cout << "==== START TEST MATCH ====" << std::endl;
-	const_cast<Location&>(serv_loc).matches(res)->print();
+	const_cast<Location&>(serv_loc).matches(res).print();
 	std::cout << "==== END TEST MATCH ====" << std::endl;
 
 	// addCookie("test", "kakoukakou");

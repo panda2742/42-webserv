@@ -17,12 +17,12 @@ bool	Location::vecCmp_(std::vector<T>& vec1, std::vector<T>& vec2)
 template <typename T>
 std::vector<T> Location::vecConsume_(const std::vector<T>& vec1, const std::vector<T>& vec2)
 {
-    std::vector<T> result = vec2;
-    size_t i = 0;
+	std::vector<T> result = vec2;
+	size_t i = 0;
 
-    while (i < vec1.size() && i < result.size() && vec1[i] == result[i])
-        ++i;
+	while (i < vec1.size() && i < result.size() && vec1[i] == result[i])
+		++i;
 
-    result.erase(result.begin(), result.begin() + i);
-    return result;
+	result.erase(result.begin(), result.begin() + i);
+	return result;
 }
