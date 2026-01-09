@@ -27,11 +27,11 @@ void Location::init()
 				for (std::vector<std::string>::const_iterator rit(route_.begin()); rit != route_.end(); rit++)
 					root_ += '/' + *rit;
 			}
-			else 
+			else
 				root_ = root_vec.at(0);
-	
+
 			if (root_.empty()) throw std::invalid_argument("root is required");
-	
+
 			if (root_.size() - 1 == '/') root_.erase(root_.end() - 1);
 		}
 	}
@@ -152,7 +152,7 @@ void Location::init()
 		else if (el == "off") autoindex_ = false;
 		else throw std::invalid_argument("Invalid autoindex value: " + el);
 	}
-	
+
 	// --------------- INDEX --------------- //
 	std::vector<std::string> index;
 	try {
