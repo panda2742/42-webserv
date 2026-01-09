@@ -3,8 +3,10 @@
 #include "ServerInstance.hpp"
 #include "utils.hpp"
 
+Location *ServerInstance::global_loc_ = NULL;
+
 ServerInstance::ServerInstance(StrDirective& server, uint32_t server_index)
-	: server_(server), server_index_(server_index), locations_(server, NULL)
+	: server_(server), server_index_(server_index), locations_(server, global_loc_)
 {
 
 }
@@ -85,6 +87,9 @@ void ServerInstance::init()
 		throw std::invalid_argument("Invalid server_name value for server " + to_string(server_index_) + ". Error: " + e.what());
 	}
 
+
+
+	
 	try {
 		root_ = server_.find<std::string>("root").at(0).value;
 
@@ -97,21 +102,7 @@ void ServerInstance::init()
 	}
 
 	try {
-		error_pages_ = server_.get<std::map<unsigned int, std::string> >("error_page");
-	} catch (const std::exception& e) {
-		throw std::invalid_argument("Invalid error_page value for server " + to_string(server_index_) + ". Error: " + e.what());
-	}
-
-	try {
 		locations_.init();
-		// std::vector<StrDirective> locations = server_.find<std::string>("location");
-
-		// for (std::vector<StrDirective>::iterator it = locations.begin(); it != locations.end(); ++it)
-		// {
-		// 	locations_.push_back(Location(*it, NULL));
-		// 	Location& loc = locations_.back();
-		// 	loc.init();
-		// }
 		locations_.print();
 	} catch (const std::exception& e) {
 		throw std::invalid_argument("Invalid locations value for server " + to_string(server_index_) + (server_.value.length() > 0 ? " " + server_.value : "") + ". Error: " + e.what());
