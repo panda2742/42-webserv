@@ -98,6 +98,8 @@ void HttpResponse::setDirectory()
 		return ;
 	}
 
+	if (!req_.getLocation().getAutoindex()) return setError(403);
+
 	std::string dirname = (req_.getTarget()[req_.getTarget().size() - 1] == '/') ? req_.getTarget() : (req_.getTarget() + "/");
 	std::string auto_index_html = "<!DOCTYPE html><html><head><title>Index of "+ dirname + "</title></head><body><h1>Index of "+ dirname + "</h1><hr><pre>";
 
@@ -140,14 +142,26 @@ void HttpResponse::createDefault()
 	// std::cout << cfg::util::represent(res) << std::endl;
 
 	const Location&	target = req_.getLocation();
-	(void)target;
 
-	std::cout << (int)target.getAllowMethods() << " | " << (int)req_.getMethod() << std::endl;
 	if ((target.getAllowMethods() & req_.getMethod()) == 0 && status_mutable_)
 	{
 		setError(405);
 		return;
 	}
+
+	redirect_t	redir = target.getRedirection();
+
+	if (redir.enabled)
+	{
+		setRedirect(redir.code, redir.route);
+		return;
+	}
+
+	upload_t	upload = target.getUpload();
+	// if (upload.enabled)
+	// {
+		// std::cout << "UPLOAD BODY: " << req_.getBody() << std::endl;
+	// }
 
 	// addCookie("test", "kakoukakou");
 	// addCookie("test2", "kakoukakou2", true, true, 3600, "/", "Lax");
@@ -155,11 +169,6 @@ void HttpResponse::createDefault()
 	// useCGI("/usr/bin/php-cgi", "/home/lilefebv/Documents/cursus/42-webserv/www/script.php");
 	// return ;
 
-	// if (req_.getTarget() == "/abc")
-	// {
-	// 	setRedirect(302, "/OEOEOEOE");
-	// 	return ;
-	// } // Redirection example
 	if (req_.getMethod() == METHOD_GET || !status_mutable_)
 	{
 		if (file_status_ == NONE) file_status_ = FileCacheManager::getFile(req_.getServerInstance()->getRoot(), req_.getTarget(), file_, file_info_, file_path_);

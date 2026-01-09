@@ -72,8 +72,8 @@ ResponseState HttpResponse::sendResponsePart(int socket_fd)
 
 	if (send_state_ == BODY)
 	{
-		if (req_.getMethod() == METHOD_GET)
-		{
+		// if (req_.getMethod() == METHOD_GET)
+		// {
 			if (file_status_ == FILE_OK)
 			{
 				size_t to_send = file_->data.size();
@@ -102,11 +102,11 @@ ResponseState HttpResponse::sendResponsePart(int socket_fd)
 				}
 				else send_state_ = SENT;
 			}
-		}
-		else
-		{
+		// }
+		// else
+		// {
 
-		}
+		// }
 	}
 
 	return send_state_;
