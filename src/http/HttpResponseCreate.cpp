@@ -81,21 +81,26 @@ void HttpResponse::setError(int code)
 
 void HttpResponse::setDirectory()
 {
-	struct stat tmp_file_info;
+	std::vector<std::string> indexes = req_.getLocation().getIndex();
 
-	std::string full_path_tmp;
-	std::string index_path = req_.getTarget()[req_.getTarget().size() - 1] == '/' ? req_.getTarget() + "index.html" : req_.getTarget() + "/index.html";
+	std::string baseTarget = req_.getTarget()[req_.getTarget().size() - 1] == '/' ? req_.getTarget() : req_.getTarget() + "/";
 
-	FileStatus index_status = FileCacheManager::getFile(req_.getServerInstance()->getRoot(), index_path, file_, tmp_file_info, full_path_tmp);
-
-
-	if (index_status == FILE_OK || index_status == FILE_STREAM_DIRECT)
+	for (std::vector<std::string>::iterator it = indexes.begin(); it != indexes.end(); it++)
 	{
-		file_path_ = full_path_tmp;
-		file_info_ = tmp_file_info;
-		file_status_ = index_status;
-		createDefault();
-		return ;
+		struct stat tmp_file_info;
+		std::string full_path_tmp;
+		std::string index_path = baseTarget + *it;
+	
+		FileStatus index_status = FileCacheManager::getFile(req_.getServerInstance()->getRoot(), index_path, file_, tmp_file_info, full_path_tmp);
+	
+		if (index_status == FILE_OK || index_status == FILE_STREAM_DIRECT)
+		{
+			file_path_ = full_path_tmp;
+			file_info_ = tmp_file_info;
+			file_status_ = index_status;
+			createDefault();
+			return ;
+		}
 	}
 
 	if (!req_.getLocation().getAutoindex()) return setError(403);
