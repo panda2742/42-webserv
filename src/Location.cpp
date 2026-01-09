@@ -308,3 +308,22 @@ Location::~Location()
 {
 
 }
+
+vecstr_t Location::getRoute() const
+{
+	std::vector<const Location*> chain;
+	const Location* cur = this;
+	while (cur && cur->parent_)
+	{
+		chain.push_back(cur);
+		cur = cur->parent_;
+	}
+
+	vecstr_t result;
+	for (std::vector<const Location*>::reverse_iterator it = chain.rbegin(); it != chain.rend(); ++it)
+	{
+		const std::vector<std::string>& r = (*it)->route_;
+		result.insert(result.end(), r.begin(), r.end());
+	}
+	return result;
+}

@@ -86,6 +86,8 @@ private:
 	std::vector<ResCookie> cookies_;
 	std::vector<char> body_;
 
+	std::string root_;
+
 	CachedFile *file_;
 	FileStatus file_status_;
 	struct stat file_info_;
@@ -137,6 +139,7 @@ private:
 	bool sendFileDirectPart(int socket_fd);
 
 	const std::string getBodySize() const;
+	void getRealRoot();
 
 public:
 	HttpResponse(HttpRequest &req, Server &server);

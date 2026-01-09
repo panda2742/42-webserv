@@ -90,6 +90,8 @@ public:
 
 	void print(int indent = 0) const;
 
+	vecstr_t			getRoute(void) const;
+
 	MatchRes	matchescanbenullbecauseitsapointer(vecstr_t fragments, MatchRes res);
 	Location&	matches(vecstr_t fragments);
 

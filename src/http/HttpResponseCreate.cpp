@@ -55,7 +55,7 @@ void HttpResponse::setError(int code)
 		struct stat file_error_info = {};
 		std::string final_file_path;
 		// TODO modif pour pas prendre le root mais passer par les locations
-		FileStatus err_file_status = FileCacheManager::getFile("", *error_path, file_error, file_error_info, final_file_path);
+		FileStatus err_file_status = FileCacheManager::getFile(*error_path, file_error, file_error_info, final_file_path);
 
 		if (err_file_status == FILE_OK || err_file_status == FILE_STREAM_DIRECT)
 		{
@@ -83,7 +83,7 @@ void HttpResponse::setDirectory()
 {
 	std::vector<std::string> indexes = req_.getLocation().getIndex();
 
-	std::string baseTarget = req_.getTarget()[req_.getTarget().size() - 1] == '/' ? req_.getTarget() : req_.getTarget() + "/";
+	std::string baseTarget = root_[root_.size() - 1] == '/' ? root_ : root_ + "/";
 
 	for (std::vector<std::string>::iterator it = indexes.begin(); it != indexes.end(); it++)
 	{
@@ -91,7 +91,7 @@ void HttpResponse::setDirectory()
 		std::string full_path_tmp;
 		std::string index_path = baseTarget + *it;
 	
-		FileStatus index_status = FileCacheManager::getFile(req_.getServerInstance()->getRoot(), index_path, file_, tmp_file_info, full_path_tmp);
+		FileStatus index_status = FileCacheManager::getFile(index_path, file_, tmp_file_info, full_path_tmp);
 	
 		if (index_status == FILE_OK || index_status == FILE_STREAM_DIRECT)
 		{
@@ -105,7 +105,7 @@ void HttpResponse::setDirectory()
 
 	if (!req_.getLocation().getAutoindex()) return setError(403);
 
-	std::string dirname = (req_.getTarget()[req_.getTarget().size() - 1] == '/') ? req_.getTarget() : (req_.getTarget() + "/");
+	std::string dirname = (root_[root_.size() - 1] == '/') ? root_ : (root_ + "/");
 	std::string auto_index_html = "<!DOCTYPE html><html><head><title>Index of "+ dirname + "</title></head><body><h1>Index of "+ dirname + "</h1><hr><pre>";
 
 
@@ -133,6 +133,19 @@ void HttpResponse::setDirectory()
 	setHeader("Content-Type", "text/html");
 	std::vector<char> body_vec(auto_index_html.begin(), auto_index_html.end());
 	setBody(body_vec);
+}
+
+void HttpResponse::getRealRoot()
+{
+	root_ = req_.getLocation().getRoot();
+
+	vecstr_t target = split(req_.getTarget(), '/');
+	target.erase(target.begin(), target.begin() + split(req_.getTarget(), '/').size());
+
+	for (vecstr_t::iterator it = target.begin(); it != target.end(); it++)
+		root_ += "/" + *it;
+
+	std::cout << root_;
 }
 
 void HttpResponse::createDefault()
@@ -176,7 +189,7 @@ void HttpResponse::createDefault()
 
 	if (req_.getMethod() == METHOD_GET || !status_mutable_)
 	{
-		if (file_status_ == NONE) file_status_ = FileCacheManager::getFile(req_.getServerInstance()->getRoot(), req_.getTarget(), file_, file_info_, file_path_);
+		if (file_status_ == NONE) file_status_ = FileCacheManager::getFile(root_, file_, file_info_, file_path_);
 
 		if (file_status_ == FILE_OK)
 		{
@@ -219,7 +232,9 @@ void HttpResponse::create()
 	{
 	case NO_REQ_ERROR:
 	case NO_HTTP_VERSION:
-		createDefault(); break;
+		getRealRoot();
+		createDefault();
+		break;
 	case NOT_HTTP_HEADER:
 		return ;
 	case UNKNOWN_METHOD:
