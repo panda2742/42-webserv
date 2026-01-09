@@ -258,11 +258,11 @@ void Location::print(int indent) const
 	if (cgi_.enabled)
 	{
 		std::cout << std::string(indent, ' ') << " - cgi:" << std::endl;
-		for (std::map<std::string, std::string>::iterator it = cgi_.map.begin(); it != cgi_.map.end(); it++)
+		for (std::map<std::string, std::string>::const_iterator it = cgi_.map.begin(); it != cgi_.map.end(); it++)
 			std::cout << std::string(indent, ' ') << "   • " << it->first << " -> " << it->second << std::endl;
 	}
 
-	for (std::vector<Location>::iterator it = childs_.begin(); it != childs_.end(); ++it)
+	for (std::vector<Location>::const_iterator it = childs_.begin(); it != childs_.end(); ++it)
 	{
 		it->print(indent + 2);
 	}

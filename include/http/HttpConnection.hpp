@@ -49,7 +49,8 @@ private:
 	 * Called when the request is considered as completed.
 	 * It create a `HttpRequest`, parse it, and finnaly create a `HttpResponse`.
 	 */
-	bool handleRequest();
+	void handleRequest();
+	bool handleRequestHeader();
 	
 public:
 	HttpConnection(int socket_fd, FdContext *socket_context, Server& server);
@@ -75,7 +76,7 @@ public:
 	 * @param content The data received by recv
 	 * @param size The size of the received data
 	 */
-	void receiveContent(char *content, size_t size);
+	bool receiveContent(char *content, size_t size);
 
 	/**
 	 * This function is called when epoll mark the fd of the connection as ready to write.

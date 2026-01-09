@@ -6,7 +6,7 @@
 #include <algorithm>
 
 HttpRequest::HttpRequest()
-	: create_error_(NO_REQ_ERROR)
+	: create_error_(NO_REQ_ERROR), location(NULL)
 {
 	infos_["Content-Type"] = "";
 }
@@ -237,6 +237,17 @@ bool HttpRequest::parse()
 		if (linkInstance()) return true;
 
 		if (!checkHttpVersion()) return true;
+
+		std::vector<std::string> splitted_target = split(target_, '/');
+
+		std::cout << cfg::util::represent(splitted_target) << std::endl;
+
+		Location& serv_loc = instance_->getLocations();
+
+		std::cout << "==== START TEST MATCH ====" << std::endl;
+		location = &serv_loc.matches(splitted_target);
+		location->print();
+		std::cout << "==== END TEST MATCH ====" << std::endl;
 
 
 		// for (std::map<std::string, std::string>::const_iterator it = infos_.begin();

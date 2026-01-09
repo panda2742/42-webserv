@@ -94,6 +94,8 @@ public:
 
 	MatchRes	matchescanbenullbecauseitsapointer(vecstr_t fragments, MatchRes res);
 	Location&	matches(vecstr_t fragments);
+
+	unsigned long getClientMaxBodySize() const { return client_max_body_size_; }
 };
 
 #include "Location.tpp"
