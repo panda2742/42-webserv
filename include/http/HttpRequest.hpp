@@ -8,6 +8,7 @@
 
 #include "utils_structs.hpp"
 #include "ServerInstance.hpp"
+#include "Location.hpp"
 
 /**
  * @enum Method
@@ -40,7 +41,8 @@ enum RequestError
 	UNSUPPORTED_HTTP_VERSION,
 	NO_HTTP_VERSION,
 	BAD_REQUEST,
-	HTTPS_REQUEST
+	HTTPS_REQUEST,
+	BODY_TOO_LONG
 };
 
 /**
@@ -71,6 +73,8 @@ private:
 	
 	std::map<std::string, std::string> queries_;
 	std::map<std::string, std::string> infos_;
+
+	Location *location;
 
 	bool checkHttpVersion();
 	bool parseTarget();
@@ -109,6 +113,14 @@ public:
 	const std::map<std::string, std::string>& getHeaders() const { return infos_; }
 	const std::map<std::string, std::string>& getQueries() const { return queries_; }
 	const ServerInstance *getServerInstance() const { return instance_; }
+
+	bool isBodyFull() const { return raw_.size() >= header_size_ + content_size_; }
+	size_t getRealBodySize() const { return raw_.size() - header_size_; }
+	void addBodyPart(std::vector<char>& part) { raw_.insert(raw_.end(), part.data(), part.data() + part.size()); }
+	void addBodyPart(char *part, size_t size) { raw_.insert(raw_.end(), part, part + size); }
+	void setBodyTooLong() { create_error_ = BODY_TOO_LONG; infos_["Connection"] = "close"; }
+
+	Location& getLocation() { return *location; };
 
 	void clear();
 

@@ -77,7 +77,8 @@ void Server::handleClientIN(int fd)
 	std::map<int, HttpConnection>::iterator it = connections_.find(fd);
 	if (it != connections_.end())
 	{
-		it->second.receiveContent(request_buffer.data(), size);
+		if (!it->second.receiveContent(request_buffer.data(), size))
+			removeClient(fd, Logger::WARN);
 	}
 	else
 	{

@@ -137,16 +137,16 @@ void HttpResponse::createDefault()
 
 	// VERIFY LOCATION
 
-	std::vector<std::string> res = split(req_.getTarget(), '/');
+	// std::vector<std::string> res = split(req_.getTarget(), '/');
 
-	std::cout << cfg::util::represent(res) << std::endl;
+	// std::cout << cfg::util::represent(res) << std::endl;
 
-	const ServerInstance&	servi = *req_.getServerInstance();
-	const Location&			serv_loc = servi.getLocations();
+	// const ServerInstance&	servi = *req_.getServerInstance();
+	// const Location&			serv_loc = servi.getLocations();
 
-	std::cout << "==== START TEST MATCH ====" << std::endl;
-	const_cast<Location&>(serv_loc).matches(res).print();
-	std::cout << "==== END TEST MATCH ====" << std::endl;
+	// std::cout << "==== START TEST MATCH ====" << std::endl;
+	// const_cast<Location&>(serv_loc).matches(res).print();
+	// std::cout << "==== END TEST MATCH ====" << std::endl;
 
 	// addCookie("test", "kakoukakou");
 	// addCookie("test2", "kakoukakou2", true, true, 3600, "/", "Lax");
@@ -214,6 +214,8 @@ void HttpResponse::create()
 		setError(505); break;
 	case HTTPS_REQUEST:
 		setError(501); break;
+	case BODY_TOO_LONG:
+		setError(413); break;
 	case BAD_REQUEST:
 	default:
 		setError(400); break;
