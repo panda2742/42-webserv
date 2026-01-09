@@ -44,20 +44,18 @@ void HttpResponse::setError(int code)
 {
 	setStatus(code, getHttpErrorMessage(code));
 
-	const std::map<unsigned int, std::string>& error_pages = req_.getServerInstance()->getErrorPages();
-	std::map<unsigned int, std::string>::const_iterator error_it = error_pages.find(static_cast<unsigned int>(code));
+	const std::string *error_path = req_.getLocation().getErrorPage(code);
 
 	// std::cout << cfg::util::represent(error_pages) << std::endl;
 
-	if (error_it != error_pages.end())
+
+	if (error_path)
 	{
 		CachedFile *file_error = NULL;
 		struct stat file_error_info = {};
 		std::string final_file_path;
 		// TODO modif pour pas prendre le root mais passer par les locations
-		FileStatus err_file_status = FileCacheManager::getFile(req_.getServerInstance()->getRoot(), error_it->second, file_error, file_error_info, final_file_path);
-
-		std::cout << err_file_status << std::endl;
+		FileStatus err_file_status = FileCacheManager::getFile("", *error_path, file_error, file_error_info, final_file_path);
 
 		if (err_file_status == FILE_OK || err_file_status == FILE_STREAM_DIRECT)
 		{
@@ -142,6 +140,14 @@ void HttpResponse::createDefault()
 	// std::cout << cfg::util::represent(res) << std::endl;
 
 	const Location&	target = req_.getLocation();
+	(void)target;
+
+	std::cout << (int)target.getAllowMethods() << " | " << (int)req_.getMethod() << std::endl;
+	if ((target.getAllowMethods() & req_.getMethod()) == 0 && status_mutable_)
+	{
+		setError(405);
+		return;
+	}
 
 	// addCookie("test", "kakoukakou");
 	// addCookie("test2", "kakoukakou2", true, true, 3600, "/", "Lax");
@@ -154,7 +160,7 @@ void HttpResponse::createDefault()
 	// 	setRedirect(302, "/OEOEOEOE");
 	// 	return ;
 	// } // Redirection example
-	if (req_.getMethod() == GET)
+	if (req_.getMethod() == METHOD_GET || !status_mutable_)
 	{
 		if (file_status_ == NONE) file_status_ = FileCacheManager::getFile(req_.getServerInstance()->getRoot(), req_.getTarget(), file_, file_info_, file_path_);
 

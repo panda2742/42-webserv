@@ -215,12 +215,12 @@ void Location::init()
 
 const std::string *Location::getErrorPage(int code) const
 {
-	if (!parent_) return NULL;
-
 	const std::map<unsigned int, std::string>::const_iterator found_error_page = error_pages_.find(code);
 
 	if (found_error_page != error_pages_.end())
 		return &found_error_page->second;
+
+	if (!parent_) return NULL;
 
 	return parent_->getErrorPage(code);
 }
@@ -251,6 +251,7 @@ void Location::print(int indent) const
 
 	std::cout << std::string(indent, ' ') << " - root: " + root_ << std::endl;
 	std::cout << std::string(indent, ' ') << " - client_max_body_size: " << client_max_body_size_ << std::endl;
+	std::cout << std::string(indent, ' ') << " - allowed_methods: " << (int)allow_methods_ << std::endl;
 	std::cout << std::string(indent, ' ') << " - autoindex: " << autoindex_ << std::endl;
 	std::cout << std::string(indent, ' ') << " - index: " << cfg::util::represent(index_) << std::endl;
 	if (redirection_.enabled) std::cout << std::string(indent, ' ') << " - redirection: " << redirection_.code << " " << redirection_.route << std::endl;

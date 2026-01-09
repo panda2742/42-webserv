@@ -69,19 +69,19 @@ bool HttpRequest::checkHttpVersion()
 		{
 			major_str = ver.substr(0, dot);
 			std::string minor_str = ver.substr(dot + 1);
-	
+
 			if (major_str.empty() || minor_str.empty())
 			{
 				create_error_ = BAD_REQUEST;
 				return false;
 			}
-			
+
 			if (!isOnlyDigits(minor_str))
 			{
 				create_error_ = BAD_REQUEST;
 				return false;
 			}
-		
+
 			minor = std::atoi(minor_str.c_str());
 		}
 
@@ -93,7 +93,7 @@ bool HttpRequest::checkHttpVersion()
 		major = std::atoi(major_str.c_str());
 
 		if (major == 1 && minor == 1) return true;
-	
+
 		create_error_ = UNSUPPORTED_HTTP_VERSION;
 		return false;
 	}
@@ -201,15 +201,15 @@ bool HttpRequest::parse()
 		}
 
 		first_line_ = lines[0];
-		
+
 		std::string method = getNextPart(lines[0], " ");
 
-		if (method == "GET") method_ = GET;
-		else if (method == "POST") method_ = POST;
-		else if (method == "DELETE") method_ = DELETE;
+		if (method == "GET") method_ = METHOD_GET;
+		else if (method == "POST") method_ = METHOD_POST;
+		else if (method == "DELETE") method_ = METHOD_DELETE;
 		else
 		{
-			method_ = UNKNOWN;
+			method_ = 0;
 			create_error_ = UNKNOWN_METHOD;
 			return true;
 		}
@@ -278,7 +278,7 @@ void HttpRequest::clear()
 	header_size_ = 0;
 	content_size_ = 0;
 
-	method_ = GET;
+	method_ = METHOD_GET;
 	target_.clear();
 	version_.clear();
 
@@ -287,6 +287,6 @@ void HttpRequest::clear()
 
 HttpRequest::~HttpRequest()
 {
-	
+
 }
 

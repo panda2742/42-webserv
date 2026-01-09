@@ -11,18 +11,6 @@
 #include "Location.hpp"
 
 /**
- * @enum Method
- * 
- * List of supported http methods
- */
-enum Method {
-	UNKNOWN,
-	GET,
-	POST,
-	DELETE
-};
-
-/**
  * @enum RequestError
  * @brief Error codes encountered while constructing/parsing a request.
  *
@@ -47,7 +35,7 @@ enum RequestError
 
 /**
  * @class HttpRequest
- * 
+ *
  * This class take a raw request, and parse it.
  * It will allow you to easily get the differents parts of the request :
  * headers, queries, and the body. The request can hold an error if there
@@ -65,12 +53,12 @@ private:
 	size_t content_size_;
 
 	std::string first_line_;
-	Method method_;
+	allow_methods_t	method_;
 	std::string target_;
 	std::string version_;
 
 	RequestError create_error_;
-	
+
 	std::map<std::string, std::string> queries_;
 	std::map<std::string, std::string> infos_;
 
@@ -104,7 +92,7 @@ public:
 	bool parse();
 
 	std::string getTarget() { return target_; }
-	Method getMethod() { return method_; }
+	allow_methods_t getMethod() { return method_; }
 	size_t getContentSize() { return content_size_; }
 	char* getBody() { return raw_.data() + header_size_; }
 	RequestError getRequestError() { return create_error_; }
