@@ -68,11 +68,6 @@ std::string HttpConnection::findHeaderContent(const std::string& key, size_t ran
 
 bool HttpConnection::receiveContent(char *content, size_t size)
 {
-	std::cout << "Ta grande daronne" << std::endl;
-	std::cout << "Part: " << std::string(content, size) << std::endl;
-	std::cout << "Header:" << header_ << std::endl;
-	std::cout << "Ta grande daronne2" << std::endl;
-
 	if (!header_)
 	{
 		raw_.insert(raw_.end(), content, content + size);
@@ -100,9 +95,8 @@ bool HttpConnection::receiveContent(char *content, size_t size)
 		else content_size_ = std::atol(contentLength.c_str());
 
 		if (!handleRequestHeader()) return false;
-		std::cout << "J'ai traité le header de con avec un content size qui fait: " << content_size_ << std::endl;
 
-		if (content_size_ == 0)
+		if (content_size_ == 0 || raw_.size() >= content_size_ + header_size_)
 		{
 			handleRequest();
 			return true;
@@ -111,8 +105,6 @@ bool HttpConnection::receiveContent(char *content, size_t size)
 	else
 	{
 		HttpRequest& req = requests_.back();
-
-		std::cout << "Real body size: " << req.getRealBodySize() << " | Max body size: " << req.getLocation().getClientMaxBodySize() << " | received size: " << size << std::endl;
 
 		if(req.getRealBodySize() + size > req.getLocation().getClientMaxBodySize())
 		{
@@ -125,7 +117,6 @@ bool HttpConnection::receiveContent(char *content, size_t size)
 
 		if (req.isBodyFull())
 		{
-			std::cout << "handling request" << std::endl;
 			handleRequest();
 			return true;
 		}
