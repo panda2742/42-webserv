@@ -141,12 +141,7 @@ void HttpResponse::createDefault()
 
 	// std::cout << cfg::util::represent(res) << std::endl;
 
-	// const ServerInstance&	servi = *req_.getServerInstance();
-	// const Location&			serv_loc = servi.getLocations();
-
-	// std::cout << "==== START TEST MATCH ====" << std::endl;
-	// const_cast<Location&>(serv_loc).matches(res).print();
-	// std::cout << "==== END TEST MATCH ====" << std::endl;
+	const Location&	target = req_.getLocation();
 
 	// addCookie("test", "kakoukakou");
 	// addCookie("test2", "kakoukakou2", true, true, 3600, "/", "Lax");
@@ -188,7 +183,6 @@ void HttpResponse::createDefault()
 		else if (file_status_ == FILE_FORBIDDEN) setError(403);
 		else if (file_status_ == PATH_TO_LONG) setError(414);
 		else setError(500);
-
 	}
 	else
 	{

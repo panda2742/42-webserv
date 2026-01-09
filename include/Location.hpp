@@ -47,15 +47,15 @@ private:
 	LocationType type_;
 	std::vector<std::string> route_;
 
-  std::string root_;
-	std::map<unsigned int, std::string> error_pages_;
-	unsigned long client_max_body_size_;
-	allow_methods_t allow_methods_;
-	redirect_t redirection_;
-	bool autoindex_;
-	std::vector<std::string> index_;
-	upload_t upload_;
-	cgi_t cgi_;
+	std::string							root_;
+	std::map<unsigned int, std::string>	error_pages_;
+	unsigned long						client_max_body_size_;
+	allow_methods_t						allow_methods_;
+	redirect_t							redirection_;
+	bool								autoindex_;
+	std::vector<std::string>			index_;
+	upload_t							upload_;
+	cgi_t								cgi_;
 
 	template <typename T>
 	static bool	vecCmp_(std::vector<T>& vec1, std::vector<T>& vec2);
@@ -88,14 +88,20 @@ public:
 
 	void init();
 
-	const std::string *getErrorPage(int code) const;
-
 	void print(int indent = 0) const;
 
 	MatchRes	matchescanbenullbecauseitsapointer(vecstr_t fragments, MatchRes res);
 	Location&	matches(vecstr_t fragments);
 
-	unsigned long getClientMaxBodySize() const { return client_max_body_size_; }
+	const std::string				*getErrorPage(int code) const;
+	const std::string&				getRoot(void) const { return root_; }
+	const unsigned long				getClientMaxBodySize(void) const { return client_max_body_size_; }
+	const allow_methods_t			getAllowMethods(void) const { return allow_methods_; }
+	const redirect_t				getRedirection(void) const { return redirection_; }
+	const bool						getAutoindex(void) const { return autoindex_; }
+	const std::vector<std::string>	getIndex(void) const { return index_; }
+	const upload_t					getUpload(void) const { return upload_; }
+	const cgi_t						getCgi(void) const { return cgi_; }
 };
 
 #include "Location.tpp"
