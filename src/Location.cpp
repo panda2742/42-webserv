@@ -37,33 +37,39 @@ void Location::print(int indent) const
 	}
 }
 
-Location* Location::matchProcess_(vecstr_t& fragments, Location& location)
+Location::MatchRes	Location::matchescanbenullbecauseitsapointer(vecstr_t fragments, MatchRes res = MatchRes())
 {
-	for (std::vector<Location>::iterator it = location.childs_.begin(); it != location.childs_.end(); ++it)
+	std::vector<std::string>	consumed = vecConsume_(fragments, route_);
+	if (consumed.size()) return res;
+
+	res.common += route_.size();
+
+	if (parent_ != NULL) ++res.common;
+
+	res.spotify(this);
+
+	std::vector<std::string> remaining_fragments = fragments;
+	remaining_fragments.erase(remaining_fragments.begin(), remaining_fragments.begin() + route_.size());
+
+	MatchRes	a_son_prime(res);
+	for (std::vector<Location>::iterator it = childs_.begin(); it != childs_.end(); ++it)
 	{
-		Location* loc_child = matchProcess_(fragments, *it);
-		if (loc_child)
-			return loc_child;
+		MatchRes	child_res = it->matchescanbenullbecauseitsapointer(remaining_fragments, res);
+		if (child_res.common > a_son_prime.common)
+			a_son_prime = child_res;
 	}
 
-	vecstr_t	remaining = vecConsume_(fragments, location.route_);
-
-	if (remaining.size() < fragments.size()) return &location;
-
-	return NULL;
+	if (a_son_prime.common > res.common)
+		return a_son_prime;
+	return res;
 }
 
-Location* Location::matches(vecstr_t fragments)
+Location& Location::matches(vecstr_t fragments)
 {
-	for (std::vector<Location>::iterator it = childs_.begin();
-		it != childs_.end(); ++it)
-	{
-		Location* match = matchProcess_(fragments, *it);
-		if (match)
-			return match;
-	}
-
-	return NULL;  // Ou this si vous voulez un fallback
+	Location	*res = matchescanbenullbecauseitsapointer(fragments).res;
+	if (res)
+		return *res;
+	return *this;
 }
 
 Location::~Location()

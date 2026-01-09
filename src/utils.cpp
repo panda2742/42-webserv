@@ -49,12 +49,19 @@ std::vector<std::string> split(const std::string& str, char sep)
 	{
 		if (str[i] == sep)
 		{
-			if (i - start > 0) result.push_back(str.substr(start, i - start));
+			if (i - start > 0)
+			{
+				std::string	res = str.substr(start, i - start);
+				if (res.length())
+					result.push_back(res);
+			}
 			start = i + 1;
 		}
 	}
 
-	result.push_back(str.substr(start));
+	std::string	res = str.substr(start);
+	if (res.length())
+		result.push_back(res);
 	return result;
 }
 

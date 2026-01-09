@@ -79,7 +79,7 @@ str_t	represent(const T& value)
 			if (it != v.begin())
 				s << ", ";
 			const str_t	color = colorize(*it);
-			s << color << (*it);
+			s << color << '\'' << (*it) << '\'';
 		}
 		s << main_color << "]" << RESET;
 	}
