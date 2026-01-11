@@ -140,7 +140,7 @@ void HttpResponse::getRealRoot()
 	root_ = req_.getLocation().getRoot();
 
 	vecstr_t target = split(req_.getTarget(), '/');
-	target.erase(target.begin(), target.begin() + split(req_.getTarget(), '/').size());
+	target.erase(target.begin(), target.begin() + req_.getLocation().getRoute().size());
 
 	for (vecstr_t::iterator it = target.begin(); it != target.end(); it++)
 		root_ += "/" + *it;
