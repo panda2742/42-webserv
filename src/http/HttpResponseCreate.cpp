@@ -46,9 +46,6 @@ void HttpResponse::setError(int code)
 
 	const std::string *error_path = req_.getLocation().getErrorPage(code);
 
-	// std::cout << cfg::util::represent(error_pages) << std::endl;
-
-
 	if (error_path)
 	{
 		CachedFile *file_error = NULL;
@@ -98,6 +95,9 @@ void HttpResponse::setDirectory()
 			file_path_ = full_path_tmp;
 			file_info_ = tmp_file_info;
 			file_status_ = index_status;
+
+			if (testUseCGI(index_path)) return ;
+
 			createDefault();
 			return ;
 		}
@@ -144,8 +144,22 @@ void HttpResponse::getRealRoot()
 
 	for (vecstr_t::iterator it = target.begin(); it != target.end(); it++)
 		root_ += "/" + *it;
+}
 
-	std::cout << root_;
+bool HttpResponse::testUseCGI(const std::string& cgi_prog)
+{
+	cgi_t cgi = req_.getLocation().getCgi();
+	if (cgi.enabled)
+	{
+		std::map<std::string, std::string>::iterator cgi_map = cgi.map.find(getExtension(cgi_prog));
+		if (cgi_map != cgi.map.end())
+		{
+			file_status_ = NONE;
+			useCGI(cgi_map->second, cgi_prog);
+			return true;
+		}
+	}
+	return false;
 }
 
 void HttpResponse::createDefault()
@@ -193,6 +207,8 @@ void HttpResponse::createDefault()
 
 		if (file_status_ == FILE_OK)
 		{
+			if (testUseCGI(root_)) return ;
+			
 			setStatus(200, "OK");
 			setHeader("Content-Type", file_->mime);
 			headers_["Content-Length"] = to_string(file_->size);
@@ -219,6 +235,7 @@ void HttpResponse::createDefault()
 	}
 	else
 	{
+		if (testUseCGI(root_)) return ; // Ajouter le test pour les index
 		setHeader("Content-Type", "text/plain");
 		std::string body = "Unknown method";
 		std::vector<char> body_vec(body.begin(), body.end());

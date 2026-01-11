@@ -120,6 +120,7 @@ private:
 	void setError(int code);
 	void setRedirect(int code, const std::string& target);
 	void addCookie(const std::string& name, const std::string& value, bool httpOnly, bool secure, ssize_t maxAge, const std::string& path, const std::string& sameSite);
+	bool testUseCGI(const std::string& cgi_prog);
 	void useCGI(const std::string& cgi_prog, const std::string& script_path);
 	void execChildCGI(const std::string& cgi_prog, const std::string& script_path);
 	void handleResultCGI();
