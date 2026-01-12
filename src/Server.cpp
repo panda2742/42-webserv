@@ -286,10 +286,13 @@ void Server::run()
 
 			if (context->type == LISTEN)
 			{
-				int client_fd = accept(listen_fd_[context->fd_index], NULL, NULL);
+				struct sockaddr_storage client_addr;
+				socklen_t len = sizeof(client_addr);
+
+				int client_fd = accept(listen_fd_[context->fd_index], (struct sockaddr *)&client_addr, &len);
 				fcntl(client_fd, F_SETFL, O_NONBLOCK);
 
-				connections_.insert(std::make_pair(client_fd, HttpConnection(client_fd, context, *this)));
+				connections_.insert(std::make_pair(client_fd, HttpConnection(client_fd, ((struct sockaddr_in*)&client_addr)->sin_addr, context, *this)));
 
 				std::map<int, HttpConnection>::iterator it = connections_.find(client_fd);
 				if (it == connections_.end())
@@ -338,8 +341,11 @@ void Server::clean()
 	{
 		if (it->first >= 0) close(it->first);
 	}
-	// if (listen_fd_ >= 0) close(listen_fd_);
-	// listen_fd_ = -1; // TODO
+	for (std::vector<int>::iterator it = listen_fd_.begin(); it != listen_fd_.end(); it++)
+	{
+		if (*it >= 0) close(*it);
+		*it = -1;
+	}
 	if (epoll_fd_ >= 0) close(epoll_fd_);
 	epoll_fd_ = -1;
 

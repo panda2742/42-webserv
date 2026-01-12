@@ -17,6 +17,8 @@ std::vector<std::string> split(const std::string& str, char sep);
 
 const std::string getHttpErrorMessage(int code);
 const std::string getMimeType(const std::string& ext);
-const std::string getMethodName(Method m);
+const std::string getMethodName(allow_methods_t m);
 
 const std::string respStateToText(ResponseState s);
+
+const std::string randomString(size_t s);

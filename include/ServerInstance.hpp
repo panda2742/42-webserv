@@ -29,6 +29,12 @@ inline bool operator==(const ListenProp &a, const ListenProp &b)
 	return a.salade_tomate_oignons == b.salade_tomate_oignons;
 }
 
+struct session_data
+{
+	time_t creation_time;
+	size_t request_amount;
+};
+
 class ServerInstance
 {
 private:
@@ -38,12 +44,12 @@ private:
 	std::vector<ListenProp> listens_;
 	std::vector<std::string> server_names_;
 	bool is_default_;
-	std::string root_;
-	std::map<unsigned int, std::string> error_pages_;
 	Location locations_;
 
+	std::map<std::string, session_data> sessions_;
+
 	static Location *global_loc_;
-	
+
 public:
 	ServerInstance(StrDirective& server, uint32_t server_index);
 	~ServerInstance();
@@ -53,8 +59,6 @@ public:
 	const std::vector<ListenProp>& getListens() const { return listens_; }
 	const std::vector<std::string>& getServerNames() const { return server_names_; }
 	bool hasDefaultName() const { return is_default_; }
-	const std::string& getRoot() const { return root_; }
-	const std::map<unsigned int, std::string>& getErrorPages() const { return error_pages_; }
 
 	Location&	getLocations(void) { return locations_; }
 
@@ -62,6 +66,9 @@ public:
 	static const Location *getGlobalLocation() { return global_loc_; }
 	static void freeGlobalLocation() { delete global_loc_; }
 	
+	std::map<std::string, session_data>& getSessions() { return sessions_; }
+	session_data *getSession(const std::string& key);
+
 };
 
 

@@ -18,7 +18,10 @@ struct FdContext
 	FdType type;
 	union {
 		HttpResponse *cgi_owner_response;
-		int fd;
+		struct {
+			int fd;
+			in_addr ip;
+		};
 		struct {
 			const std::vector<ServerInstance*> *server_instances;
 			uint32_t fd_index;

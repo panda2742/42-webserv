@@ -11,18 +11,6 @@
 #include "Location.hpp"
 
 /**
- * @enum Method
- * 
- * List of supported http methods
- */
-enum Method {
-	UNKNOWN,
-	GET,
-	POST,
-	DELETE
-};
-
-/**
  * @enum RequestError
  * @brief Error codes encountered while constructing/parsing a request.
  *
@@ -47,7 +35,7 @@ enum RequestError
 
 /**
  * @class HttpRequest
- * 
+ *
  * This class take a raw request, and parse it.
  * It will allow you to easily get the differents parts of the request :
  * headers, queries, and the body. The request can hold an error if there
@@ -57,6 +45,7 @@ class HttpRequest
 {
 
 private:
+	FdContext *connection_context_;
 	FdContext *socket_context_;
 	ServerInstance *instance_;
 
@@ -65,14 +54,15 @@ private:
 	size_t content_size_;
 
 	std::string first_line_;
-	Method method_;
+	allow_methods_t	method_;
 	std::string target_;
 	std::string version_;
 
 	RequestError create_error_;
-	
+
 	std::map<std::string, std::string> queries_;
 	std::map<std::string, std::string> infos_;
+	std::map<std::string, std::string> cookies_;
 
 	Location *location;
 
@@ -94,7 +84,7 @@ public:
 	 * After `init` is called, invoke `parse()` to analyze the request line,
 	 * headers and extract query parameters if present.
 	 */
-	void init(std::vector<char>& raw, size_t header_size, size_t content_size, FdContext *socket_context);
+	void init(std::vector<char>& raw, size_t header_size, size_t content_size, FdContext *socket_context, FdContext *connection_context);
 
 	/**
 	 * @brief Parse the request stored in `raw_`.
@@ -104,15 +94,16 @@ public:
 	bool parse();
 
 	std::string getTarget() { return target_; }
-	Method getMethod() { return method_; }
+	allow_methods_t getMethod() { return method_; }
 	size_t getContentSize() { return content_size_; }
 	char* getBody() { return raw_.data() + header_size_; }
 	RequestError getRequestError() { return create_error_; }
 	std::string& getFirstLine() { return first_line_; }
 	const std::string* getHeaderInfo(const std::string& key) const;
+	const std::string* getCookie(const std::string& key) const;
 	const std::map<std::string, std::string>& getHeaders() const { return infos_; }
 	const std::map<std::string, std::string>& getQueries() const { return queries_; }
-	const ServerInstance *getServerInstance() const { return instance_; }
+	ServerInstance *getServerInstance() { return instance_; }
 
 	bool isBodyFull() const { return raw_.size() >= header_size_ + content_size_; }
 	size_t getRealBodySize() const { return raw_.size() - header_size_; }
@@ -121,6 +112,8 @@ public:
 	void setBodyTooLong() { create_error_ = BODY_TOO_LONG; infos_["Connection"] = "close"; }
 
 	Location& getLocation() { return *location; };
+	FdContext *getSocketContext() { return socket_context_; };
+	FdContext *getConnectionContext() { return connection_context_; };
 
 	void clear();
 

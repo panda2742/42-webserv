@@ -91,11 +91,9 @@ void ServerInstance::init()
 
 	
 	try {
-		root_ = server_.find<std::string>("root").at(0).value;
+		std::string root = server_.find<std::string>("root").at(0).value;
 
-		if (root_.empty()) throw std::invalid_argument("root is required");
-
-		if (root_.size() - 1 == '/') root_.erase(root_.end() - 1);
+		if (root.empty()) throw std::invalid_argument("root is required");
 
 	} catch (const std::exception& e) {
 		throw std::invalid_argument("Invalid root value for server " + to_string(server_index_) + ". Error: " + e.what());
@@ -107,4 +105,11 @@ void ServerInstance::init()
 	} catch (const std::exception& e) {
 		throw std::invalid_argument("Invalid locations value for server " + to_string(server_index_) + (server_.value.length() > 0 ? " " + server_.value : "") + ". Error: " + e.what());
 	}
+}
+
+session_data* ServerInstance::getSession(const std::string& key)
+{
+	std::map<std::string, session_data>::iterator it = sessions_.find(key);
+	if (it == sessions_.end()) return NULL;
+	return &it->second;
 }

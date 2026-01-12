@@ -8,21 +8,29 @@
 HttpRequest::HttpRequest()
 	: create_error_(NO_REQ_ERROR), location(NULL)
 {
-	infos_["Content-Type"] = "";
+
 }
 
-void HttpRequest::init(std::vector<char>& raw, size_t header_size, size_t content_size, FdContext *socket_context)
+void HttpRequest::init(std::vector<char>& raw, size_t header_size, size_t content_size, FdContext *socket_context, FdContext *connection_context)
 {
 	raw_ = raw;
 	header_size_ = header_size;
 	content_size_ = content_size;
 	socket_context_ = socket_context;
+	connection_context_ = connection_context;
 }
 
 const std::string* HttpRequest::getHeaderInfo(const std::string& key) const
 {
 	std::map<std::string, std::string>::const_iterator it = infos_.find(key);
 	if (it == infos_.end()) return NULL;
+	return &it->second;
+}
+
+const std::string* HttpRequest::getCookie(const std::string& key) const
+{
+	std::map<std::string, std::string>::const_iterator it = cookies_.find(key);
+	if (it == cookies_.end()) return NULL;
 	return &it->second;
 }
 
@@ -69,19 +77,19 @@ bool HttpRequest::checkHttpVersion()
 		{
 			major_str = ver.substr(0, dot);
 			std::string minor_str = ver.substr(dot + 1);
-	
+
 			if (major_str.empty() || minor_str.empty())
 			{
 				create_error_ = BAD_REQUEST;
 				return false;
 			}
-			
+
 			if (!isOnlyDigits(minor_str))
 			{
 				create_error_ = BAD_REQUEST;
 				return false;
 			}
-		
+
 			minor = std::atoi(minor_str.c_str());
 		}
 
@@ -93,7 +101,7 @@ bool HttpRequest::checkHttpVersion()
 		major = std::atoi(major_str.c_str());
 
 		if (major == 1 && minor == 1) return true;
-	
+
 		create_error_ = UNSUPPORTED_HTTP_VERSION;
 		return false;
 	}
@@ -201,15 +209,15 @@ bool HttpRequest::parse()
 		}
 
 		first_line_ = lines[0];
-		
+
 		std::string method = getNextPart(lines[0], " ");
 
-		if (method == "GET") method_ = GET;
-		else if (method == "POST") method_ = POST;
-		else if (method == "DELETE") method_ = DELETE;
+		if (method == "GET") method_ = METHOD_GET;
+		else if (method == "POST") method_ = METHOD_POST;
+		else if (method == "DELETE") method_ = METHOD_DELETE;
 		else
 		{
-			method_ = UNKNOWN;
+			method_ = 0;
 			create_error_ = UNKNOWN_METHOD;
 			return true;
 		}
@@ -240,15 +248,25 @@ bool HttpRequest::parse()
 
 		std::vector<std::string> splitted_target = split(target_, '/');
 
-		std::cout << cfg::util::represent(splitted_target) << std::endl;
+		location = &instance_->getLocations().matches(splitted_target);
+		// std::cout << "==== START TEST MATCH ====" << std::endl;
+		// location->print();
+		// std::cout << "==== END TEST MATCH ====" << std::endl;
 
-		Location& serv_loc = instance_->getLocations();
+		const std::string *cookies = getHeaderInfo("Cookie");
+		if (cookies)
+		{
+			std::vector<std::string> cookies_split = split(*cookies, ';');
 
-		std::cout << "==== START TEST MATCH ====" << std::endl;
-		location = &serv_loc.matches(splitted_target);
-		location->print();
-		std::cout << "==== END TEST MATCH ====" << std::endl;
+			for (std::vector<std::string>::iterator it = cookies_split.begin(); it != cookies_split.end(); it++)
+			{
+				*it = trim(*it);
+				size_t eq_pos = it->find('=');
+				if (eq_pos == std::string::npos) continue;
 
+				cookies_[it->substr(0, eq_pos)] = it->substr(eq_pos + 1);
+			}
+		}
 
 		// for (std::map<std::string, std::string>::const_iterator it = infos_.begin();
 		// 	it != infos_.end();
@@ -262,6 +280,13 @@ bool HttpRequest::parse()
 		// 	++itt)
 		// {
 		// 	std::cout << itt->first << ": " << itt->second << std::endl;
+		// }
+
+		// for (std::map<std::string, std::string>::const_iterator it = cookies_.begin();
+		// 	it != cookies_.end();
+		// 	++it)
+		// {
+		// 	std::cout << it->first << ": " << it->second << std::endl;
 		// }
 	}
 	catch(const std::exception& e)
@@ -278,7 +303,7 @@ void HttpRequest::clear()
 	header_size_ = 0;
 	content_size_ = 0;
 
-	method_ = GET;
+	method_ = METHOD_GET;
 	target_.clear();
 	version_.clear();
 
@@ -287,6 +312,6 @@ void HttpRequest::clear()
 
 HttpRequest::~HttpRequest()
 {
-	
+
 }
 

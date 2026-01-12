@@ -1,6 +1,7 @@
 #include "utils.hpp"
 #include <string>
 #include <vector>
+#include <cstdlib>
 
 std::string getNextPart(std::string& input, const std::string& sep)
 {
@@ -65,3 +66,10 @@ std::vector<std::string> split(const std::string& str, char sep)
 	return result;
 }
 
+const std::string randomString(size_t s)
+{
+	std::string res;
+	for (size_t i = 0; i < s; i++)
+		res += "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"[std::rand() % 62];
+	return res;
+}

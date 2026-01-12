@@ -60,7 +60,8 @@ public:
 	FileCacheManager();
 	~FileCacheManager();
 
-	static FileStatus getFile(const std::string& root, const std::string& path, CachedFile*& file, struct stat &fileInfo, std::string &full_path);
+	static FileStatus getFile(const std::string& path, CachedFile*& file, struct stat &fileInfo, std::string &full_path);
+	static FileStatus testFile(const std::string& path);
 
 };
 

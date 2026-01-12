@@ -27,11 +27,11 @@ void Location::init()
 				for (std::vector<std::string>::const_iterator rit(route_.begin()); rit != route_.end(); rit++)
 					root_ += '/' + *rit;
 			}
-			else 
+			else
 				root_ = root_vec.at(0);
-	
+
 			if (root_.empty()) throw std::invalid_argument("root is required");
-	
+
 			if (root_.size() - 1 == '/') root_.erase(root_.end() - 1);
 		}
 	}
@@ -152,7 +152,7 @@ void Location::init()
 		else if (el == "off") autoindex_ = false;
 		else throw std::invalid_argument("Invalid autoindex value: " + el);
 	}
-	
+
 	// --------------- INDEX --------------- //
 	std::vector<std::string> index;
 	try {
@@ -198,6 +198,45 @@ void Location::init()
 	}
 	else cgi_.enabled = false;
 
+	// -------------- SESSIONS ------------- //
+	session_get_ = false;
+	session_login_ = false;
+	session_logout_ = false;
+	std::vector<StrDirective> tmp;
+
+	try {
+		tmp = directive_.find<std::string>("session_login");
+	} catch (const std::exception& e) {
+		throw std::invalid_argument("Invalid session_login value in location. Error: " + std::string(e.what()));
+	}
+	if (tmp.size()) session_login_ = true;
+
+	try {
+		tmp = directive_.find<std::string>("session_logout");
+	} catch (const std::exception& e) {
+		throw std::invalid_argument("Invalid session_logout value in location. Error: " + std::string(e.what()));
+	}
+	if (tmp.size()) session_logout_ = true;
+
+	try {
+		tmp = directive_.find<std::string>("session_get");
+	} catch (const std::exception& e) {
+		throw std::invalid_argument("Invalid session_get value in location. Error: " + std::string(e.what()));
+	}
+	if (tmp.size()) session_get_ = true;
+
+	if ((session_get_ + session_login_ + session_logout_) > 1)
+		throw std::invalid_argument("Only one session directive allowed per location");
+
+	// --------------- DELETE -------------- //
+	allow_delete_file_ = false;
+	try {
+		tmp = directive_.find<std::string>("allow_delete_file");
+	} catch (const std::exception& e) {
+		throw std::invalid_argument("Invalid allow_delete value in location. Error: " + std::string(e.what()));
+	}
+	allow_delete_file_ = tmp.size();
+
 	// ----------------------------------------------- //
 
 	std::vector<StrDirective> childs = directive_.find<std::string>("location");
@@ -215,12 +254,12 @@ void Location::init()
 
 const std::string *Location::getErrorPage(int code) const
 {
-	if (!parent_) return NULL;
-
 	const std::map<unsigned int, std::string>::const_iterator found_error_page = error_pages_.find(code);
 
 	if (found_error_page != error_pages_.end())
 		return &found_error_page->second;
+
+	if (!parent_) return NULL;
 
 	return parent_->getErrorPage(code);
 }
@@ -251,6 +290,7 @@ void Location::print(int indent) const
 
 	std::cout << std::string(indent, ' ') << " - root: " + root_ << std::endl;
 	std::cout << std::string(indent, ' ') << " - client_max_body_size: " << client_max_body_size_ << std::endl;
+	std::cout << std::string(indent, ' ') << " - allowed_methods: " << (int)allow_methods_ << std::endl;
 	std::cout << std::string(indent, ' ') << " - autoindex: " << autoindex_ << std::endl;
 	std::cout << std::string(indent, ' ') << " - index: " << cfg::util::represent(index_) << std::endl;
 	if (redirection_.enabled) std::cout << std::string(indent, ' ') << " - redirection: " << redirection_.code << " " << redirection_.route << std::endl;
@@ -306,4 +346,23 @@ Location& Location::matches(vecstr_t fragments)
 Location::~Location()
 {
 
+}
+
+vecstr_t Location::getRoute() const
+{
+	std::vector<const Location*> chain;
+	const Location* cur = this;
+	while (cur && cur->parent_)
+	{
+		chain.push_back(cur);
+		cur = cur->parent_;
+	}
+
+	vecstr_t result;
+	for (std::vector<const Location*>::reverse_iterator it = chain.rbegin(); it != chain.rend(); ++it)
+	{
+		const std::vector<std::string>& r = (*it)->route_;
+		result.insert(result.end(), r.begin(), r.end());
+	}
+	return result;
 }
