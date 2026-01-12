@@ -81,6 +81,6 @@ run: all
 .PHONY: vg
 vg: all
 	@clear
-	$(VG) $(VGFLAGS) ./$(NAME) samples/valid_complete.conf 2> outerr
+	$(VG) $(VGFLAGS) ./$(NAME) samples/valid_complete.conf
 
 -include $(DEPS)
