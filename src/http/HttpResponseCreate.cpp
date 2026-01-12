@@ -88,9 +88,9 @@ void HttpResponse::setDirectory()
 		struct stat tmp_file_info;
 		std::string full_path_tmp;
 		std::string index_path = baseTarget + *it;
-	
+
 		FileStatus index_status = FileCacheManager::getFile(index_path, file_, tmp_file_info, full_path_tmp);
-	
+
 		if (index_status == FILE_OK || index_status == FILE_STREAM_DIRECT)
 		{
 			file_path_ = full_path_tmp;
@@ -210,7 +210,7 @@ void HttpResponse::createDefault()
 		if (file_status_ == FILE_OK)
 		{
 			if (testUseCGI(root_)) return ;
-			
+
 			setStatus(200, "OK");
 			setHeader("Content-Type", file_->mime);
 			headers_["Content-Length"] = to_string(file_->size);
@@ -276,8 +276,7 @@ void HttpResponse::create()
 }
 
 
-std::vector<
-HttpResponse::UploadExtractData>	HttpResponse::extractUpload(char *body, size_t size) const
+std::vector<HttpResponse::UploadExtractData>	HttpResponse::extractUpload(char *body, size_t size) const
 {
 	static std::vector<char>	charset;
 	if (charset.empty())
@@ -291,21 +290,34 @@ HttpResponse::UploadExtractData>	HttpResponse::extractUpload(char *body, size_t 
 
 	std::vector<UploadExtractData>	extract_data;
 	std::string						flag;
-	size_t							flag_len;
+	size_t							flag_len = 0;
+	size_t							i = 0;
 
-	for (size_t i = 0; i < size; ++i)
+	for (; i < size; ++i)
 	{
 		if (flag.length() == 0)
 		{
-			std::cout << '<' << (int)body[i] << "> " << std::cout;
 			if (std::find(charset.begin(), charset.end(), body[i]) != charset.end())
 				flag = std::string(body, body + flag_len);
 			else
 				++flag_len;
 		}
+		else
+			break;
 	}
+	body += i;
 
-	std::cout << "Flag is " << flag << std::endl;
+	while (body[i])
+	{
+		const std::string	file(&body[i]);
+		size_t				next_flag_pos = file.find(flag);
+		if (next_flag_pos == std::string::npos)
+		{
+
+		}
+		// i += j;
+		break;
+	}
 
 	return extract_data;
 }
