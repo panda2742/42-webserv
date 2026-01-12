@@ -107,6 +107,16 @@ void Location::init()
 		}
 	}
 
+	// -------------- DENY ALL ------------- //
+
+	std::vector<StrDirective> tmp;
+	try {
+		tmp = directive_.find<std::string>("deny_all");
+	} catch (const std::exception& e) {
+		throw std::invalid_argument("Invalid deny_all value in location. Error: " + std::string(e.what()));
+	}
+	if (tmp.size()) allow_methods_ = 0;
+
 	// -------------- REDIRECT ------------- //
 	std::vector<std::string> redirect;
 	try {
@@ -202,7 +212,6 @@ void Location::init()
 	session_get_ = false;
 	session_login_ = false;
 	session_logout_ = false;
-	std::vector<StrDirective> tmp;
 
 	try {
 		tmp = directive_.find<std::string>("session_login");
