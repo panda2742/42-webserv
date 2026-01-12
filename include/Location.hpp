@@ -59,6 +59,7 @@ private:
 	bool								session_login_;
 	bool								session_get_;
 	bool								session_logout_;
+	bool								allow_delete_file_;
 
 	template <typename T>
 	static bool	vecCmp_(std::vector<T>& vec1, std::vector<T>& vec2);
@@ -110,6 +111,7 @@ public:
 	bool							isSessionLogin() const { return session_login_; }
 	bool							isSessionLogout() const { return session_logout_; }
 	bool							isSessionGet() const { return session_get_; }
+	bool							getAllowDeleteFile(void) const { return allow_delete_file_; }
 };
 
 #include "Location.tpp"

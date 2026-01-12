@@ -228,6 +228,15 @@ void Location::init()
 	if ((session_get_ + session_login_ + session_logout_) > 1)
 		throw std::invalid_argument("Only one session directive allowed per location");
 
+	// --------------- DELETE -------------- //
+	allow_delete_file_ = false;
+	try {
+		tmp = directive_.find<std::string>("allow_delete_file");
+	} catch (const std::exception& e) {
+		throw std::invalid_argument("Invalid allow_delete value in location. Error: " + std::string(e.what()));
+	}
+	allow_delete_file_ = tmp.size();
+
 	// ----------------------------------------------- //
 
 	std::vector<StrDirective> childs = directive_.find<std::string>("location");
