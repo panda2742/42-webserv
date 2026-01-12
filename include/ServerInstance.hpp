@@ -63,9 +63,9 @@ public:
 	Location&	getLocations(void) { return locations_; }
 
 	static void setGlobalLocation(Location *loc) { global_loc_ = loc; }
-	static const Location *getGlobalLocation() { return global_loc_; }
+	static Location *getGlobalLocation() { return global_loc_; }
 	static void freeGlobalLocation() { delete global_loc_; }
-	
+
 	std::map<std::string, session_data>& getSessions() { return sessions_; }
 	session_data *getSession(const std::string& key);
 

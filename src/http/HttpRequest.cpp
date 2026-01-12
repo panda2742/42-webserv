@@ -189,6 +189,7 @@ bool HttpRequest::linkInstance()
 
 bool HttpRequest::parse()
 {
+	location = ServerInstance::getGlobalLocation();
 	try
 	{
 		if (raw_.size() > 3 && raw_[0] == 0x16 && raw_[1] == 0x03 && (raw_[2] == 0x01 || raw_[2] == 0x02 || raw_[2] == 0x03))
@@ -209,6 +210,12 @@ bool HttpRequest::parse()
 		}
 
 		first_line_ = lines[0];
+
+		if (split(first_line_, ' ').size() < 2)
+		{
+			create_error_ = BAD_REQUEST;
+			return true;
+		}
 
 		std::string method = getNextPart(lines[0], " ");
 
@@ -244,11 +251,11 @@ bool HttpRequest::parse()
 
 		if (linkInstance()) return true;
 
+		std::vector<std::string> splitted_target = split(target_, '/');
+		location = &instance_->getLocations().matches(splitted_target);
+
 		if (!checkHttpVersion()) return true;
 
-		std::vector<std::string> splitted_target = split(target_, '/');
-
-		location = &instance_->getLocations().matches(splitted_target);
 		// std::cout << "==== START TEST MATCH ====" << std::endl;
 		// location->print();
 		// std::cout << "==== END TEST MATCH ====" << std::endl;
