@@ -58,36 +58,6 @@ void Server::removeClient(int fd, Logger::Level lvl)
 	}
 }
 
-// void Server::handleClientIN(int fd)
-// {
-// 	std::vector<char> request_buffer;
-// 	char buf[4096];
-// 	ssize_t r;
-
-// 	size_t size = 0;
-
-// 	while ((r = recv(fd, buf, sizeof(buf), 0)) > 0) // TODO remove cette boucle et passer en un recv par call de handleClient
-// 	{
-// 		request_buffer.insert(request_buffer.end(), buf, buf + r);
-// 		size += r;
-// 	}
-
-// 	if (r == 0) return removeClient(fd, Logger::INFO);
-
-// 	std::map<int, HttpConnection>::iterator it = connections_.find(fd);
-// 	if (it != connections_.end())
-// 	{
-// 		if (!it->second.receiveContent(request_buffer.data(), size))
-// 			removeClient(fd, Logger::WARN);
-// 	}
-// 	else
-// 	{
-// 		Logger::warn("received data for unknown fd (fd: " + to_string(fd) + std::string(")"));
-// 	}
-// }
-
-// /*
-
 void Server::handleClientIN(int fd)
 {
 	char request_buffer[4096];
@@ -108,9 +78,6 @@ void Server::handleClientIN(int fd)
 		Logger::warn("received data for unknown fd (fd: " + to_string(fd) + std::string(")"));
 	}
 }
-
-
-// */
 
 void Server::handleClientOUT(int fd)
 {
