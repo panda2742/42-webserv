@@ -1,10 +1,10 @@
 #include "config/HttpConfig.hpp"
 #include <iostream>
-#include "config/ConfigLogger.hpp"
 #include "config/util.hpp"
 #include <cstdlib>
 #include <sstream>
 #include "config/Node4.hpp"
+#include "Logger.hpp"
 
 namespace cfg
 {
@@ -58,7 +58,7 @@ void	HttpConfig::generate(const std::vector<Lexer::TokenNode>& nodes) throw(Pars
 				switch (current->type) {
 					case Lexer::TokenSymbolClose:
 						if (parent->parent == NULL) {
-							log.error("Unexpected token '}'. Cannot unfold current element.");
+							Logger::error("Unexpected token '}'. Cannot unfold current element.");
 							delete node;
 							return;
 						}
@@ -155,7 +155,7 @@ void	HttpConfig::generate(const std::vector<Lexer::TokenNode>& nodes) throw(Pars
 		else if (it->type == Lexer::TokenSymbolClose)
 		{
 			if (parent->parent == NULL) {
-				log.error("Unexpected token '}'. Cannot unfold current element.");
+				Logger::error("Unexpected token '}'. Cannot unfold current element.");
 				return;
 			}
 			parent = parent->parent;
