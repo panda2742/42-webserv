@@ -20,3 +20,5 @@ const std::string getMimeType(const std::string& ext);
 const std::string getMethodName(allow_methods_t m);
 
 const std::string respStateToText(ResponseState s);
+
+const std::string randomString(size_t s);

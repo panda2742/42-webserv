@@ -198,6 +198,36 @@ void Location::init()
 	}
 	else cgi_.enabled = false;
 
+	// -------------- SESSIONS ------------- //
+	session_get_ = false;
+	session_login_ = false;
+	session_logout_ = false;
+	std::vector<StrDirective> tmp;
+
+	try {
+		tmp = directive_.find<std::string>("session_login");
+	} catch (const std::exception& e) {
+		throw std::invalid_argument("Invalid session_login value in location. Error: " + std::string(e.what()));
+	}
+	if (tmp.size()) session_login_ = true;
+
+	try {
+		tmp = directive_.find<std::string>("session_logout");
+	} catch (const std::exception& e) {
+		throw std::invalid_argument("Invalid session_logout value in location. Error: " + std::string(e.what()));
+	}
+	if (tmp.size()) session_logout_ = true;
+
+	try {
+		tmp = directive_.find<std::string>("session_get");
+	} catch (const std::exception& e) {
+		throw std::invalid_argument("Invalid session_get value in location. Error: " + std::string(e.what()));
+	}
+	if (tmp.size()) session_get_ = true;
+
+	if ((session_get_ + session_login_ + session_logout_) > 1)
+		throw std::invalid_argument("Only one session directive allowed per location");
+
 	// ----------------------------------------------- //
 
 	std::vector<StrDirective> childs = directive_.find<std::string>("location");

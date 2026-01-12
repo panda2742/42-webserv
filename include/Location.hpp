@@ -56,6 +56,9 @@ private:
 	std::vector<std::string>			index_;
 	upload_t							upload_;
 	cgi_t								cgi_;
+	bool								session_login_;
+	bool								session_get_;
+	bool								session_logout_;
 
 	template <typename T>
 	static bool	vecCmp_(std::vector<T>& vec1, std::vector<T>& vec2);
@@ -104,6 +107,9 @@ public:
 	const std::vector<std::string>	getIndex(void) const { return index_; }
 	const upload_t					getUpload(void) const { return upload_; }
 	const cgi_t						getCgi(void) const { return cgi_; }
+	bool							isSessionLogin() const { return session_login_; }
+	bool							isSessionLogout() const { return session_logout_; }
+	bool							isSessionGet() const { return session_get_; }
 };
 
 #include "Location.tpp"

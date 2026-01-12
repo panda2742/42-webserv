@@ -116,6 +116,7 @@ private:
 	 */
 	void setHeader(const std::string &name, const std::string &value);
 	void setStatus(int code, const std::string &message);
+	void setStatus(int code);
 	void setBody(const std::vector<char> &body);
 	void handleExistingFile();
 	void setDirectory();

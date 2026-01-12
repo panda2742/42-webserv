@@ -13,6 +13,12 @@ void HttpResponse::setStatus(int code, const std::string &message)
 	status_message_ = message;
 }
 
+void HttpResponse::setStatus(int code)
+{
+	status_code_ = code;
+	status_message_ = getHttpErrorMessage(code);
+}
+
 void HttpResponse::setHeader(const std::string &name, const std::string &value)
 {
 	headers_[name] = value;
@@ -25,7 +31,7 @@ void HttpResponse::setBody(const std::vector<char> &body) {
 
 void HttpResponse::setRedirect(int code, const std::string& target)
 {
-	setStatus(code, getHttpErrorMessage(code));
+	setStatus(code);
 	headers_["Location"] = target;
 }
 
@@ -42,7 +48,7 @@ void HttpResponse::addCookie(const std::string& name,
 
 void HttpResponse::setError(int code)
 {
-	setStatus(code, getHttpErrorMessage(code));
+	setStatus(code);
 
 	const std::string *error_path = req_.getLocation().getErrorPage(code);
 
@@ -61,6 +67,7 @@ void HttpResponse::setError(int code)
 			file_status_ = err_file_status;
 			file_ = file_error;
 			handleExistingFile();
+			setStatus(code);
 			return ;
 		}
 	}
@@ -100,7 +107,7 @@ void HttpResponse::setDirectory()
 
 	auto_index_html += "</pre><hr></body></html>";
 
-	setStatus(200, "OK");
+	setStatus(200);
 	setHeader("Content-Type", "text/html");
 	std::vector<char> body_vec(auto_index_html.begin(), auto_index_html.end());
 	setBody(body_vec);
@@ -123,7 +130,7 @@ void HttpResponse::handleExistingFile()
 {
 	if (file_status_ == FILE_OK)
 	{
-		setStatus(200, "OK");
+		setStatus(200);
 		setHeader("Content-Type", file_->mime);
 		headers_["Content-Length"] = to_string(file_->size);
 	}
@@ -135,7 +142,7 @@ void HttpResponse::handleExistingFile()
 			setError(500);
 		else
 		{
-			setStatus(200, "OK");
+			setStatus(200);
 			setHeader("Content-Type", getMimeType(getExtension(req_.getTarget())));
 			headers_["Content-Length"] = to_string(file_info_.st_size);
 		}
@@ -230,8 +237,6 @@ void HttpResponse::createDefault()
 
 	if (req_.getMethod() == METHOD_GET)
 	{
-
-		std::cout << "OEOEOEO" << std::endl;
 		if (file_status_ == NONE) file_status_ = FileCacheManager::getFile(root_, file_, file_info_, file_path_);
 
 		if (file_status_ == FILE_OK || file_status_ == FILE_STREAM_DIRECT) handleExistingFile();
@@ -241,6 +246,22 @@ void HttpResponse::createDefault()
 		else if (file_status_ == FILE_FORBIDDEN) setError(403);
 		else if (file_status_ == PATH_TO_LONG) setError(414);
 		else setError(500);
+
+		if (target.isSessionGet())
+		{
+			// const std::string *session_cookie = req_.getCookie("session");
+			// if (session_cookie)
+			// {
+			// 	req_.getServerInstance()->getSessions().find(*session_cookie);
+			// }
+			// std::string cookie_content = randomString(40);
+			// session_data data;
+			// data.creation_time = std::time(0);
+			// data.request_amount = 0;
+			// req_.getServerInstance()->getSessions()[cookie_content] = data;
+			
+			// addCookie("session", cookie_content, false, false, 24*60*60*1000);
+		}
 
 		return;
 	}
@@ -260,7 +281,16 @@ void HttpResponse::createDefault()
 			}
 		}
 
+		if (target.isSessionLogin())
+		{
+			std::string cookie_content = randomString(40);
+			session_data data;
+			data.creation_time = std::time(0);
+			data.request_amount = 0;
+			req_.getServerInstance()->getSessions()[cookie_content] = data;
 
+			addCookie("session", cookie_content, false, false, 24*60*60*1000);
+		}
 
 	}
 

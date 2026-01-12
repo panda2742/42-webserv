@@ -187,7 +187,7 @@ void HttpResponse::execChildCGI(const std::string& cgi_prog, const std::string& 
 
 void HttpResponse::handleResultCGI()
 {
-	setStatus(200, "OK");
+	setStatus(200);
 
 	Logger::info("CGI out handling");
 	body_.push_back('\0');

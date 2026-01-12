@@ -27,6 +27,13 @@ const std::string* HttpRequest::getHeaderInfo(const std::string& key) const
 	return &it->second;
 }
 
+const std::string* HttpRequest::getCookie(const std::string& key) const
+{
+	std::map<std::string, std::string>::const_iterator it = cookies_.find(key);
+	if (it == cookies_.end()) return NULL;
+	return &it->second;
+}
+
 bool isOnlyDigits(const std::string &s)
 {
 	for (size_t i = 0; i < s.size(); ++i)
@@ -241,15 +248,25 @@ bool HttpRequest::parse()
 
 		std::vector<std::string> splitted_target = split(target_, '/');
 
-		std::cout << cfg::util::represent(splitted_target) << std::endl;
+		location = &instance_->getLocations().matches(splitted_target);
+		// std::cout << "==== START TEST MATCH ====" << std::endl;
+		// location->print();
+		// std::cout << "==== END TEST MATCH ====" << std::endl;
 
-		Location& serv_loc = instance_->getLocations();
+		const std::string *cookies = getHeaderInfo("Cookie");
+		if (cookies)
+		{
+			std::vector<std::string> cookies_split = split(*cookies, ';');
 
-		std::cout << "==== START TEST MATCH ====" << std::endl;
-		location = &serv_loc.matches(splitted_target);
-		location->print();
-		std::cout << "==== END TEST MATCH ====" << std::endl;
+			for (std::vector<std::string>::iterator it = cookies_split.begin(); it != cookies_split.end(); it++)
+			{
+				*it = trim(*it);
+				size_t eq_pos = it->find('=');
+				if (eq_pos == std::string::npos) continue;
 
+				cookies_[it->substr(0, eq_pos)] = it->substr(eq_pos + 1);
+			}
+		}
 
 		// for (std::map<std::string, std::string>::const_iterator it = infos_.begin();
 		// 	it != infos_.end();
@@ -264,6 +281,13 @@ bool HttpRequest::parse()
 		// {
 		// 	std::cout << itt->first << ": " << itt->second << std::endl;
 		// }
+
+		for (std::map<std::string, std::string>::const_iterator it = cookies_.begin();
+			it != cookies_.end();
+			++it)
+		{
+			std::cout << it->first << ": " << it->second << std::endl;
+		}
 	}
 	catch(const std::exception& e)
 	{

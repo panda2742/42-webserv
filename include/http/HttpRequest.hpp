@@ -62,6 +62,7 @@ private:
 
 	std::map<std::string, std::string> queries_;
 	std::map<std::string, std::string> infos_;
+	std::map<std::string, std::string> cookies_;
 
 	Location *location;
 
@@ -99,9 +100,10 @@ public:
 	RequestError getRequestError() { return create_error_; }
 	std::string& getFirstLine() { return first_line_; }
 	const std::string* getHeaderInfo(const std::string& key) const;
+	const std::string* getCookie(const std::string& key) const;
 	const std::map<std::string, std::string>& getHeaders() const { return infos_; }
 	const std::map<std::string, std::string>& getQueries() const { return queries_; }
-	const ServerInstance *getServerInstance() const { return instance_; }
+	ServerInstance *getServerInstance() { return instance_; }
 
 	bool isBodyFull() const { return raw_.size() >= header_size_ + content_size_; }
 	size_t getRealBodySize() const { return raw_.size() - header_size_; }
