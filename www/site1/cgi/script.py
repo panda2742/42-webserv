@@ -107,7 +107,6 @@ cgi_vars = [
     'SCRIPT_NAME',
     'PATH_INFO',
     'REMOTE_ADDR',
-    'REMOTE_HOST',
     'HTTP_USER_AGENT',
     'HTTP_ACCEPT',
     'HTTP_HOST'

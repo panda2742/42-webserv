@@ -45,6 +45,7 @@ class HttpRequest
 {
 
 private:
+	FdContext *connection_context_;
 	FdContext *socket_context_;
 	ServerInstance *instance_;
 
@@ -82,7 +83,7 @@ public:
 	 * After `init` is called, invoke `parse()` to analyze the request line,
 	 * headers and extract query parameters if present.
 	 */
-	void init(std::vector<char>& raw, size_t header_size, size_t content_size, FdContext *socket_context);
+	void init(std::vector<char>& raw, size_t header_size, size_t content_size, FdContext *socket_context, FdContext *connection_context);
 
 	/**
 	 * @brief Parse the request stored in `raw_`.
@@ -109,6 +110,8 @@ public:
 	void setBodyTooLong() { create_error_ = BODY_TOO_LONG; infos_["Connection"] = "close"; }
 
 	Location& getLocation() { return *location; };
+	FdContext *getSocketContext() { return socket_context_; };
+	FdContext *getConnectionContext() { return connection_context_; };
 
 	void clear();
 

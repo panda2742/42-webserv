@@ -53,7 +53,7 @@ private:
 	bool handleRequestHeader();
 	
 public:
-	HttpConnection(int socket_fd, FdContext *socket_context, Server& server);
+	HttpConnection(int socket_fd, in_addr ip, FdContext *socket_context, Server& server);
 	~HttpConnection();
 
 	/**

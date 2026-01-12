@@ -131,24 +131,29 @@ void HttpResponse::execChildCGI(const std::string& cgi_prog, const std::string& 
 	
 	// Request
 	env_strings.push_back("SERVER_PROTOCOL=HTTP/1.1");
-	env_strings.push_back("SERVER_PORT="); // A FAIRE mais flemme maintenant
+	env_strings.push_back("SERVER_PORT=" + to_string(req_.getSocketContext()->port));
 	env_strings.push_back("REQUEST_METHOD=" + getMethodName(req_.getMethod()));
 	env_strings.push_back("PATH_INFO="); // A FAIRE mais infernal, genre faut tester la route / par / pour verifier si y'a pas une cgi avant et que c'est pas un path apres genre
-	// env_strings.push_back("PATH_TRANSLATED="); // En vrai belek
 	env_strings.push_back("SCRIPT_FILENAME=" + script_path);
 	env_strings.push_back("SCRIPT_NAME=" + script_path.substr(script_path.find_last_of('/') + 1));
-	const std::map<std::string, std::string> queries;
 	std::string queries_str = "";
-	for (std::map<std::string, std::string>::const_iterator it = queries.begin(); it != queries.end(); ++it)
+	for (std::map<std::string, std::string>::const_iterator it = req_.getQueries().begin(); it != req_.getQueries().end(); ++it)
 	{
-		if (it == queries.begin()) queries_str += it->first + "=" + it->second;
+		if (it == req_.getQueries().begin()) queries_str += it->first + "=" + it->second;
 		else queries_str += "&"+ it->first +"="+ it->second;
 	}
 	env_strings.push_back("QUERY_STRING="+ queries_str);
-	env_strings.push_back("REMOTE_ADDR="); // Faut que je stoque l'ip du client jsp comment
-	// env_strings.push_back("AUTH_TYPE="); // Basic/Digest, pas compris a quoi ca sert
-	// env_strings.push_back("REMOTE_USER="); // en rapport avec l'auth je crois
-	env_strings.push_back("CONTENT_TYPE=" + *req_.getHeaderInfo("Content-Type"));
+
+	struct in_addr ipaddr = req_.getConnectionContext()->ip;
+
+	env_strings.push_back("REMOTE_ADDR="  + to_string(int(ipaddr.s_addr&0xFF))
+									+ "." + to_string(int((ipaddr.s_addr&0xFF00)>>8)) 
+									+ "." + to_string(int((ipaddr.s_addr&0xFF0000)>>16))
+									+ "." + to_string(int((ipaddr.s_addr&0xFF000000)>>24)));
+	
+
+	if (req_.getHeaderInfo("Content-Type"))
+		env_strings.push_back("CONTENT_TYPE=" + *req_.getHeaderInfo("Content-Type"));
 	env_strings.push_back("CONTENT_LENGTH=" + to_string(req_.getContentSize()));
 	env_strings.push_back("REDIRECT_STATUS=200");
 

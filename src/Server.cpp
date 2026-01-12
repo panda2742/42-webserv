@@ -286,10 +286,13 @@ void Server::run()
 
 			if (context->type == LISTEN)
 			{
-				int client_fd = accept(listen_fd_[context->fd_index], NULL, NULL);
+				struct sockaddr_storage client_addr;
+				socklen_t len = sizeof(client_addr);
+
+				int client_fd = accept(listen_fd_[context->fd_index], (struct sockaddr *)&client_addr, &len);
 				fcntl(client_fd, F_SETFL, O_NONBLOCK);
 
-				connections_.insert(std::make_pair(client_fd, HttpConnection(client_fd, context, *this)));
+				connections_.insert(std::make_pair(client_fd, HttpConnection(client_fd, ((struct sockaddr_in*)&client_addr)->sin_addr, context, *this)));
 
 				std::map<int, HttpConnection>::iterator it = connections_.find(client_fd);
 				if (it == connections_.end())

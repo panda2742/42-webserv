@@ -8,15 +8,16 @@
 HttpRequest::HttpRequest()
 	: create_error_(NO_REQ_ERROR), location(NULL)
 {
-	infos_["Content-Type"] = "";
+
 }
 
-void HttpRequest::init(std::vector<char>& raw, size_t header_size, size_t content_size, FdContext *socket_context)
+void HttpRequest::init(std::vector<char>& raw, size_t header_size, size_t content_size, FdContext *socket_context, FdContext *connection_context)
 {
 	raw_ = raw;
 	header_size_ = header_size;
 	content_size_ = content_size;
 	socket_context_ = socket_context;
+	connection_context_ = connection_context;
 }
 
 const std::string* HttpRequest::getHeaderInfo(const std::string& key) const
@@ -231,6 +232,7 @@ bool HttpRequest::parse()
 			std::string key = lines[i].substr(0, lines[i].find(": "));
 			lines[i].erase(0, lines[i].find(": ") + 2);
 
+			std::cout << "Add pair: " << key << " " << lines[i] << std::endl;
 			infos_.insert(std::make_pair(key, lines[i]));
 		}
 
