@@ -165,8 +165,17 @@ void HttpResponse::createDefault()
 	upload_t	upload = target.getUpload();
 	// if (upload.enabled)
 	// {
-	std::cout << "UPLOAD BODY: " << req_.getBody() << std::endl;
-	extractUpload(req_.getBody(), req_.getContentSize());
+	std::cout << "UPLOAD BODY: " << req_.getBody() << "\n===============================================" << std::endl;
+	std::deque<UploadExtractData>	extracted = extractUpload(req_.getBody(), req_.getContentSize());
+	for (std::deque<UploadExtractData>::const_iterator it = extracted.begin(); it != extracted.end(); ++it)
+	{
+		if ((*it).error != 200)
+		{
+			setError((*it).error);
+			return;
+		}
+		// create file and write
+	}
 	// }
 
 	// addCookie("test", "kakoukakou");
@@ -292,7 +301,7 @@ void HttpResponse::create()
 }
 
 
-std::vector<HttpResponse::UploadExtractData>	HttpResponse::extractUpload(char *body, size_t size) const
+std::deque<HttpResponse::UploadExtractData>	HttpResponse::extractUpload(char *body, size_t size) const
 {
 	static std::vector<char>	charset;
 	if (charset.empty())
@@ -304,7 +313,7 @@ std::vector<HttpResponse::UploadExtractData>	HttpResponse::extractUpload(char *b
 		charset.push_back('\v');
 	}
 
-	std::vector<UploadExtractData>	extract_data;
+	std::deque<UploadExtractData>	extract_data;
 	std::string						flag;
 	size_t							flag_len = 0;
 	size_t							i = 0;
@@ -321,18 +330,77 @@ std::vector<HttpResponse::UploadExtractData>	HttpResponse::extractUpload(char *b
 		else
 			break;
 	}
-	body += i;
 
-	while (body[i])
+	if (!flag.length())
 	{
-		const std::string	file(&body[i]);
-		size_t				next_flag_pos = file.find(flag);
-		if (next_flag_pos == std::string::npos)
-		{
+		extract_data.push_front(UploadExtractData(400));
+		return extract_data;
+	}
 
+	while (i < size)
+	{
+		const std::string	file(&body[i], size - i);
+		const size_t		next_flag_pos = file.find(flag);
+		const size_t		filename_pos = file.find("filename=");
+		if (next_flag_pos == std::string::npos || filename_pos == std::string::npos)
+		{
+			extract_data.push_front(UploadExtractData(400));
+			return extract_data;
 		}
-		// i += j;
-		break;
+
+		std::string			filename;
+		const std::string	tmp_filename_cstr = file.substr(filename_pos + 9);
+		const char			*filename_cstr = tmp_filename_cstr.c_str();
+		size_t		j = 0;
+		for (; j < size; ++j)
+		{
+			if (j == 0)
+			{
+				if (filename_cstr[0] != '"')
+				{
+					extract_data.push_front(UploadExtractData(400));
+					return extract_data;
+				}
+				continue;
+			}
+			if (filename.length() == 0)
+			{
+				if (filename_cstr[j] == '"')
+					filename = std::string(&filename_cstr[1], j - 1);
+			}
+			else break;
+		}
+		if (!filename.length())
+		{
+			extract_data.push_front(UploadExtractData(400));
+			return extract_data;
+		}
+
+		std::string	content = file.substr(0, next_flag_pos);
+
+		const size_t		end_header_pos = content.find("\r\n\r\n");
+		if (end_header_pos == std::string::npos)
+		{
+			extract_data.push_front(UploadExtractData(400));
+			return extract_data;
+		}
+		content = content.substr(end_header_pos + 4);
+
+		const std::string	caught = file.substr(next_flag_pos, flag.length() + 2);
+		const bool			is_end_flag = caught == std::string(flag + "--");
+
+		// std::cout << "- Content=" << content << "\n- Caught=" << caught << "\n- Is end flag? " << is_end_flag
+		// 	<< "\n- Filename=" << filename
+		// 	<< "\n===============================================" << std::endl;
+		UploadExtractData	extract = UploadExtractData(200);
+		extract.body = content;
+		extract.body_size = content.size();
+		extract.filename = filename;
+		extract_data.push_back(extract);
+
+		if (is_end_flag)
+			return extract_data;
+		i += next_flag_pos + flag.length();
 	}
 
 	return extract_data;

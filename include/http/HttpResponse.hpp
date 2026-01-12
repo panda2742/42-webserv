@@ -144,12 +144,13 @@ private:
 	void getRealRoot();
 
 	struct UploadExtractData {
-		std::string	body;
-		std::string	filename;
-		size_t		body_size;
+		std::string			body;
+		std::string			filename;
+		size_t				body_size;
+		unsigned short int	error;
 
-		UploadExtractData(void): body(), filename(), body_size(0) {}
-		UploadExtractData(const UploadExtractData& other): body(other.body), filename(other.filename), body_size(other.body_size) {}
+		UploadExtractData(unsigned short int err): body(), filename(), body_size(0), error(err) {}
+		UploadExtractData(const UploadExtractData& other): body(other.body), filename(other.filename), body_size(other.body_size), error(other.error) {}
 		UploadExtractData& operator=(const UploadExtractData& other) {
 			if (this != &other)
 			{
@@ -158,6 +159,14 @@ private:
 				this->body_size = other.body_size;
 			}
 			return *this;
+		}
+
+		void	print(void) const
+		{
+			std::cout << "- Filename  = " << filename << "\n"
+				<< "- Body size = " << body_size << " bytes\n"
+				<< "- Error     = " << error << "\n"
+				<< "- Body      = " << body << "\n";
 		}
 	};
 
@@ -196,7 +205,7 @@ public:
 	 */
 	void getContentCGI();
 
-	std::vector<UploadExtractData>	extractUpload(char *body, size_t size) const;
+	std::deque<UploadExtractData>	extractUpload(char *body, size_t size) const;
 };
 
 
