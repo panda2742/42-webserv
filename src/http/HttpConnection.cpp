@@ -127,7 +127,6 @@ bool HttpConnection::receiveContent(char *content, size_t size)
 
 bool HttpConnection::handleRequestHeader()
 {
-	raw_.push_back('\0');
 	requests_.push_back(HttpRequest());
 	HttpRequest& req = requests_.back();
 
