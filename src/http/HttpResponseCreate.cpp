@@ -59,7 +59,7 @@ void HttpResponse::setError(int code)
 		CachedFile *file_error = NULL;
 		struct stat file_error_info = {};
 		std::string final_file_path;
-		// TODO modif pour pas prendre le root mais passer par les locations
+
 		FileStatus err_file_status = FileCacheManager::getFile(*error_path, file_error, file_error_info, final_file_path);
 
 		if (err_file_status == FILE_OK || err_file_status == FILE_STREAM_DIRECT)
@@ -155,6 +155,12 @@ void HttpResponse::createDefault()
 {
 	headers_["Content-Length"] = "0";
 
+	const std::string *session_cookie = req_.getCookie("session");
+	session_data *sess_data = NULL;
+
+	if (session_cookie) sess_data = req_.getServerInstance()->getSession(*session_cookie);
+	if (sess_data) sess_data->request_amount++;
+
 	const Location&	target = req_.getLocation();
 
 	if ((target.getAllowMethods() & req_.getMethod()) == 0)
@@ -170,9 +176,6 @@ void HttpResponse::createDefault()
 		setRedirect(redir.code, redir.route);
 		return;
 	}
-
-	// addCookie("test", "kakoukakou");
-	// addCookie("test2", "kakoukakou2", true, true, 3600, "/", "Lax");
 
 	cgi_t cgi = req_.getLocation().getCgi();
 
@@ -242,16 +245,11 @@ void HttpResponse::createDefault()
 
 		if (target.isSessionGet())
 		{
-			const std::string *session_cookie = req_.getCookie("session");
-			const session_data *data = NULL;
-
-			if (session_cookie) data = req_.getServerInstance()->getSession(*session_cookie);
-
 			setStatus(200);
 			setHeader("Content-Type", "application/json");
-			if (data)
+			if (sess_data)
 			{
-				std::string body = "{\"logged_in\": true, \"data\": {\"creation_time\": "+ to_string(data->creation_time) +", \"request_amount\": "+ to_string(data->request_amount) +"}}";
+				std::string body = "{\"logged_in\": true, \"data\": {\"creation_time\": "+ to_string(sess_data->creation_time) +", \"request_amount\": "+ to_string(sess_data->request_amount) +"}}";
 				std::vector<char> body_vec(body.begin(), body.end());
 				setBody(body_vec);
 			}
@@ -351,8 +349,6 @@ void HttpResponse::createDefault()
 
 		if (target.isSessionLogout())
 		{
-			const std::string *session_cookie = req_.getCookie("session");
-
 			if (session_cookie)
 			{
 				std::map<std::string, session_data>::iterator ses = req_.getServerInstance()->getSessions().find(*session_cookie);

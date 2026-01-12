@@ -107,9 +107,9 @@ void ServerInstance::init()
 	}
 }
 
-const session_data* ServerInstance::getSession(const std::string& key) const
+session_data* ServerInstance::getSession(const std::string& key)
 {
-	std::map<std::string, session_data>::const_iterator it = sessions_.find(key);
+	std::map<std::string, session_data>::iterator it = sessions_.find(key);
 	if (it == sessions_.end()) return NULL;
 	return &it->second;
 }
