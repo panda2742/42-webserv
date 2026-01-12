@@ -334,8 +334,6 @@ void HttpResponse::createDefault()
 			setError(204);
 			return;
 		}
-		setError(403);
-		return;
 	}
 
 	setError(405);
