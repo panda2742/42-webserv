@@ -289,17 +289,17 @@ HttpResponse::UploadExtractData>	HttpResponse::extractUpload(char *body, size_t 
 		charset.push_back('\v');
 	}
 
-	std::vector<UploadExtractData>	extractData;
+	std::vector<UploadExtractData>	extract_data;
 	std::string						flag;
 	size_t							flag_len;
 
-	for (size_t i = 0; i < body.size(); ++i)
+	for (size_t i = 0; i < size; ++i)
 	{
 		if (flag.length() == 0)
 		{
-			std::cout << '<' << (int)body.at(i) << "> " << std::cout;
-			if (std::find(charset.begin(), charset.end(), body.at(1)) != charset.end())
-				flag = std::string(body.begin(), body.begin() + flag_len);
+			std::cout << '<' << (int)body[i] << "> " << std::cout;
+			if (std::find(charset.begin(), charset.end(), body[i]) != charset.end())
+				flag = std::string(body, body + flag_len);
 			else
 				++flag_len;
 		}
@@ -307,6 +307,6 @@ HttpResponse::UploadExtractData>	HttpResponse::extractUpload(char *body, size_t 
 
 	std::cout << "Flag is " << flag << std::endl;
 
-	return extractData;
+	return extract_data;
 }
 
