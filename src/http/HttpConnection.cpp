@@ -5,11 +5,12 @@
 #include <vector>
 #include <sys/socket.h>
 
-HttpConnection::HttpConnection(int socket_fd, FdContext *socket_context, Server& server)
+HttpConnection::HttpConnection(int socket_fd, in_addr ip, FdContext *socket_context, Server& server)
 	: socket_fd_(socket_fd), socket_context_(socket_context), server_(server), header_(false), content_size_(0)
 {
 	context_.type = CLIENT;
 	context_.fd = socket_fd;
+	context_.ip = ip;
 }
 
 HttpConnection::~HttpConnection()
@@ -62,68 +63,90 @@ std::string HttpConnection::findHeaderContent(const std::string& key, size_t ran
 		begin, end,
 		crlf, crlf + 2
 	);
-	
+
 	return std::string(begin, it);
 }
 
-void HttpConnection::receiveContent(char *content, size_t size)
+bool HttpConnection::receiveContent(char *content, size_t size)
 {
-	raw_.insert(raw_.end(), content, content + size);
-
 	if (!header_)
 	{
+		raw_.insert(raw_.end(), content, content + size);
+
 		if (raw_.size() > 3)
 		{
 			if (raw_[0] == 0x16 && raw_[1] == 0x03 && (raw_[2] == 0x01 || raw_[2] == 0x02 || raw_[2] == 0x03))
 			{
 				handleRequest();
-				return ;
+				return true;
 			}
 		}
 
 		ssize_t pos = find("\r\n\r\n", raw_.size());
 
-		if (pos == -1) return ;
-		
+		if (pos == -1) return true;
+
 		header_size_ = pos + 4;
 		header_ = true;
 
 		// Basic header parsing
 		std::string contentLength = findHeaderContent("Content-Length:", pos);
 
-		if (contentLength.empty())
+		if (contentLength.empty()) content_size_ = 0;
+		else content_size_ = std::atol(contentLength.c_str());
+
+		if (!handleRequestHeader()) return false;
+
+		if (content_size_ == 0 || raw_.size() >= content_size_ + header_size_)
 		{
 			handleRequest();
-			return ;
+			return true;
 		}
-
-		content_size_ = std::atol(contentLength.c_str());
 	}
 	else
 	{
-		if (raw_.size() >= content_size_ + header_size_)
+		HttpRequest& req = requests_.back();
+
+		if(req.getRealBodySize() + size > req.getLocation().getClientMaxBodySize())
+		{
+			req.setBodyTooLong();
+			handleRequest();
+			return true;
+		}
+
+		req.addBodyPart(content, size);
+
+		if (req.isBodyFull())
 		{
 			handleRequest();
-			return ;
+			return true;
 		}
 	}
+	return true;
 }
 
-bool HttpConnection::handleRequest()
+bool HttpConnection::handleRequestHeader()
 {
 	raw_.push_back('\0');
 	requests_.push_back(HttpRequest());
 	HttpRequest& req = requests_.back();
 
-	req.init(raw_, header_size_, content_size_, socket_context_);
+	req.init(raw_, header_size_, content_size_, socket_context_, &context_);
 
 	if (!req.parse()) return false;
+
+	return true;
+}
+
+void HttpConnection::handleRequest()
+{
+	HttpRequest& req = requests_.back();
 
 	responses_.push_back(HttpResponse(req, server_));
 	HttpResponse& res = responses_.back();
 	res.create();
+
 	clear();
-	return true;
 }
 
 bool HttpConnection::sendResponse()

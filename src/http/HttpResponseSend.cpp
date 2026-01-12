@@ -21,7 +21,7 @@ bool HttpResponse::sendFileDirectPart(int socket_fd)
 		else
 			send_index_ = 0;
 	}
-	
+
 	direct_file_n_ = read(direct_file_fd_, direct_file_buffer_, sizeof(direct_file_buffer_));
 	if (direct_file_n_ > 0)
 	{
@@ -72,8 +72,8 @@ ResponseState HttpResponse::sendResponsePart(int socket_fd)
 
 	if (send_state_ == BODY)
 	{
-		if (req_.getMethod() == GET)
-		{
+		// if (req_.getMethod() == METHOD_GET)
+		// {
 			if (file_status_ == FILE_OK)
 			{
 				size_t to_send = file_->data.size();
@@ -102,11 +102,11 @@ ResponseState HttpResponse::sendResponsePart(int socket_fd)
 				}
 				else send_state_ = SENT;
 			}
-		}
-		else
-		{
-			
-		}
+		// }
+		// else
+		// {
+
+		// }
 	}
 
 	return send_state_;

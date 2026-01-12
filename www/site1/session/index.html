@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Session demo</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 40px;
+        }
+        button {
+            padding: 8px 16px;
+            margin-top: 10px;
+        }
+        pre {
+            background: #eee;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Session demo</h1>
+
+    <div id="content">Loading…</div>
+
+    <script>
+        async function fetchSession() {
+            const res = await fetch("/session/get", {
+                credentials: "include"
+            });
+
+            if (!res.ok) {
+                document.getElementById("content").textContent =
+                    "Failed to fetch session";
+                return;
+            }
+
+            const json = await res.json();
+            render(json);
+        }
+
+        async function login() {
+            await fetch("/session/login", {
+                method: "POST",
+                credentials: "include"
+            });
+            fetchSession();
+        }
+
+        async function logout() {
+            await fetch("/session/logout", {
+                method: "DELETE",
+                credentials: "include"
+            });
+            fetchSession();
+        }
+
+        function render(session) {
+            const div = document.getElementById("content");
+
+            if (!session.logged_in) {
+                div.innerHTML = `
+                    <p>Status: <strong>Not logged in</strong></p>
+                    <button onclick="login()">Login</button>
+                `;
+                return;
+            }
+
+            div.innerHTML = `
+                <p>Status: <strong>Logged in</strong></p>
+                <h3>Session data</h3>
+                <pre>${JSON.stringify(session.data, null, 2)}</pre>
+                <button onclick="logout()">Logout</button>
+            `;
+        }
+
+        fetchSession();
+    </script>
+</body>
+</html>

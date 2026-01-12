@@ -66,7 +66,7 @@ void Server::handleClientIN(int fd)
 
 	size_t size = 0;
 
-	while ((r = recv(fd, buf, sizeof(buf), 0)) > 0)
+	while ((r = recv(fd, buf, sizeof(buf), 0)) > 0) // TODO remove cette boucle et passer en un recv par call de handleClient
 	{
 		request_buffer.insert(request_buffer.end(), buf, buf + r);
 		size += r;
@@ -77,7 +77,8 @@ void Server::handleClientIN(int fd)
 	std::map<int, HttpConnection>::iterator it = connections_.find(fd);
 	if (it != connections_.end())
 	{
-		it->second.receiveContent(request_buffer.data(), size);
+		if (!it->second.receiveContent(request_buffer.data(), size))
+			removeClient(fd, Logger::WARN);
 	}
 	else
 	{
@@ -164,6 +165,12 @@ void Server::initInstances()
 {
 	StrDirective http = conf_.http();
 	std::vector<StrDirective> servers = http.find<std::string>("server");
+
+	Location *glob_loc = new Location(http, NULL);
+	glob_loc->init();
+	ServerInstance::setGlobalLocation(glob_loc);
+
+	glob_loc->print();
 
 	for (size_t i = 0; i < servers.size(); i++)
 	{
@@ -279,10 +286,13 @@ void Server::run()
 
 			if (context->type == LISTEN)
 			{
-				int client_fd = accept(listen_fd_[context->fd_index], NULL, NULL);
+				struct sockaddr_storage client_addr;
+				socklen_t len = sizeof(client_addr);
+
+				int client_fd = accept(listen_fd_[context->fd_index], (struct sockaddr *)&client_addr, &len);
 				fcntl(client_fd, F_SETFL, O_NONBLOCK);
 
-				connections_.insert(std::make_pair(client_fd, HttpConnection(client_fd, context, *this)));
+				connections_.insert(std::make_pair(client_fd, HttpConnection(client_fd, ((struct sockaddr_in*)&client_addr)->sin_addr, context, *this)));
 
 				std::map<int, HttpConnection>::iterator it = connections_.find(client_fd);
 				if (it == connections_.end())
@@ -331,8 +341,13 @@ void Server::clean()
 	{
 		if (it->first >= 0) close(it->first);
 	}
-	// if (listen_fd_ >= 0) close(listen_fd_);
-	// listen_fd_ = -1; // TODO
+	for (std::vector<int>::iterator it = listen_fd_.begin(); it != listen_fd_.end(); it++)
+	{
+		if (*it >= 0) close(*it);
+		*it = -1;
+	}
 	if (epoll_fd_ >= 0) close(epoll_fd_);
 	epoll_fd_ = -1;
+
+	ServerInstance::freeGlobalLocation();
 }

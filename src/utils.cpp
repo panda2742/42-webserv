@@ -1,4 +1,7 @@
 #include "utils.hpp"
+#include <string>
+#include <vector>
+#include <cstdlib>
 
 std::string getNextPart(std::string& input, const std::string& sep)
 {
@@ -35,4 +38,38 @@ std::string trim(const std::string &s)
 	if (start == std::string::npos) return "";
 	size_t end = s.find_last_not_of(" \t\r\n");
 	return s.substr(start, end - start + 1);
+}
+
+std::vector<std::string> split(const std::string& str, char sep)
+{
+	std::vector<std::string> result;
+	size_t start = 0;
+	size_t i;
+
+	for (i = 0; i < str.size(); ++i)
+	{
+		if (str[i] == sep)
+		{
+			if (i - start > 0)
+			{
+				std::string	res = str.substr(start, i - start);
+				if (res.length())
+					result.push_back(res);
+			}
+			start = i + 1;
+		}
+	}
+
+	std::string	res = str.substr(start);
+	if (res.length())
+		result.push_back(res);
+	return result;
+}
+
+const std::string randomString(size_t s)
+{
+	std::string res;
+	for (size_t i = 0; i < s; i++)
+		res += "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"[std::rand() % 62];
+	return res;
 }

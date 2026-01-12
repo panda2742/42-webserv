@@ -117,13 +117,13 @@ const std::string respStateToText(ResponseState s)
 	return ("Bah wsh");
 }
 
-const std::string getMethodName(Method m)
+const std::string getMethodName(allow_methods_t m)
 {
 	switch (m)
 	{
-		case GET: return "GET";
-		case POST: return "POST";
-		case DELETE: return "DELETE";
+		case METHOD_GET: return "GET";
+		case METHOD_POST: return "POST";
+		case METHOD_DELETE: return "DELETE";
 		default: return "UNKNOWN";
 	}
 }

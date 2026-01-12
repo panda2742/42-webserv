@@ -9,7 +9,6 @@ HttpResponse::HttpResponse(HttpRequest &req, Server& server)
 		: server_(server),
 		req_(req),
 		status_code_(500),
-		status_mutable_(true),
 		file_(NULL),
 		file_status_(NONE),
 		send_state_(NOT_SENT),

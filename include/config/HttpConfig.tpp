@@ -72,8 +72,6 @@ R	Directive<T>::get(const str_t& prop_name)
 			}
 			case cfg::Node4::TYPE_MAP_UINT_STRING:
 			{
-				std::cout << (*it)->name << std::endl;
-				std::cout << cfg::util::represent(*(*it)->value.getAs<mapstr_t >()) << std::endl;
 				R	v = cfg::magic_cast<R>(*(*it)->value.getAs<mapstr_t >());
 				final_value = cfg::magic_assemble<R>(final_value, v);
 				break;
