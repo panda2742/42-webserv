@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <dirent.h>
 #include <algorithm>
+#include <unistd.h>
 
 void HttpResponse::setStatus(int code, const std::string &message)
 {
@@ -278,6 +279,15 @@ void HttpResponse::createDefault()
 					setError((*it).error);
 					return;
 				}
+				const std::string	path = upload.path[upload.path.length() - 1] == '/' ? upload.path + (*it).filename : upload.path + "/" + (*it).filename;
+				const int			fd = open(path.c_str(), O_CREAT | O_WRONLY | O_TRUNC, 0644);
+				if (fd == -1)
+				{
+					setError(500);
+					return;
+				}
+				write(fd, (*it).body.c_str(), (*it).body_size);
+				close(fd);
 			}
 		}
 
@@ -405,7 +415,7 @@ std::deque<HttpResponse::UploadExtractData>	HttpResponse::extractUpload(char *bo
 			return extract_data;
 		}
 
-		std::string	content = file.substr(0, next_flag_pos);
+		std::string	content = file.substr(0, next_flag_pos - 2);
 
 		const size_t		end_header_pos = content.find("\r\n\r\n");
 		if (end_header_pos == std::string::npos)
