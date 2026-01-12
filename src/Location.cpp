@@ -108,7 +108,6 @@ void Location::init()
 	}
 
 	// -------------- DENY ALL ------------- //
-
 	std::vector<StrDirective> tmp;
 	try {
 		tmp = directive_.find<std::string>("deny_all");
