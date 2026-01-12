@@ -52,13 +52,13 @@ struct FdContext;
 /**
  * @class HttpResponse
  * @brief Create an HTTP response for a request
- * 
+ *
  * This class have 2 majors parts :
- * 
+ *
  * - The response creation : creating the headers, oppening the files asked by a get, ...
- * 
+ *
  * - Sending the response. Each call to `sendResponsePart` will result in a send to the
- * client fd with a part of the response. 
+ * client fd with a part of the response.
  */
 class HttpResponse
 {
@@ -142,10 +142,28 @@ private:
 	const std::string getBodySize() const;
 	void getRealRoot();
 
+	struct UploadExtractData {
+		std::string	body;
+		std::string	filename;
+		size_t		body_size;
+
+		UploadExtractData(void): body(), filename(), body_size(0) {}
+		UploadExtractData(const UploadExtractData& other): body(other.body), filename(other.filename), body_size(other.body_size) {}
+		UploadExtractData& operator=(const UploadExtractData& other) {
+			if (this != &other)
+			{
+				this->body = other.body;
+				this->filename = other.filename;
+				this->body_size = other.body_size;
+			}
+			return *this;
+		}
+	};
+
 public:
 	HttpResponse(HttpRequest &req, Server &server);
 	~HttpResponse();
-	
+
 	/**
 	 * @brief Build the response from the associated request.
 	 *	This method prepares headers and body according to the request and
@@ -176,6 +194,8 @@ public:
 	 * the response.
 	 */
 	void getContentCGI();
+
+	std::vector<UploadExtractData>	extractUpload(char *body, size_t size) const;
 };
 
 

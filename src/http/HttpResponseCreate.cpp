@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <fcntl.h>
 #include <dirent.h>
+#include <algorithm>
 
 void HttpResponse::setStatus(int code, const std::string &message)
 {
@@ -192,7 +193,8 @@ void HttpResponse::createDefault()
 	upload_t	upload = target.getUpload();
 	// if (upload.enabled)
 	// {
-		// std::cout << "UPLOAD BODY: " << req_.getBody() << std::endl;
+	std::cout << "UPLOAD BODY: " << req_.getBody() << std::endl;
+	extractUpload(req_.getBody(), req_.getContentSize());
 	// }
 
 	// addCookie("test", "kakoukakou");
@@ -272,3 +274,39 @@ void HttpResponse::create()
 
 	res_ready_ = true;
 }
+
+
+std::vector<
+HttpResponse::UploadExtractData>	HttpResponse::extractUpload(char *body, size_t size) const
+{
+	static std::vector<char>	charset;
+	if (charset.empty())
+	{
+		charset.push_back(' ');
+		charset.push_back('\n');
+		charset.push_back('\t');
+		charset.push_back('\r');
+		charset.push_back('\v');
+	}
+
+	std::vector<UploadExtractData>	extract_data;
+	std::string						flag;
+	size_t							flag_len;
+
+	for (size_t i = 0; i < size; ++i)
+	{
+		if (flag.length() == 0)
+		{
+			std::cout << '<' << (int)body[i] << "> " << std::cout;
+			if (std::find(charset.begin(), charset.end(), body[i]) != charset.end())
+				flag = std::string(body, body + flag_len);
+			else
+				++flag_len;
+		}
+	}
+
+	std::cout << "Flag is " << flag << std::endl;
+
+	return extract_data;
+}
+
