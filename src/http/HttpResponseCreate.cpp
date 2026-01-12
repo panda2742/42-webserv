@@ -7,6 +7,7 @@
 #include <dirent.h>
 #include <algorithm>
 #include <unistd.h>
+#include <errno.h>
 
 void HttpResponse::setStatus(int code, const std::string &message)
 {
@@ -260,7 +261,7 @@ void HttpResponse::createDefault()
 			// data.creation_time = std::time(0);
 			// data.request_amount = 0;
 			// req_.getServerInstance()->getSessions()[cookie_content] = data;
-			
+
 			// addCookie("session", cookie_content, false, false, 24*60*60*1000);
 		}
 
@@ -303,8 +304,39 @@ void HttpResponse::createDefault()
 		}
 
 	}
+	else if (req_.getMethod() == METHOD_DELETE)
+	{
+		if (target.getAllowDeleteFile())
+		{
+			unlink(root_.c_str());
 
-	// Si delete autorise + DELETE -> delete file
+			switch (errno)
+			{
+				case (ENOENT):
+					setError(404);
+					return;
+				case (EACCES):
+				case (EPERM):
+				case (EROFS):
+					setError(403);
+					return;
+				case (EISDIR):
+				case (EBUSY):
+					setError(409);
+					return;
+				case (EIO):
+				case (ENOMEM):
+				case (EFAULT):
+					setError(500);
+					return;
+			}
+
+			setError(204);
+			return;
+		}
+		setError(403);
+		return;
+	}
 
 	setError(405);
 }
