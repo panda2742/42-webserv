@@ -162,3 +162,27 @@ void FileCacheManager::freeMinimumSize(size_t required)
 		cache_.erase(it);
 	}
 }
+
+FileStatus FileCacheManager::testFile(const std::string& path)
+{
+	if (path.find('\0') != std::string::npos) return PATH_FORBIDDEN;
+	if (path.find("..") != std::string::npos) return PATH_FORBIDDEN;
+
+	struct stat fileInfo;
+	if (stat(path.c_str(), &fileInfo) != 0)
+	{
+		if (errno == ENOENT) return FILE_NOT_FOUND;
+		else if (errno == EACCES) return FILE_FORBIDDEN;
+		else if (errno == EBADF) return INTERNAL_ERROR;
+		else if (errno == EFAULT) return INTERNAL_ERROR;
+		else if (errno == ELOOP) return INTERNAL_ERROR;
+		else if (errno == ENAMETOOLONG) return PATH_TO_LONG;
+		else if (errno == ENOMEM) return INTERNAL_ERROR;
+		else if (errno == ENOTDIR) return FILE_NOT_FOUND;
+		else return(INTERNAL_ERROR);
+	}
+
+	if ((fileInfo.st_mode & S_IFMT) == S_IFDIR) return FILE_IS_DIR;
+
+	return FILE_OK;
+}

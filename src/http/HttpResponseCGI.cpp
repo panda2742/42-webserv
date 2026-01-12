@@ -133,7 +133,7 @@ void HttpResponse::execChildCGI(const std::string& cgi_prog, const std::string& 
 	env_strings.push_back("SERVER_PROTOCOL=HTTP/1.1");
 	env_strings.push_back("SERVER_PORT=" + to_string(req_.getSocketContext()->port));
 	env_strings.push_back("REQUEST_METHOD=" + getMethodName(req_.getMethod()));
-	env_strings.push_back("PATH_INFO="); // A FAIRE mais infernal, genre faut tester la route / par / pour verifier si y'a pas une cgi avant et que c'est pas un path apres genre
+	env_strings.push_back("PATH_INFO=" + path_info_);
 	env_strings.push_back("SCRIPT_FILENAME=" + script_path);
 	env_strings.push_back("SCRIPT_NAME=" + script_path.substr(script_path.find_last_of('/') + 1));
 	std::string queries_str = "";

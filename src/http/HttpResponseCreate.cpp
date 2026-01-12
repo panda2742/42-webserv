@@ -9,7 +9,6 @@
 
 void HttpResponse::setStatus(int code, const std::string &message)
 {
-	if (!status_mutable_) return ;
 	status_code_ = code;
 	status_message_ = message;
 }
@@ -61,14 +60,10 @@ void HttpResponse::setError(int code)
 			file_info_ = file_error_info;
 			file_status_ = err_file_status;
 			file_ = file_error;
-			status_mutable_ = false;
-			createDefault();
+			handleExistingFile();
 			return ;
 		}
 	}
-
-	// try load configurated error page
-	// + set file status a FILE_OK si y'a bien un fichier / FILE_STREAM_DIRECT si trop lourd
 
 	setHeader("Content-Type", "text/html");
 	std::string error = to_string(code) + " " + status_message_;
@@ -79,34 +74,9 @@ void HttpResponse::setError(int code)
 
 void HttpResponse::setDirectory()
 {
-	std::vector<std::string> indexes = req_.getLocation().getIndex();
-
-	std::string baseTarget = root_[root_.size() - 1] == '/' ? root_ : root_ + "/";
-
-	for (std::vector<std::string>::iterator it = indexes.begin(); it != indexes.end(); it++)
-	{
-		struct stat tmp_file_info;
-		std::string full_path_tmp;
-		std::string index_path = baseTarget + *it;
-
-		FileStatus index_status = FileCacheManager::getFile(index_path, file_, tmp_file_info, full_path_tmp);
-
-		if (index_status == FILE_OK || index_status == FILE_STREAM_DIRECT)
-		{
-			file_path_ = full_path_tmp;
-			file_info_ = tmp_file_info;
-			file_status_ = index_status;
-
-			if (testUseCGI(index_path)) return ;
-
-			createDefault();
-			return ;
-		}
-	}
-
 	if (!req_.getLocation().getAutoindex()) return setError(403);
 
-	std::string dirname = (root_[root_.size() - 1] == '/') ? root_ : (root_ + "/");
+	std::string dirname = (req_.getTarget()[req_.getTarget().size() - 1] == '/') ? req_.getTarget() : (req_.getTarget() + "/");
 	std::string auto_index_html = "<!DOCTYPE html><html><head><title>Index of "+ dirname + "</title></head><body><h1>Index of "+ dirname + "</h1><hr><pre>";
 
 
@@ -143,40 +113,42 @@ void HttpResponse::getRealRoot()
 	vecstr_t target = split(req_.getTarget(), '/');
 	target.erase(target.begin(), target.begin() + req_.getLocation().getRoute().size());
 
+	depth_in_loc_ = target.size();
+
 	for (vecstr_t::iterator it = target.begin(); it != target.end(); it++)
 		root_ += "/" + *it;
 }
 
-bool HttpResponse::testUseCGI(const std::string& cgi_prog)
+void HttpResponse::handleExistingFile()
 {
-	cgi_t cgi = req_.getLocation().getCgi();
-	if (cgi.enabled)
+	if (file_status_ == FILE_OK)
 	{
-		std::map<std::string, std::string>::iterator cgi_map = cgi.map.find(getExtension(cgi_prog));
-		if (cgi_map != cgi.map.end())
+		setStatus(200, "OK");
+		setHeader("Content-Type", file_->mime);
+		headers_["Content-Length"] = to_string(file_->size);
+	}
+	else if (file_status_ == FILE_STREAM_DIRECT)
+	{
+		direct_file_fd_ = open(file_path_.c_str(), O_RDONLY);
+
+		if (direct_file_fd_ < 0)
+			setError(500);
+		else
 		{
-			file_status_ = NONE;
-			useCGI(cgi_map->second, cgi_prog);
-			return true;
+			setStatus(200, "OK");
+			setHeader("Content-Type", getMimeType(getExtension(req_.getTarget())));
+			headers_["Content-Length"] = to_string(file_info_.st_size);
 		}
 	}
-	return false;
 }
 
 void HttpResponse::createDefault()
 {
 	headers_["Content-Length"] = "0";
 
-
-	// VERIFY LOCATION
-
-	// std::vector<std::string> res = split(req_.getTarget(), '/');
-
-	// std::cout << cfg::util::represent(res) << std::endl;
-
 	const Location&	target = req_.getLocation();
 
-	if ((target.getAllowMethods() & req_.getMethod()) == 0 && status_mutable_)
+	if ((target.getAllowMethods() & req_.getMethod()) == 0)
 	{
 		setError(405);
 		return;
@@ -200,49 +172,93 @@ void HttpResponse::createDefault()
 	// addCookie("test", "kakoukakou");
 	// addCookie("test2", "kakoukakou2", true, true, 3600, "/", "Lax");
 
-	// useCGI("/usr/bin/php-cgi", "/home/lilefebv/Documents/cursus/42-webserv/www/script.php");
-	// return ;
+	cgi_t cgi = req_.getLocation().getCgi();
+	
+	std::string root_backup = root_;
+	std::vector<std::string> path_info;
+	int test_depth = 0;
 
-	if (req_.getMethod() == METHOD_GET || !status_mutable_)
+	while (test_depth <= depth_in_loc_)
 	{
-		if (file_status_ == NONE) file_status_ = FileCacheManager::getFile(root_, file_, file_info_, file_path_);
+		FileStatus status_test = FileCacheManager::testFile(root_);
 
-		if (file_status_ == FILE_OK)
+		if (status_test == FILE_IS_DIR && test_depth == 0)
 		{
-			if (testUseCGI(root_)) return ;
+			std::vector<std::string> indexes = req_.getLocation().getIndex();
 
-			setStatus(200, "OK");
-			setHeader("Content-Type", file_->mime);
-			headers_["Content-Length"] = to_string(file_->size);
-		}
-		else if (file_status_ == FILE_STREAM_DIRECT)
-		{
-			direct_file_fd_ = open(file_path_.c_str(), O_RDONLY);
-
-			if (direct_file_fd_ < 0)
-				setError(500);
-			else
+			for (std::vector<std::string>::iterator it = indexes.begin(); it != indexes.end(); it++)
 			{
-				setStatus(200, "OK");
-				setHeader("Content-Type", getMimeType(getExtension(req_.getTarget())));
-				headers_["Content-Length"] = to_string(file_info_.st_size);
+				std::string index_path = root_ + "/" + *it;
+
+				FileStatus index_status = FileCacheManager::testFile(index_path);
+
+				if (index_status == FILE_OK)
+				{
+					root_ = index_path;
+					root_backup = index_path;
+					status_test = FILE_OK;
+				}
 			}
 		}
+
+		if (status_test == FILE_OK)
+		{
+			if (!cgi.enabled) break;
+			
+			std::map<std::string, std::string>::iterator cgi_map = cgi.map.find(getExtension(root_));
+			if (cgi_map != cgi.map.end())
+			{
+				for (std::vector<std::string>::reverse_iterator it = path_info.rbegin(); it != path_info.rend(); it++)
+					path_info_ += *it;
+				useCGI(cgi_map->second, root_);
+				return ;
+			}
+
+			break;
+		}
+		else if (status_test == FILE_NOT_FOUND)
+		{
+			if (!cgi.enabled) break;
+
+			size_t pos = root_.find_last_of('/');
+
+			if (pos == std::string::npos) break;
+
+			path_info.push_back(root_.substr(pos, root_.size()));
+			root_.erase(pos, root_.size());
+			std::cout << root_ << std::endl;
+			test_depth++;
+			continue;
+		}
+		else break;
+
+	}
+	root_ = root_backup;
+
+	if (req_.getMethod() == METHOD_GET)
+	{
+
+		std::cout << "OEOEOEO" << std::endl;
+		if (file_status_ == NONE) file_status_ = FileCacheManager::getFile(root_, file_, file_info_, file_path_);
+
+		if (file_status_ == FILE_OK || file_status_ == FILE_STREAM_DIRECT) handleExistingFile();
 		else if (file_status_ == FILE_IS_DIR) setDirectory();
 		else if (file_status_ == PATH_FORBIDDEN) setError(400);
 		else if (file_status_ == FILE_NOT_FOUND) setError(404);
 		else if (file_status_ == FILE_FORBIDDEN) setError(403);
 		else if (file_status_ == PATH_TO_LONG) setError(414);
 		else setError(500);
+		
+		return;
 	}
-	else
-	{
-		if (testUseCGI(root_)) return ; // Ajouter le test pour les index
-		setHeader("Content-Type", "text/plain");
-		std::string body = "Unknown method";
-		std::vector<char> body_vec(body.begin(), body.end());
-		setBody(body_vec);
-	}
+
+
+		
+	// si upload autorise + POST -> upload fichier
+
+	// Si delete autorise + DELETE -> delete file
+
+	setError(405);
 }
 
 void HttpResponse::create()

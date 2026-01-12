@@ -80,13 +80,13 @@ private:
 
 	int status_code_;
 	std::string status_message_;
-	bool status_mutable_;
 
 	std::map<std::string, std::string> headers_;
 	std::vector<ResCookie> cookies_;
 	std::vector<char> body_;
 
 	std::string root_;
+	int depth_in_loc_;
 
 	CachedFile *file_;
 	FileStatus file_status_;
@@ -106,6 +106,7 @@ private:
 	int cgi_out_;
 	FdContext fd_context_in_;
 	FdContext fd_context_out_;
+	std::string path_info_;
 
 	bool waiting_cgi_;
 	bool res_ready_;
@@ -116,11 +117,11 @@ private:
 	void setHeader(const std::string &name, const std::string &value);
 	void setStatus(int code, const std::string &message);
 	void setBody(const std::vector<char> &body);
+	void handleExistingFile();
 	void setDirectory();
 	void setError(int code);
 	void setRedirect(int code, const std::string& target);
 	void addCookie(const std::string& name, const std::string& value, bool httpOnly, bool secure, ssize_t maxAge, const std::string& path, const std::string& sameSite);
-	bool testUseCGI(const std::string& cgi_prog);
 	void useCGI(const std::string& cgi_prog, const std::string& script_path);
 	void execChildCGI(const std::string& cgi_prog, const std::string& script_path);
 	void handleResultCGI();

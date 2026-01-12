@@ -232,7 +232,6 @@ bool HttpRequest::parse()
 			std::string key = lines[i].substr(0, lines[i].find(": "));
 			lines[i].erase(0, lines[i].find(": ") + 2);
 
-			std::cout << "Add pair: " << key << " " << lines[i] << std::endl;
 			infos_.insert(std::make_pair(key, lines[i]));
 		}
 
