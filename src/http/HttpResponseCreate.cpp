@@ -162,27 +162,11 @@ void HttpResponse::createDefault()
 		return;
 	}
 
-	upload_t	upload = target.getUpload();
-	// if (upload.enabled)
-	// {
-	std::cout << "UPLOAD BODY: " << req_.getBody() << "\n===============================================" << std::endl;
-	std::deque<UploadExtractData>	extracted = extractUpload(req_.getBody(), req_.getContentSize());
-	for (std::deque<UploadExtractData>::const_iterator it = extracted.begin(); it != extracted.end(); ++it)
-	{
-		if ((*it).error != 200)
-		{
-			setError((*it).error);
-			return;
-		}
-		// create file and write
-	}
-	// }
-
 	// addCookie("test", "kakoukakou");
 	// addCookie("test2", "kakoukakou2", true, true, 3600, "/", "Lax");
 
 	cgi_t cgi = req_.getLocation().getCgi();
-	
+
 	std::string root_backup = root_;
 	std::vector<std::string> path_info;
 	int test_depth = 0;
@@ -213,7 +197,7 @@ void HttpResponse::createDefault()
 		if (status_test == FILE_OK)
 		{
 			if (!cgi.enabled) break;
-			
+
 			std::map<std::string, std::string>::iterator cgi_map = cgi.map.find(getExtension(root_));
 			if (cgi_map != cgi.map.end())
 			{
@@ -257,13 +241,28 @@ void HttpResponse::createDefault()
 		else if (file_status_ == FILE_FORBIDDEN) setError(403);
 		else if (file_status_ == PATH_TO_LONG) setError(414);
 		else setError(500);
-		
+
 		return;
 	}
+	else if (req_.getMethod() == METHOD_POST)
+	{
+		upload_t	upload = target.getUpload();
+		if (upload.enabled)
+		{
+			std::deque<UploadExtractData>	extracted = extractUpload(req_.getBody(), req_.getContentSize());
+			for (std::deque<UploadExtractData>::const_iterator it = extracted.begin(); it != extracted.end(); ++it)
+			{
+				if ((*it).error != 200)
+				{
+					setError((*it).error);
+					return;
+				}
+			}
+		}
 
 
-		
-	// si upload autorise + POST -> upload fichier
+
+	}
 
 	// Si delete autorise + DELETE -> delete file
 
