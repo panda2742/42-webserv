@@ -282,12 +282,12 @@ bool HttpRequest::parse()
 		// 	std::cout << itt->first << ": " << itt->second << std::endl;
 		// }
 
-		for (std::map<std::string, std::string>::const_iterator it = cookies_.begin();
-			it != cookies_.end();
-			++it)
-		{
-			std::cout << it->first << ": " << it->second << std::endl;
-		}
+		// for (std::map<std::string, std::string>::const_iterator it = cookies_.begin();
+		// 	it != cookies_.end();
+		// 	++it)
+		// {
+		// 	std::cout << it->first << ": " << it->second << std::endl;
+		// }
 	}
 	catch(const std::exception& e)
 	{

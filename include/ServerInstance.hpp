@@ -67,6 +67,7 @@ public:
 	static void freeGlobalLocation() { delete global_loc_; }
 	
 	std::map<std::string, session_data>& getSessions() { return sessions_; }
+	const session_data *getSession(const std::string& key) const;
 
 };
 

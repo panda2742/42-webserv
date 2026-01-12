@@ -238,6 +238,32 @@ void HttpResponse::createDefault()
 
 	if (req_.getMethod() == METHOD_GET)
 	{
+
+		if (target.isSessionGet())
+		{
+			const std::string *session_cookie = req_.getCookie("session");
+			const session_data *data = NULL;
+
+			if (session_cookie) data = req_.getServerInstance()->getSession(*session_cookie);
+
+			setStatus(200);
+			setHeader("Content-Type", "application/json");
+			if (data)
+			{
+				std::string body = "{\"logged_in\": true, \"data\": {\"creation_time\": "+ to_string(data->creation_time) +", \"request_amount\": "+ to_string(data->request_amount) +"}}";
+				std::vector<char> body_vec(body.begin(), body.end());
+				setBody(body_vec);
+			}
+			else
+			{
+				std::string body = "{\"logged_in\": false}";
+				std::vector<char> body_vec(body.begin(), body.end());
+				setBody(body_vec);
+			}
+			return;
+		}
+
+
 		if (file_status_ == NONE) file_status_ = FileCacheManager::getFile(root_, file_, file_info_, file_path_);
 
 		if (file_status_ == FILE_OK || file_status_ == FILE_STREAM_DIRECT) handleExistingFile();
@@ -247,22 +273,6 @@ void HttpResponse::createDefault()
 		else if (file_status_ == FILE_FORBIDDEN) setError(403);
 		else if (file_status_ == PATH_TO_LONG) setError(414);
 		else setError(500);
-
-		if (target.isSessionGet())
-		{
-			// const std::string *session_cookie = req_.getCookie("session");
-			// if (session_cookie)
-			// {
-			// 	req_.getServerInstance()->getSessions().find(*session_cookie);
-			// }
-			// std::string cookie_content = randomString(40);
-			// session_data data;
-			// data.creation_time = std::time(0);
-			// data.request_amount = 0;
-			// req_.getServerInstance()->getSessions()[cookie_content] = data;
-			
-			// addCookie("session", cookie_content, false, false, 24*60*60*1000);
-		}
 
 		return;
 	}

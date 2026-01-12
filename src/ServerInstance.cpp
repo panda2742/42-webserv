@@ -106,3 +106,10 @@ void ServerInstance::init()
 		throw std::invalid_argument("Invalid locations value for server " + to_string(server_index_) + (server_.value.length() > 0 ? " " + server_.value : "") + ". Error: " + e.what());
 	}
 }
+
+const session_data* ServerInstance::getSession(const std::string& key) const
+{
+	std::map<std::string, session_data>::const_iterator it = sessions_.find(key);
+	if (it == sessions_.end()) return NULL;
+	return &it->second;
+}
