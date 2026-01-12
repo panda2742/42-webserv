@@ -1,6 +1,6 @@
 #include "config/Node4.hpp"
-#include "config/ConfigLogger.hpp"
 #include "config/util.hpp"
+#include "Logger.hpp"
 
 namespace cfg
 {
@@ -39,7 +39,7 @@ Node4	*createNode4(Node4::ValueType type)
 	}
 	catch (const std::bad_alloc& e)
 	{
-		log.error("Memory allocation failed in createNode4: " + str_t(e.what()));
+		Logger::error("Memory allocation failed in createNode4: " + str_t(e.what()));
 		return NULL;
 	}
 	return NULL;
@@ -91,7 +91,7 @@ Node4::ValueType	dataType_(std::vector<Lexer::TokenNode>::const_iterator node, s
 {
 	if (node == end || (node->type != Lexer::TokenParent && node->type != Lexer::TokenDirective))
 	{
-		log.error("Trying to access the type of a non-directive attribute '" + node->value + "'.");
+		Logger::error("Trying to access the type of a non-directive attribute '" + node->value + "'.");
 		return Node4::TYPE_STRING;
 	}
 	bool					nb_starts = false;
@@ -129,7 +129,7 @@ Node4::ValueType	dataType_(std::vector<Lexer::TokenNode>::const_iterator node, s
 		else
 			return Node4::TYPE_STRING_VECTOR;
 	}
-	log.warn("Could not identify type for directive '" + node->value + "'.");
+	Logger::warn("Could not identify type for directive '" + node->value + "'.");
 	return Node4::TYPE_STRING;
 }
 

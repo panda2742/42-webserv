@@ -16,16 +16,16 @@ public:
 		ERROR
 	};
 
-	static void log(Level lvl, const std::string &msg);
+	static void	log(Level lvl, const std::string &msg);
 
-	static void info(const std::string &msg)  { log(INFO,  msg); }
-	static void warn(const std::string &msg)  { log(WARN,  msg); }
-	static void error(const std::string &msg) { log(ERROR, msg); }
+	static void	info(const std::string &msg) { log(INFO, msg); }
+	static void	warn(const std::string &msg) { log(WARN, msg); }
+	static void	error(const std::string &msg) { log(ERROR, msg); }
 
 private:
-	static std::string timestamp();
+	static std::string	timestamp(void);
 
-	static std::string levelToString(Level lvl);
+	static std::string	levelToString(Level lvl);
 };
 
 #endif
