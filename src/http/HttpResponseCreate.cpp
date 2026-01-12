@@ -300,6 +300,8 @@ void HttpResponse::createDefault()
 				write(fd, (*it).body.c_str(), (*it).body_size);
 				close(fd);
 			}
+			setStatus(204);
+			return ;
 		}
 
 		if (target.isSessionLogin())
@@ -311,6 +313,8 @@ void HttpResponse::createDefault()
 			req_.getServerInstance()->getSessions()[cookie_content] = data;
 
 			addCookie("session", cookie_content, false, false, 24*60*60*1000);
+			setStatus(204);
+			return ;
 		}
 
 	}
@@ -343,6 +347,20 @@ void HttpResponse::createDefault()
 
 			setError(204);
 			return;
+		}
+
+		if (target.isSessionLogout())
+		{
+			const std::string *session_cookie = req_.getCookie("session");
+
+			if (session_cookie)
+			{
+				std::map<std::string, session_data>::iterator ses = req_.getServerInstance()->getSessions().find(*session_cookie);
+				if (ses != req_.getServerInstance()->getSessions().end()) req_.getServerInstance()->getSessions().erase(ses);
+			}
+			addCookie("session", "", false, false, 0);
+			setStatus(204);
+			return ;
 		}
 	}
 
