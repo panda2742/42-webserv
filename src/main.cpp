@@ -20,14 +20,14 @@ int main(int argc, char **argv)
 
 	// Create the configuration class
 	cfg::HttpConfig	conf;
-	
+
 	try
 	{
 		// Create a parser
 		cfg::Parser	parser(argv[1]);
 		// Parse the file
 		parser.parse();
-		
+
 		// Load the configuration by passing parser lexer nodes
 		conf.generate(parser.getNodes());
 
@@ -40,7 +40,10 @@ int main(int argc, char **argv)
 	catch (const std::exception& e)
 	{
 		std::cerr << "Middleware went wrong! Reason: " << e.what() << std::endl;
+		return 1;
 	}
+
+	if (conf.getErrorOccurred()) return 1;
 
 	try
 	{
