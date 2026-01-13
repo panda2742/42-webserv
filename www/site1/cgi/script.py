@@ -112,6 +112,11 @@ cgi_vars = [
     'HTTP_HOST'
 ]
 
+
+while True:
+    val = 1
+
+
 for var in cgi_vars:
     value = os.environ.get(var, '<em>non défini</em>')
     print(f"""

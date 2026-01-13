@@ -261,6 +261,14 @@ void Server::init()
 	initSockets();
 }
 
+void Server::monitorCGI()
+{
+	for (std::map<int, HttpResponse*>::iterator it = cgi_monitoring_.begin(); it != cgi_monitoring_.end(); it++)
+	{
+		it->second->checkTimeoutCGI();
+	}
+}
+
 void Server::run()
 {
 	running_ = true;
@@ -269,6 +277,8 @@ void Server::run()
 
 	while (running_ && !siginted)
 	{
+		monitorCGI();
+
 		struct epoll_event events[MAX_EVENTS];
 		int n = epoll_wait(epoll_fd_, events, MAX_EVENTS, -1);
 

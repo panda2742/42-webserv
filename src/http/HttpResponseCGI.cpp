@@ -5,6 +5,8 @@
 #include <algorithm>
 #include "Server.hpp"
 #include <fcntl.h>
+#include <sys/types.h>
+#include <signal.h>
 
 void HttpResponse::sendBodyCGI()
 {
@@ -72,8 +74,10 @@ void HttpResponse::useCGI(const std::string& cgi_prog, const std::string& script
 		return ;
 	}
 	
-	pid_t pid = fork();
-	if (pid < 0)
+	
+	cgi_create_time_ = std::time(0);
+	cgi_pid_ = fork();
+	if (cgi_pid_ < 0)
 	{
 		close(pipe_in[0]);
 		close(pipe_in[1]);
@@ -82,7 +86,7 @@ void HttpResponse::useCGI(const std::string& cgi_prog, const std::string& script
 		setError(500);
 		return ;
 	}
-	else if (pid == 0)
+	else if (cgi_pid_ == 0)
 	{
 		close(pipe_in[1]);
 		close(pipe_out[0]);
@@ -98,6 +102,8 @@ void HttpResponse::useCGI(const std::string& cgi_prog, const std::string& script
 
 		execChildCGI(cgi_prog, script_path);
 	}
+
+	server_.addMonitoredCGI(cgi_pid_, this);
 
 	close(pipe_in[0]);
 	close(pipe_out[1]);
@@ -187,6 +193,8 @@ void HttpResponse::execChildCGI(const std::string& cgi_prog, const std::string& 
 
 void HttpResponse::handleResultCGI()
 {
+	server_.removeMonitoredCGI(cgi_pid_);
+
 	setStatus(200);
 
 	Logger::info("CGI out handling");
@@ -252,3 +260,11 @@ void HttpResponse::handleResultCGI()
 	serializeHeader();
 }
 
+void HttpResponse::checkTimeoutCGI()
+{
+	if (time(0) > cgi_create_time_ + 2)
+	{
+		kill(cgi_pid_, SIGKILL);
+		// indiquer que le temps est ecouler pour pas avoir un 500
+	}
+}
