@@ -155,6 +155,13 @@ class HttpConfig
 	 */
 	Directive<str_t>			http(void);
 
+	/**
+	 * Return the boolean whether an error occurred during the parsing.
+	 *
+	 * @return The boolean of the test.
+	 */
+	bool	getErrorOccurred(void) const;
+
 	private:
 	/**
 	 * This structure is used for storing data during the search.
@@ -186,6 +193,10 @@ class HttpConfig
 	 * The root of the configuration, also named as http().
 	 */
 	Node4	*root_;
+	/**
+	 * If an error occurs during the parsing, this will be set to true.
+	 */
+	bool	error_occurred_;
 
 	/**
 	 * The core implementation of the get function. Only called by the HttpConfig::get() method.

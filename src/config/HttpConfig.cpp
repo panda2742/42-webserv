@@ -10,7 +10,7 @@ namespace cfg
 {
 // #########################################################
 
-HttpConfig::HttpConfig(void): root_(n4u::createStringNode4())
+HttpConfig::HttpConfig(void): root_(n4u::createStringNode4()), error_occurred_(false)
 {
 	root_->name = "http";
 }
@@ -23,6 +23,11 @@ HttpConfig::~HttpConfig(void)
 Directive<str_t>	HttpConfig::http(void)
 {
 	return Directive<str_t>(*root_->value.getAs<str_t>(), root_);
+}
+
+bool	HttpConfig::getErrorOccurred(void) const
+{
+	return error_occurred_;
 }
 
 void	HttpConfig::generate(const std::vector<Lexer::TokenNode>& nodes) throw(ParsingException)
@@ -59,6 +64,7 @@ void	HttpConfig::generate(const std::vector<Lexer::TokenNode>& nodes) throw(Pars
 					case Lexer::TokenSymbolClose:
 						if (parent->parent == NULL) {
 							Logger::error("Unexpected token '}'. Cannot unfold current element.");
+							error_occurred_ = true;
 							delete node;
 							return;
 						}
@@ -156,6 +162,7 @@ void	HttpConfig::generate(const std::vector<Lexer::TokenNode>& nodes) throw(Pars
 		{
 			if (parent->parent == NULL) {
 				Logger::error("Unexpected token '}'. Cannot unfold current element.");
+				error_occurred_ = true;
 				return;
 			}
 			parent = parent->parent;
