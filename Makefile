@@ -81,6 +81,6 @@ run: all
 .PHONY: vg
 vg: all
 	@clear
-	$(VG) $(VGFLAGS) ./$(NAME) samples/photo_gallery.conf
+	$(VG) $(VGFLAGS) ./$(NAME) samples/goofy_cat_world.conf
 
 -include $(DEPS)
