@@ -107,8 +107,28 @@ bool HttpRequest::checkHttpVersion()
 	}
 }
 
+void HttpRequest::replaceHex(void)
+{
+	for (std::string::iterator it = target_.begin(); it != target_.end(); ++it)
+	{
+		char	c = *it;
+		if (c != '%') continue;
+
+		if ((it + 1) == target_.end() || (it + 2) == target_.end()) continue;
+
+		std::size_t	tens = std::string("0123456789abcdef").find(std::tolower(*(it + 1)));
+		std::size_t	units = std::string("0123456789abcdef").find(std::tolower(*(it + 2)));
+		if (tens == std::string::npos || units == std::string::npos) continue;
+
+		target_.insert(it, tens * 16 + units);
+		target_.erase(it + 1, it + 4);
+	}
+}
+
 bool HttpRequest::parseTarget()
 {
+	replaceHex();
+	std::cout << target_ << std::endl;
 	if (target_.empty())
 	{
 		create_error_ = NOT_HTTP_HEADER;

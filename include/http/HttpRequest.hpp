@@ -66,10 +66,10 @@ private:
 
 	Location *location;
 
-	bool checkHttpVersion();
-	bool parseTarget();
-	bool linkInstance();
-
+	bool	checkHttpVersion(void);
+	bool	parseTarget(void);
+	bool	linkInstance(void);
+	void	replaceHex(void);
 public:
 	HttpRequest();
 	~HttpRequest();
