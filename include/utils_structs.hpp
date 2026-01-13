@@ -17,7 +17,10 @@ struct FdContext
 {
 	FdType type;
 	union {
-		HttpResponse *cgi_owner_response;
+		struct {
+			HttpResponse *cgi_owner_response;
+			int client_fd;
+		};
 		struct {
 			int fd;
 			in_addr ip;

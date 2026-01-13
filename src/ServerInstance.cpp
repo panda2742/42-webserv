@@ -101,7 +101,6 @@ void ServerInstance::init()
 
 	try {
 		locations_.init();
-		locations_.print();
 	} catch (const std::exception& e) {
 		throw std::invalid_argument("Invalid locations value for server " + to_string(server_index_) + (server_.value.length() > 0 ? " " + server_.value : "") + ". Error: " + e.what());
 	}

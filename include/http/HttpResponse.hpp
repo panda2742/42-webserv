@@ -10,6 +10,8 @@
 #include "utils_structs.hpp"
 #include <sys/stat.h>
 
+#define CGI_TIMEOUT 2
+
 /**
  * @enum ResponseState
  * @brief State of a response -> what I need to send.
@@ -107,6 +109,8 @@ private:
 	FdContext fd_context_in_;
 	FdContext fd_context_out_;
 	std::string path_info_;
+	pid_t cgi_pid_;
+	time_t cgi_create_time_;
 
 	bool waiting_cgi_;
 	bool res_ready_;
@@ -205,6 +209,8 @@ public:
 	 * the response.
 	 */
 	void getContentCGI();
+
+	void checkTimeoutCGI();
 
 	std::deque<UploadExtractData>	extractUpload(char *body, size_t size) const;
 };

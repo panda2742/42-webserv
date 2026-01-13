@@ -31,6 +31,9 @@ private:
 	// std::map<int, FdContext> pipe_context_;
 	std::map<int, HttpConnection> connections_;
 
+	std::map<int, HttpResponse*>cgi_monitoring_;
+	
+
 	void handleCGI(struct epoll_event &epoll);
 	void handleClient(struct epoll_event &epoll);
 	void handleClientIN(int fd);
@@ -39,6 +42,8 @@ private:
 	int removeFdEpoll(int fd);
 	int addFdEpoll(int fd, uint32_t flags, FdContext* context);
 	void removeClient(int fd, Logger::Level lvl);
+
+	void monitorCGI();
 
 public:
 	Server(cfg::HttpConfig &conf);
@@ -55,6 +60,9 @@ public:
 	int removeCgiFd(int fd);
 
 	void setChild() { is_child_ = true; }
+
+	void addMonitoredCGI(int pid, HttpResponse *resp) { cgi_monitoring_[pid] = resp; }
+	void removeMonitoredCGI(int pid) { std::map<int, HttpResponse*>::iterator it = cgi_monitoring_.find(pid); if (it != cgi_monitoring_.end()) cgi_monitoring_.erase(it); }
 };
 
 #endif

@@ -128,7 +128,7 @@ void HttpRequest::replaceHex(void)
 bool HttpRequest::parseTarget()
 {
 	replaceHex();
-	std::cout << target_ << std::endl;
+
 	if (target_.empty())
 	{
 		create_error_ = NOT_HTTP_HEADER;

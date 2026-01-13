@@ -4,6 +4,9 @@
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <signal.h>
 
 HttpResponse::HttpResponse(HttpRequest &req, Server& server)
 		: server_(server),
@@ -18,6 +21,7 @@ HttpResponse::HttpResponse(HttpRequest &req, Server& server)
 		direct_file_n_(-1),
 		cgi_in_(-1),
 		cgi_out_(-1),
+		cgi_create_time_(-1),
 		waiting_cgi_(false),
 		res_ready_(false)
 {}
@@ -69,6 +73,16 @@ void HttpResponse::clear()
 		close(direct_file_fd_);
 		direct_file_fd_ = -1;
 	}
+
+	if (cgi_create_time_ != -1)
+	{
+		kill(cgi_pid_, SIGTERM);
+		kill(cgi_pid_, SIGKILL);	
+		int dummy;
+		waitpid(cgi_pid_, &dummy, WNOHANG);
+		cgi_create_time_ = -1;
+	}
+	server_.removeMonitoredCGI(cgi_pid_);
 
 	if (cgi_in_ >= 0)
 	{
