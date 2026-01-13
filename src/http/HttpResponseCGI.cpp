@@ -6,6 +6,7 @@
 #include "Server.hpp"
 #include <fcntl.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <signal.h>
 
 void HttpResponse::sendBodyCGI()
@@ -25,9 +26,12 @@ void HttpResponse::sendBodyCGI()
 		}
 	}
 
-	server_.removeCgiFd(cgi_in_);
-	close(cgi_in_);
-	cgi_in_ = -1;
+	if (cgi_in_ >= 0)
+	{
+		server_.removeCgiFd(cgi_in_);
+		close(cgi_in_);
+		cgi_in_ = -1;
+	}
 	cgi_state_ = WAIT_CONTENT;
 }
 
@@ -54,7 +58,6 @@ void HttpResponse::getContentCGI()
 	}
 	
 }
-
 
 void HttpResponse::useCGI(const std::string& cgi_prog, const std::string& script_path)
 {
@@ -111,11 +114,13 @@ void HttpResponse::useCGI(const std::string& cgi_prog, const std::string& script
 	cgi_in_ = pipe_in[1];
 	fcntl(cgi_in_, F_SETFL, O_NONBLOCK);
 	fd_context_in_.type = CGI_IN;
+	fd_context_in_.client_fd = req_.getConnectionContext()->fd;
 	fd_context_in_.cgi_owner_response = this;
 	server_.addCgiInFd(cgi_in_, &fd_context_in_);
 	cgi_out_ = pipe_out[0];
 	fcntl(cgi_out_, F_SETFL, O_NONBLOCK);
 	fd_context_out_.type = CGI_OUT;
+	fd_context_out_.client_fd = req_.getConnectionContext()->fd;
 	fd_context_out_.cgi_owner_response = this;
 	server_.addCgiOutFd(cgi_out_, &fd_context_out_);
 
@@ -195,6 +200,17 @@ void HttpResponse::handleResultCGI()
 {
 	server_.removeMonitoredCGI(cgi_pid_);
 
+	int dummy;
+	waitpid(cgi_pid_, &dummy, WNOHANG);
+
+	if (cgi_create_time_ == -1)
+	{
+		setError(504);
+		waiting_cgi_ = false;
+		serializeHeader();
+		return ;
+	}
+
 	setStatus(200);
 
 	Logger::info("CGI out handling");
@@ -220,7 +236,7 @@ void HttpResponse::handleResultCGI()
 
 	std::string header_str(body_.begin(), body_.begin() + header_len);
 
-	body_.erase(body_.begin(), it + 2);
+	body_.erase(body_.begin(), it + 4);
 
 	size_t start = 0;
 	while (true)
@@ -262,9 +278,12 @@ void HttpResponse::handleResultCGI()
 
 void HttpResponse::checkTimeoutCGI()
 {
-	if (time(0) > cgi_create_time_ + 2)
+	if (cgi_create_time_ == -1) return ;
+	
+	if (time(0) > cgi_create_time_ + CGI_TIMEOUT)
 	{
+		kill(cgi_pid_, SIGTERM);
 		kill(cgi_pid_, SIGKILL);
-		// indiquer que le temps est ecouler pour pas avoir un 500
+		cgi_create_time_ = -1;
 	}
 }

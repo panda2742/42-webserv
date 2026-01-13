@@ -99,6 +99,9 @@ void Server::handleClient(struct epoll_event &epoll)
 	if (epoll.events & EPOLLIN)
 	{
 		handleClientIN(fd);
+
+		if (connections_.find(fd) == connections_.end())
+			return;
 	}
 
 	if (epoll.events & EPOLLOUT)
@@ -110,6 +113,10 @@ void Server::handleClient(struct epoll_event &epoll)
 void Server::handleCGI(struct epoll_event &epoll)
 {
 	FdContext* fd_context = static_cast<FdContext*>(epoll.data.ptr);
+	
+	std::map<int, HttpConnection>::iterator conn_it = connections_.find(fd_context->client_fd);
+	if (conn_it == connections_.end()) return;
+	
 	HttpResponse* res = static_cast<HttpResponse*>(fd_context->cgi_owner_response);
 
 	if (fd_context->type == CGI_IN)
@@ -162,8 +169,6 @@ void Server::initInstances()
 	Location *glob_loc = new Location(http, NULL);
 	glob_loc->init();
 	ServerInstance::setGlobalLocation(glob_loc);
-
-	glob_loc->print();
 
 	for (size_t i = 0; i < servers.size(); i++)
 	{
