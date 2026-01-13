@@ -81,6 +81,6 @@ run: all
 .PHONY: vg
 vg: all
 	@clear
-	$(VG) $(VGFLAGS) ./$(NAME) samples/valid_complete.conf
+	$(VG) $(VGFLAGS) ./$(NAME) samples/photo_gallery.conf
 
 -include $(DEPS)
