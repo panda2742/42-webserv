@@ -145,7 +145,7 @@ void HttpResponse::handleExistingFile()
 		else
 		{
 			setStatus(200);
-			setHeader("Content-Type", getMimeType(getExtension(req_.getTarget())));
+			setHeader("Content-Type", getMimeType(getExtension(root_)));
 			headers_["Content-Length"] = to_string(file_info_.st_size);
 		}
 	}
@@ -318,6 +318,7 @@ void HttpResponse::createDefault()
 	}
 	else if (req_.getMethod() == METHOD_DELETE)
 	{
+		std::cout << target.getAllowDeleteFile() << std::endl;
 		if (target.getAllowDeleteFile())
 		{
 			unlink(root_.c_str());

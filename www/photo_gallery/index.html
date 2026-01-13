@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyberpunk Gallery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0e27;
+            min-height: 100vh;
+            color: #00ff9f;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(0, 255, 159, 0.03) 0px,
+                    transparent 1px,
+                    transparent 2px,
+                    rgba(0, 255, 159, 0.03) 3px
+                );
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
+            background: linear-gradient(135deg, rgba(13, 27, 62, 0.9), rgba(26, 13, 62, 0.9));
+            border-bottom: 2px solid #00ff9f;
+            padding: 24px 32px;
+            box-shadow: 0 0 20px rgba(0, 255, 159, 0.3);
+        }
+
+        .header h1 {
+            color: #00ff9f;
+            margin-bottom: 16px;
+            font-size: 28px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px rgba(0, 255, 159, 0.5);
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .upload-btn {
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #00ff9f, #00d4ff);
+            color: #0a0e27;
+            border: none;
+            border-radius: 2px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(0, 255, 159, 0.4);
+            font-family: 'Courier New', monospace;
+        }
+
+        .upload-btn:hover {
+            box-shadow: 0 0 25px rgba(0, 255, 159, 0.8);
+            transform: translateY(-2px);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .status {
+            color: #00d4ff;
+            font-size: 12px;
+            margin-left: auto;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .gallery {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+            padding: 32px;
+        }
+
+        .photo-card {
+            position: relative;
+            background: rgba(13, 27, 62, 0.6);
+            border: 1px solid #00ff9f;
+            border-radius: 4px;
+            overflow: hidden;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(0, 255, 159, 0.2);
+        }
+
+        .photo-card:hover {
+            box-shadow: 0 0 30px rgba(0, 255, 159, 0.5);
+            transform: translateY(-5px);
+            border-color: #00d4ff;
+        }
+
+        .photo-card img {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            display: block;
+            filter: brightness(0.9);
+            transition: filter 0.3s;
+        }
+
+        .photo-card:hover img {
+            filter: brightness(1.1);
+        }
+
+        .photo-info {
+            padding: 12px;
+            background: rgba(10, 14, 39, 0.9);
+            border-top: 1px solid rgba(0, 255, 159, 0.3);
+        }
+
+        .photo-name {
+            font-size: 12px;
+            color: #00d4ff;
+            word-break: break-all;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .delete-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 14, 39, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+            border: 2px solid #ff006e;
+        }
+
+        .photo-card:hover .delete-overlay {
+            opacity: 1;
+        }
+
+        .delete-btn {
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #ff006e, #ff4d00);
+            color: white;
+            border: none;
+            border-radius: 2px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(255, 0, 110, 0.4);
+            font-family: 'Courier New', monospace;
+        }
+
+        .delete-btn:hover {
+            box-shadow: 0 0 25px rgba(255, 0, 110, 0.8);
+            transform: scale(1.05);
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .empty-state h2 {
+            font-size: 24px;
+            margin-bottom: 12px;
+            font-weight: 700;
+            color: #00ff9f;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(0, 255, 159, 0.5);
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            color: #00d4ff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .loading {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            color: #00d4ff;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚡ Cyberpunk Gallery ⚡</h1>
+            <div class="controls">
+                <input
+                    type="file"
+                    class="file-input"
+                    id="fileInput"
+                    accept="image/*"
+                    multiple
+                >
+                <button class="upload-btn" onclick="triggerFileInput()">
+                    Upload Images
+                </button>
+                <div class="status" id="status">System Online</div>
+            </div>
+        </div>
+
+        <div class="gallery" id="gallery">
+            <div class="loading">Loading Gallery...</div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://gallery.localhost:8080';
+        let isUploading = false;
+
+        function setStatus(message) {
+            document.getElementById('status').textContent = message;
+        }
+
+        function triggerFileInput() {
+            document.getElementById('fileInput').click();
+        }
+
+        async function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch(API_BASE + '/images/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Upload failed: ' + response.status);
+                }
+
+                return true;
+            } catch (error) {
+                console.error('Upload error:', error);
+                setStatus('Error: ' + error.message);
+                return false;
+            }
+
+            await loadImages();
+        }
+
+        document.getElementById('fileInput').addEventListener('change', async function(e) {
+            const files = e.target.files;
+            if (files.length === 0) return;
+
+            isUploading = true;
+            setStatus('Uploading ' + files.length + ' file(s)...');
+
+            let successCount = 0;
+            for (let file of files) {
+                if (file.type.startsWith('image/')) {
+                    const success = await uploadFile(file);
+                    if (success) successCount++;
+                }
+            }
+
+            setStatus('Uploaded ' + successCount + '/' + files.length + ' files');
+            e.target.value = '';
+            isUploading = false;
+
+            // await loadImages();
+
+            setTimeout(function() {
+                setStatus('System Online');
+            }, 2000);
+        });
+
+        async function deleteImage(filename) {
+            try {
+                setStatus('Deleting ' + filename + '...');
+
+                const response = await fetch(API_BASE + '/images/delete/' + filename, {
+                    method: 'DELETE',
+				});
+
+                await loadImages();
+                if (!response.ok) {
+                    throw new Error('Delete failed: ' + response.status);
+                }
+
+                setStatus('System Online');
+            } catch (error) {
+                console.error('Delete error:', error);
+                setStatus('Error: ' + error.message);
+            }
+        }
+
+        async function loadImages() {
+            try {
+                const response = await fetch(API_BASE + '/images');
+
+                if (!response.ok) {
+                    throw new Error('HTTP ' + response.status);
+                }
+
+                const html = await response.text();
+
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const links = doc.querySelectorAll('a[href]');
+
+                const images = [];
+                links.forEach(function(link) {
+                    const href = link.getAttribute('href');
+                    if (href && href.indexOf('../') === -1 && href !== '/images/') {
+                        const filename = href.split('/').pop();
+                        if (filename && /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(filename)) {
+                            images.push(filename);
+                        }
+                    }
+                });
+
+                renderGallery(images);
+            } catch (error) {
+                console.error('Load error:', error);
+                setStatus('Error loading: ' + error.message);
+                renderGallery([]);
+            }
+        }
+
+        function renderGallery(images) {
+            const gallery = document.getElementById('gallery');
+
+            if (images.length === 0) {
+                gallery.innerHTML = '<div class="empty-state"><h2>No Images Found</h2><p>Upload images to begin</p></div>';
+                return;
+            }
+
+            gallery.innerHTML = images.map(function(filename) {
+                return '<div class="photo-card">' +
+                    '<img src="' + API_BASE + '/images/' + filename + '" alt="' + filename + '">' +
+                    '<div class="photo-info"><div class="photo-name">' + filename + '</div></div>' +
+                    '<div class="delete-overlay">' +
+                    '<button class="delete-btn" onclick="deleteImage(\'' + filename + '\')">Delete</button>' +
+                    '</div></div>';
+            }).join('');
+        }
+
+        setTimeout(function() {
+            loadImages();
+
+			setInterval(function() {
+				if (!isUploading) {
+					loadImages();
+				}
+			}, 5000);
+        }, 100);
+    </script>
+</body>
+</html>

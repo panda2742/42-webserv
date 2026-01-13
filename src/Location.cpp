@@ -239,7 +239,7 @@ void Location::init()
 	// --------------- DELETE -------------- //
 	allow_delete_file_ = false;
 	try {
-		tmp = directive_.find<std::string>("allow_delete_file_");
+		tmp = directive_.find<std::string>("allow_delete_file");
 	} catch (const std::exception& e) {
 		throw std::invalid_argument("Invalid allow_delete value in location. Error: " + std::string(e.what()));
 	}
