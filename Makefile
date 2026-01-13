@@ -76,11 +76,11 @@ re: fclean
 .PHONY: run
 run: all
 	@clear
-	./$(NAME) samples/webserv.conf
+	./$(NAME) samples/cat_generator.conf
 
 .PHONY: vg
 vg: all
 	@clear
-	$(VG) $(VGFLAGS) ./$(NAME) samples/photo_gallery.conf
+	$(VG) $(VGFLAGS) ./$(NAME) samples/cat_generator.conf
 
 -include $(DEPS)
