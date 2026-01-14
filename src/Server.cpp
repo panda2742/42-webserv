@@ -170,11 +170,18 @@ void Server::initInstances()
 	glob_loc->init();
 	ServerInstance::setGlobalLocation(glob_loc);
 
+	instances_.reserve(servers.size());
 	for (size_t i = 0; i < servers.size(); i++)
 	{
 		instances_.push_back(ServerInstance(servers[i], i));
 		instances_.back().init();
 	}
+
+	// ServerInstance::getGlobalLocation()->print();
+	// for (size_t i = 0; i < instances_.size(); i++)
+	// {
+	// 	instances_[i].getLocations().print();
+	// }
 
 	for (size_t i = 0; i < instances_.size(); i++)
 	{

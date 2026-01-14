@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Cat sans cat</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            background: #111;
+            color: #eee;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 600px;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        h1 span {
+            color: #ff9800;
+        }
+
+        p {
+            opacity: 0.85;
+            line-height: 1.6;
+        }
+
+        .cat {
+            margin: 2rem 0;
+        }
+
+        .cat img {
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(255, 152, 0, 0.3);
+        }
+
+        .footer {
+            font-size: 0.9rem;
+            opacity: 0.6;
+            margin-top: 1.5rem;
+        }
+
+        a {
+            color: #ff9800;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cat sans cat</h1>
+
+        <p>
+            Cette page n'existe pas.
+        </p>
+
+        <div class="cat">
+            <img src="https://cataas.com/cat/angry?random=<?php echo time(); ?>" 
+                 alt="Chat en colère">
+        </div>
+
+        <p>
+            Erreur classique : tu voulais une page,  
+            tu as trouvé un chat.  
+            C'est objectivement mieux, mais pas très utile.
+        </p>
+
+        <div class="footer">
+            🐾 Retourne <a href="/">au panier</a> avant qu'il ne griffe.
+        </div>
+    </div>
+</body>
+</html>

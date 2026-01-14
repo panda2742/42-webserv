@@ -107,22 +107,41 @@ bool HttpRequest::checkHttpVersion()
 	}
 }
 
+int hexValue(unsigned char c)
+{
+	if (c >= '0' && c <= '9')
+		return c - '0';
+	if (c >= 'a' && c <= 'f')
+		return c - 'a' + 10;
+	if (c >= 'A' && c <= 'F')
+		return c - 'A' + 10;
+	return -1;
+}
+
 void HttpRequest::replaceHex(void)
 {
-	for (std::string::iterator it = target_.begin(); it != target_.end(); ++it)
+	std::string result;
+	result.reserve(target_.size());
+
+	std::size_t i = 0;
+	while (i < target_.size())
 	{
-		char	c = *it;
-		if (c != '%') continue;
+		if (target_[i] == '%' && i + 2 < target_.size())
+		{
+			int hi = hexValue(static_cast<unsigned char>(target_[i + 1]));
+			int lo = hexValue(static_cast<unsigned char>(target_[i + 2]));
 
-		if ((it + 1) == target_.end() || (it + 2) == target_.end()) continue;
-
-		std::size_t	tens = std::string("0123456789abcdef").find(std::tolower(*(it + 1)));
-		std::size_t	units = std::string("0123456789abcdef").find(std::tolower(*(it + 2)));
-		if (tens == std::string::npos || units == std::string::npos) continue;
-
-		target_.insert(it, tens * 16 + units);
-		target_.erase(it + 1, it + 4);
+			if (hi != -1 && lo != -1)
+			{
+				result.push_back(static_cast<char>((hi << 4) | lo));
+				i += 3;
+				continue;
+			}
+		}
+		result.push_back(target_[i]);
+		++i;
 	}
+	target_.swap(result);
 }
 
 bool HttpRequest::parseTarget()
