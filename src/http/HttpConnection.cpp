@@ -77,6 +77,7 @@ bool HttpConnection::receiveContent(char *content, size_t size)
 		{
 			if (raw_[0] == 0x16 && raw_[1] == 0x03 && (raw_[2] == 0x01 || raw_[2] == 0x02 || raw_[2] == 0x03))
 			{
+				if (!handleRequestHeader()) return false;
 				handleRequest();
 				return true;
 			}
