@@ -177,19 +177,13 @@ void Server::initInstances()
 		instances_.back().init();
 	}
 
-	// ServerInstance::getGlobalLocation()->print();
-	// for (size_t i = 0; i < instances_.size(); i++)
-	// {
-	// 	instances_[i].getLocations().print();
-	// }
-
 	for (size_t i = 0; i < instances_.size(); i++)
 	{
 		ServerInstance &instance = instances_[i];
 		const std::vector<ListenProp> &instance_listen_props = instance.getListens();
 
 		for (size_t j = 0; j < instance_listen_props.size(); j++)
-		{
+		{	
 			const std::vector<ServerInstance*> &server_instances = server_instance_map_[instance_listen_props[j]];
 			if (std::find(server_instances.begin(), server_instances.end(), &instance) == server_instances.end())
 			{

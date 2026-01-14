@@ -231,7 +231,6 @@ void HttpResponse::createDefault()
 
 			path_info.push_back(root_.substr(pos, root_.size()));
 			root_.erase(pos, root_.size());
-			std::cout << root_ << std::endl;
 			test_depth++;
 			continue;
 		}
@@ -318,10 +317,13 @@ void HttpResponse::createDefault()
 	}
 	else if (req_.getMethod() == METHOD_DELETE)
 	{
-		std::cout << target.getAllowDeleteFile() << std::endl;
 		if (target.getAllowDeleteFile())
 		{
-			unlink(root_.c_str());
+			if (unlink(root_.c_str()) != -1)
+			{
+				setError(204);
+				return;
+			}
 
 			switch (errno)
 			{

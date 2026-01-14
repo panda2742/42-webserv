@@ -36,6 +36,8 @@ void ServerInstance::init()
 
 		for (size_t j = 0; j < listen_directives.size(); j++)
 		{
+
+			std::cout << "LISTEN DIRECTIVE " << listen_directives[j] << std::endl;
 			size_t sep = listen_directives[j].find(":");
 
 			if (sep == std::string::npos)
@@ -62,6 +64,7 @@ void ServerInstance::init()
 
 				listens_.push_back(prop);
 			}
+			std::cout << "JE RECUP LE PORT " << listens_.back().port << std::endl;
 		}
 		// std::cout << cfg::util::represent(listen_directives) << std::endl;
 	} catch (const std::exception& e) {
