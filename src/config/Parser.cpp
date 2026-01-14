@@ -2,6 +2,7 @@
 #include "config/util.hpp"
 #include <fstream>
 #include <iostream>
+#include "FileCacheManager.hpp"
 
 namespace cfg
 {
@@ -9,6 +10,9 @@ namespace cfg
 
 void	Parser::saveRaw_(void) throw(ParsingException)
 {
+	if (FileCacheManager::testFile(filename_) != FILE_OK)
+		throw ParsingException("file is not openable");
+
 	std::ifstream	file(filename_.c_str(), std::ios::in | std::ios::binary);
 	if (!file)
 		throw ParsingException("file is not openable");

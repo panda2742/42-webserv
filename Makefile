@@ -80,6 +80,6 @@ run: all
 .PHONY: vg
 vg: all
 	@clear
-	$(VG) $(VGFLAGS) ./$(NAME) samples/webserv.conf
+	$(VG) $(VGFLAGS) ./$(NAME) /
 
 -include $(DEPS)
