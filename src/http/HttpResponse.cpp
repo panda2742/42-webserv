@@ -74,7 +74,7 @@ void HttpResponse::clear()
 		direct_file_fd_ = -1;
 	}
 
-	if (cgi_create_time_ != -1)
+	if (cgi_create_time_ != -1 && cgi_pid_ > 0)
 	{
 		kill(cgi_pid_, SIGTERM);
 		kill(cgi_pid_, SIGKILL);	

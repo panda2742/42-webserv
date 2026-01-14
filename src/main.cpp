@@ -12,19 +12,16 @@ void exit_signal(int sig);
 
 int main(int argc, char **argv)
 {
-	if (argc ^ 2)
-	{
-		std::cout << "Provide a unique configuration file." << std::endl;
-		return 1;
-	}
-
 	// Create the configuration class
 	cfg::HttpConfig	conf;
 
 	try
 	{
+		std::string path = "./samples/webserv.conf";
+		if (argc >= 2) path = argv[1];
+
 		// Create a parser
-		cfg::Parser	parser(argv[1]);
+		cfg::Parser	parser(path);
 		// Parse the file
 		parser.parse();
 
@@ -39,7 +36,7 @@ int main(int argc, char **argv)
 	}
 	catch (const std::exception& e)
 	{
-		std::cerr << "Middleware went wrong! Reason: " << e.what() << std::endl;
+		Logger::error(e.what());
 		return 1;
 	}
 
