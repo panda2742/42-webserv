@@ -19,7 +19,6 @@ SOURCES					:=	$(CONFIG_SOURCES) main \
 							http/HttpResponseSend \
 							http/HttpResponseCGI \
 							$(addprefix config/, HttpConfig Lexer MagicCast Node4 Node4Utils Parser util) \
-							$(addprefix tests/, 01_magic_cast_test 02_directive_get_test) \
 							$(addprefix middleware/, Middleware)
 
 override INCLUDE		:=	$(addprefix $(INCLUDE_DIR), $(addsuffix .hpp, $(INCLUDES)))
