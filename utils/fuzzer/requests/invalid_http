@@ -1,1 +1,0 @@
-GET aAAA HTTP/1.1\r\nHost: test\r\n\r\n
