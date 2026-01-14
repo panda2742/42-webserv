@@ -3,6 +3,7 @@
 #include <typeinfo>
 #include <iostream>
 #include <sstream>
+#include "util.hpp"
 
 namespace cfg
 {
@@ -123,6 +124,7 @@ R	magic_cast(T value) throw(MagicCastException)
 				for (vecuint_t::const_iterator it = value_vec.begin(); it != value_vec.end(); ++it)
 				{
 					string.clear();
+					string.str("");
 					string << (*it);
 					vector_string.push_back(string.str());
 				}
@@ -146,6 +148,7 @@ R	magic_cast(T value) throw(MagicCastException)
 				for (; it != value_vec.end(); ++it)
 				{
 					string.clear();
+					string.str("");
 					string << (*it);
 					vector_string.push_back(string.str());
 				}

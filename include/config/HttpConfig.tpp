@@ -60,11 +60,6 @@ R	Directive<T>::get(const str_t& prop_name)
 			}
 			case cfg::Node4::TYPE_STRING_VECTOR:
 			{
-				std::cout << "user requests for vec string" << std::endl;
-				for (std::vector<cfg::Node4 *>::iterator jt = nodes.begin(); jt != nodes.end(); ++jt)
-				{
-					std::cout << (*(*jt)).toString() << std::endl;
-				}
 				R	v = cfg::magic_cast<R>(*(*it)->value.getAs<vecstr_t >());
 				final_value = cfg::magic_assemble<R>(final_value, v);
 				break;
