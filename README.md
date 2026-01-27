@@ -1,5 +1,14 @@
 # 42-webserv
 
+Stand proud Nginx, you are strong...
+
+| Project | 42-webserv                 |
+|:--------|---------------------------:|
+| Locked  | 2026-01-19 08:55 CET:+0100 |
+| Closed  | 2026-01-19 09:00 CET:+0100 |
+| Grade   | 125%                       |
+| Retries | 2                          |
+
 ## Objectif
 
 Le serveur implémente un modèle événementiel concurrent sans threads par connexion : il utilise `epoll` pour surveiller des événements sur des sockets et autres fds, et traite chaque événement de façon non bloquante. Cela permet de gérer un grand nombre de connexions un seul thread/processus.
